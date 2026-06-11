@@ -1,7 +1,6 @@
 package com.backend.dealspot.service.serviceImpl;
 
 import java.io.IOException;
-import java.text.AttributedCharacterIterator.Attribute;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.product.ProductRegisterDto;
 import com.backend.dealspot.dto.product.ProductResponseDto;
+import com.backend.dealspot.dto.attributeKey.AttributeKeyDto;
+import com.backend.dealspot.dto.attributeKey.AttributeKeyRegisterDto;
 import com.backend.dealspot.dto.product.ProductDetailsDto;
-import com.backend.dealspot.dto.product.ProductImageDto;
 import com.backend.dealspot.entity.AttributeKey;
 import com.backend.dealspot.entity.Brand;
 import com.backend.dealspot.entity.Category;
@@ -82,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
 
         if (dto.getDetails() != null && !dto.getDetails().isEmpty()) {
             for (ProductDetailsDto detailDto : dto.getDetails()) {
-                
+
                 AttributeKey attributeKey = attributeKeyRepository.findById(detailDto.getAttributeKeyId())
                         .orElseThrow(() -> new RuntimeException("Attribute Key not found"));
 
@@ -119,6 +119,24 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return ProductResponseDto.fromEntity(savedProduct);
+    }
+
+    @Override
+    public AttributeKeyRegisterDto addAttributeKey(AttributeKeyRegisterDto dto) {
+
+        AttributeKey attributeKey = new AttributeKey();
+        attributeKey.setAttrKeyEn(dto.getAttrKeyEn());
+        attributeKey.setAttrKeyAr(dto.getAttrKeyAr());
+        AttributeKey savedKey = attributeKeyRepository.save(attributeKey);
+        return AttributeKeyRegisterDto.fromEntity(savedKey);
+    }
+
+    @Override
+    public List<AttributeKeyDto> fetchAttributeKeys() {
+        List<AttributeKey> keys = attributeKeyRepository.findAll();
+        return keys.stream()
+                .map(AttributeKeyDto::fromEntity)
+                .toList();
     }
 
 }

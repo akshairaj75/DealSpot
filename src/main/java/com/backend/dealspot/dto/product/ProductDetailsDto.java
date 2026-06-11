@@ -1,6 +1,4 @@
 package com.backend.dealspot.dto.product;
-
-import com.backend.dealspot.entity.AttributeKey;
 import com.backend.dealspot.entity.ProductDetail;
 import java.time.LocalDateTime;
 

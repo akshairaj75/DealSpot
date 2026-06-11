@@ -1,4 +1,4 @@
-package com.backend.dealspot.dto.attribute;
+package com.backend.dealspot.dto.attributeKey;
 
 import com.backend.dealspot.entity.AttributeKey;
 
@@ -22,7 +22,7 @@ public class AttributeKeyRegisterDto {
         this.attrKeyAr = attrKeyAr;
     }
 
-    AttributeKeyRegisterDto fromEntity(AttributeKey entity) {
+    public static AttributeKeyRegisterDto fromEntity(AttributeKey entity) {
         AttributeKeyRegisterDto dto = new AttributeKeyRegisterDto();
         dto.setAttrKeyEn(entity.getAttrKeyEn());
         dto.setAttrKeyAr(entity.getAttrKeyAr());

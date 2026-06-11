@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
@@ -55,6 +56,9 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category")
     private List<Offer> offers = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "categories")
+    private List<Brand> brands = new ArrayList<>();
 
     public Integer getId() {
         return id;
@@ -150,5 +154,13 @@ public class Category extends BaseEntity {
 
     public void setOffers(List<Offer> offers) {
         this.offers = offers;
+    }
+
+    public List<Brand> getBrands() {
+        return brands;
+    }
+
+    public void setBrands(List<Brand> brands) {
+        this.brands = brands;
     }
 }
