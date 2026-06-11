@@ -1,15 +1,18 @@
 package com.backend.dealspot.dto.product;
 
+import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.enums.ProductUnit;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProductResponseDto {
 
     private Long id;
     private Long categoryId;
     private String brand;
-    private String brandAr;
+    private Long brandId;
     private String sku;
     private String barcode;
     private String nameEn;
@@ -20,8 +23,26 @@ public class ProductResponseDto {
     private ProductUnit unit;
     private BigDecimal unitSize;
     private boolean active;
+    private List<ProductDetailsDto> details;
+    private List<ProductImageDto> images;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public List<ProductDetailsDto> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<ProductDetailsDto> details) {
+        this.details = details;
+    }
+
+    public List<ProductImageDto> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImageDto> images) {
+        this.images = images;
+    }
 
     public Long getId() {
         return id;
@@ -47,12 +68,12 @@ public class ProductResponseDto {
         this.brand = brand;
     }
 
-    public String getBrandAr() {
-        return brandAr;
+    public Long getBrandId() {
+        return brandId;
     }
 
-    public void setBrandAr(String brandAr) {
-        this.brandAr = brandAr;
+    public void setBrandId(Long brandId) {
+        this.brandId = brandId;
     }
 
     public String getSku() {
@@ -149,5 +170,42 @@ public class ProductResponseDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public static ProductResponseDto fromEntity(Product product) {
+        ProductResponseDto responseDto = new ProductResponseDto();
+        responseDto.setId(product.getId());
+        if (product.getCategory() != null) {
+            responseDto.setCategoryId(product.getCategory().getId().longValue());
+        }
+        if (product.getBrand() != null) {
+            responseDto.setBrandId(product.getBrand().getId());
+        }
+        responseDto.setSku(product.getSku());
+        responseDto.setBarcode(product.getBarcode());
+        responseDto.setNameEn(product.getNameEn());
+        responseDto.setNameAr(product.getNameAr());
+        responseDto.setDescriptionEn(product.getDescriptionEn());
+        responseDto.setDescriptionAr(product.getDescriptionAr());
+        responseDto.setPrimaryImageUrl(product.getPrimaryImageUrl());
+        responseDto.setUnit(product.getUnit());
+        responseDto.setUnitSize(product.getUnitSize());
+        responseDto.setActive(product.isActive());
+        
+        if (product.getDetails() != null) {
+            responseDto.setDetails(product.getDetails().stream()
+                    .map(ProductDetailsDto::fromEntity)
+                    .collect(Collectors.toList()));
+        }
+        
+        if (product.getImages() != null) {
+            responseDto.setImages(product.getImages().stream()
+                    .map(ProductImageDto::fromEntity)
+                    .collect(Collectors.toList()));
+        }
+        
+        responseDto.setCreatedAt(product.getCreatedAt());
+        responseDto.setUpdatedAt(product.getUpdatedAt());
+        return responseDto;
     }
 }

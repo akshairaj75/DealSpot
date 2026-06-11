@@ -2,12 +2,12 @@ package com.backend.dealspot.dto.product;
 
 import com.backend.dealspot.enums.ProductUnit;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ProductRegisterDto {
 
     private Long categoryId;
-    private String brand;
-    private String brandAr;
+    private Long brandId;
     private String sku;
     private String barcode;
     private String nameEn;
@@ -18,6 +18,24 @@ public class ProductRegisterDto {
     private ProductUnit unit;
     private BigDecimal unitSize;
     private boolean active = true;
+    private List<ProductDetailsDto> details;
+    private List<ProductImageDto> images;
+
+    public List<ProductDetailsDto> getDetails() {
+        return details;
+    }
+
+    public void setDetails(List<ProductDetailsDto> details) {
+        this.details = details;
+    }
+
+    public List<ProductImageDto> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImageDto> images) {
+        this.images = images;
+    }
 
     public Long getCategoryId() {
         return categoryId;
@@ -27,20 +45,12 @@ public class ProductRegisterDto {
         this.categoryId = categoryId;
     }
 
-    public String getBrand() {
-        return brand;
+    public Long getBrandId() {
+        return brandId;
     }
 
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public String getBrandAr() {
-        return brandAr;
-    }
-
-    public void setBrandAr(String brandAr) {
-        this.brandAr = brandAr;
+    public void setBrandId(Long brandId) {
+        this.brandId = brandId;
     }
 
     public String getSku() {

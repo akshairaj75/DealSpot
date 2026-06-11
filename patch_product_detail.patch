@@ -1,0 +1,44 @@
+--- src/main/java/com/backend/dealspot/entity/ProductDetail.java
++++ src/main/java/com/backend/dealspot/entity/ProductDetail.java
+@@ -25,11 +25,9 @@
+     @JoinColumn(name = "product_id", nullable = false)
+     private Product product;
+ 
+-    @Column(name = "attr_key_en", nullable = false, length = 80)
+-    private String attrKeyEn;
+-
+-    @Column(name = "attr_key_ar", nullable = false, length = 80)
+-    private String attrKeyAr;
++    @ManyToOne(fetch = FetchType.LAZY)
++    @JoinColumn(name = "attribute_key_id", nullable = false)
++    private AttributeKey attributeKey;
+ 
+     @Column(name = "attr_value_en", nullable = false, length = 255)
+     private String attrValueEn;
+@@ -60,20 +58,12 @@
+         this.product = product;
+     }
+ 
+-    public String getAttrKeyEn() {
+-        return attrKeyEn;
+-    }
+-
+-    public void setAttrKeyEn(String attrKeyEn) {
+-        this.attrKeyEn = attrKeyEn;
+-    }
+-
+-    public String getAttrKeyAr() {
+-        return attrKeyAr;
+-    }
+-
+-    public void setAttrKeyAr(String attrKeyAr) {
+-        this.attrKeyAr = attrKeyAr;
++    public AttributeKey getAttributeKey() {
++        return attributeKey;
++    }
++
++    public void setAttributeKey(AttributeKey attributeKey) {
++        this.attributeKey = attributeKey;
+     }
+ 
+     public String getAttrValueEn() {

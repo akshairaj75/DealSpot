@@ -1,8 +1,8 @@
 package com.backend.dealspot.config;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.springframework.beans.factory.annotation.Value;
+// import java.nio.file.Path;
+// import java.nio.file.Paths;
+// import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

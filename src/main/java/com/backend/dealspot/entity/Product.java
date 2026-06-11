@@ -30,11 +30,9 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(name = "brand", length = 100)
-    private String brand;
-
-    @Column(name = "brand_ar", length = 100)
-    private String brandAr;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
 
     @Column(name = "sku", length = 80)
     private String sku;
@@ -95,21 +93,14 @@ public class Product extends BaseEntity {
         this.category = category;
     }
 
-    public String getBrand() {
+    public Brand getBrand() {
         return brand;
     }
 
-    public void setBrand(String brand) {
+    public void setBrand(Brand brand) {
         this.brand = brand;
     }
 
-    public String getBrandAr() {
-        return brandAr;
-    }
-
-    public void setBrandAr(String brandAr) {
-        this.brandAr = brandAr;
-    }
 
     public String getSku() {
         return sku;

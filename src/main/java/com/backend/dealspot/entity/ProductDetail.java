@@ -25,11 +25,9 @@ public class ProductDetail {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "attr_key_en", nullable = false, length = 80)
-    private String attrKeyEn;
-
-    @Column(name = "attr_key_ar", nullable = false, length = 80)
-    private String attrKeyAr;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attribute_key_id", nullable = false)
+    private AttributeKey attributeKey;
 
     @Column(name = "attr_value_en", nullable = false, length = 255)
     private String attrValueEn;
@@ -60,20 +58,12 @@ public class ProductDetail {
         this.product = product;
     }
 
-    public String getAttrKeyEn() {
-        return attrKeyEn;
+    public AttributeKey getAttributeKey() {
+        return attributeKey;
     }
 
-    public void setAttrKeyEn(String attrKeyEn) {
-        this.attrKeyEn = attrKeyEn;
-    }
-
-    public String getAttrKeyAr() {
-        return attrKeyAr;
-    }
-
-    public void setAttrKeyAr(String attrKeyAr) {
-        this.attrKeyAr = attrKeyAr;
+    public void setAttributeKey(AttributeKey attributeKey) {
+        this.attributeKey = attributeKey;
     }
 
     public String getAttrValueEn() {
