@@ -1,7 +1,10 @@
 package com.backend.dealspot.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -27,6 +30,11 @@ public class BrandController {
 
         BrandDto res = brandService.registerBrand(dto, logoFile, bannerFile);
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/fetch-brands")
+    public ResponseEntity<List<BrandDto>> fetchBrands(){
+        return ResponseEntity.ok(brandService.fetchBrands());
     }
 
 }

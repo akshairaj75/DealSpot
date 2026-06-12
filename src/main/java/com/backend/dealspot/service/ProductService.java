@@ -18,4 +18,6 @@ public interface ProductService {
    
     List<AttributeKeyDto> fetchAttributeKeys();
 
+    List<ProductResponseDto> fetchAllProducts();
+
 }

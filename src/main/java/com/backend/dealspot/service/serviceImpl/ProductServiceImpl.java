@@ -26,6 +26,8 @@ import com.backend.dealspot.repository.ProductDetailRepository;
 import com.backend.dealspot.repository.ProductImageRepository;
 import com.backend.dealspot.service.ProductService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -54,6 +56,7 @@ public class ProductServiceImpl implements ProductService {
         this.attributeKeyRepository = attributeKeyRepository;
     }
 
+    @Transactional
     @Override
     public ProductResponseDto registerProduct(ProductRegisterDto dto, List<MultipartFile> files) {
         Product product = new Product();
@@ -105,7 +108,7 @@ public class ProductServiceImpl implements ProductService {
                 ProductImage image = new ProductImage();
                 image.setProduct(savedProduct);
                 try {
-                    filePath = fileStorageService.storeFile(file);
+                    filePath = fileStorageService.storeFile(file, "products");
                     image.setImageUrl(filePath);
                     image.setAltTextEn(file.getOriginalFilename());
                     image.setAltTextAr(file.getOriginalFilename());
@@ -124,6 +127,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public AttributeKeyRegisterDto addAttributeKey(AttributeKeyRegisterDto dto) {
 
+        if (attributeKeyRepository.existsByAttrKeyEnIgnoreCaseOrAttrKeyArIgnoreCase(dto.getAttrKeyEn(), dto.getAttrKeyAr())) {
+            throw new IllegalArgumentException("Category with the same English or Arabic name already exists");
+        }
         AttributeKey attributeKey = new AttributeKey();
         attributeKey.setAttrKeyEn(dto.getAttrKeyEn());
         attributeKey.setAttrKeyAr(dto.getAttrKeyAr());
@@ -136,6 +142,15 @@ public class ProductServiceImpl implements ProductService {
         List<AttributeKey> keys = attributeKeyRepository.findAll();
         return keys.stream()
                 .map(AttributeKeyDto::fromEntity)
+                .toList();
+    }
+
+    @Override
+    public List<ProductResponseDto> fetchAllProducts() {
+        List<Product> result = productRepository.findAll();
+
+        return result.stream()
+                .map(ProductResponseDto::fromEntity)
                 .toList();
     }
 

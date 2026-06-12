@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AttributeKeyRepository extends JpaRepository<AttributeKey, Long> {
+
+    boolean existsByAttrKeyEnIgnoreCaseOrAttrKeyArIgnoreCase(String attrKeyEn, String attrKeyAr);
+    
 }

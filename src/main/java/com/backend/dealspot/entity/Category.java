@@ -30,10 +30,10 @@ public class Category extends BaseEntity {
     @OneToMany(mappedBy = "parent")
     private List<Category> children = new ArrayList<>();
 
-    @Column(name = "name_en", nullable = false, length = 80)
+    @Column(name = "name_en", nullable = false, length = 80, unique = true)
     private String nameEn;
 
-    @Column(name = "name_ar", nullable = false, length = 80)
+    @Column(name = "name_ar", nullable = false, length = 80, unique = true)
     private String nameAr;
 
     @Column(name = "icon_slug", length = 60)

@@ -12,6 +12,8 @@ import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.service.CategoryService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
@@ -24,11 +26,17 @@ public class CategoryServiceImpl implements CategoryService {
         this.fileStorageService = fileStorageService;
     }
 
+    @Transactional
     @Override
     public CategoryDto createCategory(CategoryRequestDto dto, MultipartFile file) {
         if (dto == null) {
             throw new IllegalArgumentException("Category request is required");
         }
+
+        if (categoryRepository.existsByNameEnIgnoreCaseOrNameArIgnoreCase(dto.getNameEn(), dto.getNameAr())) {
+            throw new IllegalArgumentException("Category with the same English or Arabic name already exists");
+        }
+
 
         Category category = new Category();
 
@@ -50,7 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         if (file != null && !file.isEmpty()) {
             try {
-                String imageFile = fileStorageService.storeFile(file);
+                String imageFile = fileStorageService.storeFile(file,"categories");
                 category.setImageUrl(imageFile);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to upload category image", e);

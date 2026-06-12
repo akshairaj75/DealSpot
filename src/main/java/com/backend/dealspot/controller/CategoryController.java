@@ -31,6 +31,7 @@ public class CategoryController {
             @RequestPart(value = "file", required = false) MultipartFile file) {
         CategoryDto createdCategory = categoryService.createCategory(dto, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdCategory);
+
     }
 
     @GetMapping("/fetch-categories")

@@ -50,13 +50,13 @@ public class BrandServiceImpl implements BrandService {
         // Handle Image Uploads
         try {
             if (logoFile != null && !logoFile.isEmpty()) {
-                brand.setLogoUrl(fileStorageService.storeFile(logoFile));
+                brand.setLogoUrl(fileStorageService.storeFile(logoFile,"brands/logos"));
             } else if (dto.getLogoUrl() != null) {
                 brand.setLogoUrl(dto.getLogoUrl()); // fallback to URL if provided in JSON
             }
 
             if (bannerFile != null && !bannerFile.isEmpty()) {
-                brand.setBannerUrl(fileStorageService.storeFile(bannerFile));
+                brand.setBannerUrl(fileStorageService.storeFile(bannerFile,"brands/banners"));
             } else if (dto.getBannerUrl() != null) {
                 brand.setBannerUrl(dto.getBannerUrl());
             }
@@ -72,15 +72,25 @@ public class BrandServiceImpl implements BrandService {
                     .toList();
 
             List<Category> categories = categoryRepository.findAllById(categoryIds);
-            
+
             if (categories.isEmpty() || categories.size() != categoryIds.size()) {
                 throw new IllegalArgumentException("One or more provided Category IDs do not exist in the database.");
             }
-            
+
             brand.setCategories(categories);
         }
 
         Brand savedBrand = brandRepository.save(brand);
         return BrandDto.fromEntity(savedBrand);
+    }
+
+    @Override
+    public List<BrandDto> fetchBrands() {
+
+        List<Brand> result = brandRepository.findAll();
+
+        return result.stream()
+                .map(BrandDto::fromEntity)
+                .collect(Collectors.toList());
     }
 }
