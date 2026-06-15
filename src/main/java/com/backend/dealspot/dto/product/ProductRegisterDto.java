@@ -17,7 +17,7 @@ public class ProductRegisterDto {
     private String primaryImageUrl;
     private ProductUnit unit;
     private BigDecimal unitSize;
-    private boolean active = true;
+    private Boolean active ;
     private List<ProductDetailsDto> details;
     private List<ProductImageDto> images;
 
@@ -125,11 +125,11 @@ public class ProductRegisterDto {
         this.unitSize = unitSize;
     }
 
-    public boolean isActive() {
+    public Boolean getActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
     }
 }

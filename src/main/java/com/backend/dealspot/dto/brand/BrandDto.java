@@ -1,12 +1,13 @@
 package com.backend.dealspot.dto.brand;
 
+import com.backend.dealspot.dto.category.CategoryDto;
 import com.backend.dealspot.entity.Brand;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class BrandDto {
-    
+
     private Long id;
     private String nameEn;
     private String nameAr;
@@ -17,7 +18,16 @@ public class BrandDto {
     private String websiteUrl;
     private boolean featured;
     private boolean active;
-    private List<Integer> categoryIds = new ArrayList<>();
+    private List<CategoryDto> categories = new ArrayList<>();
+
+
+    public List<CategoryDto> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List<CategoryDto> categories) {
+        this.categories = categories;
+    }
 
     public Long getId() {
         return id;
@@ -99,17 +109,11 @@ public class BrandDto {
         this.active = active;
     }
 
-    public List<Integer> getCategoryIds() {
-        return categoryIds;
-    }
-
-    public void setCategoryIds(List<Integer> categoryIds) {
-        this.categoryIds = categoryIds;
-    }
 
     public static BrandDto fromEntity(Brand brand) {
-        if (brand == null) return null;
-        
+        if (brand == null)
+            return null;
+
         BrandDto dto = new BrandDto();
         dto.setId(brand.getId());
         dto.setNameEn(brand.getNameEn());
@@ -121,13 +125,13 @@ public class BrandDto {
         dto.setWebsiteUrl(brand.getWebsiteUrl());
         dto.setFeatured(brand.isFeatured());
         dto.setActive(brand.isActive());
-        
+
         if (brand.getCategories() != null) {
-            dto.setCategoryIds(brand.getCategories().stream()
-                    .map(category -> category.getId())
+            dto.setCategories(brand.getCategories().stream()
+                    .map(CategoryDto::fromEntity)
                     .collect(Collectors.toList()));
         }
-        
+
         return dto;
     }
 }

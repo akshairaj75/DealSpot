@@ -1,6 +1,7 @@
 package com.backend.dealspot.service.serviceImpl;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescriptionEn(dto.getDescriptionEn());
         product.setDescriptionAr(dto.getDescriptionAr());
         product.setUnitSize(dto.getUnitSize());
-        product.setActive(dto.isActive());
+        product.setActive(dto.getActive());
 
         Product savedProduct = productRepository.save(product);
 
@@ -124,10 +125,12 @@ public class ProductServiceImpl implements ProductService {
         return ProductResponseDto.fromEntity(savedProduct);
     }
 
+    @Transactional
     @Override
     public AttributeKeyRegisterDto addAttributeKey(AttributeKeyRegisterDto dto) {
 
-        if (attributeKeyRepository.existsByAttrKeyEnIgnoreCaseOrAttrKeyArIgnoreCase(dto.getAttrKeyEn(), dto.getAttrKeyAr())) {
+        if (attributeKeyRepository.existsByAttrKeyEnIgnoreCaseOrAttrKeyArIgnoreCase(dto.getAttrKeyEn(),
+                dto.getAttrKeyAr())) {
             throw new IllegalArgumentException("Category with the same English or Arabic name already exists");
         }
         AttributeKey attributeKey = new AttributeKey();
@@ -152,6 +155,151 @@ public class ProductServiceImpl implements ProductService {
         return result.stream()
                 .map(ProductResponseDto::fromEntity)
                 .toList();
+    }
+
+    @Override
+    public ProductResponseDto getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        return ProductResponseDto.fromEntity(product);
+    }
+
+    @Transactional
+    @Override
+    public ProductResponseDto editProduct(Long productId,
+            ProductRegisterDto dto,
+            List<MultipartFile> files) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        // Category
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId().intValue())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+
+            product.setCategory(category);
+        }
+
+        // Basic fields
+        if (dto.getNameEn() != null) {
+            product.setNameEn(dto.getNameEn());
+        }
+
+        if (dto.getNameAr() != null) {
+            product.setNameAr(dto.getNameAr());
+        }
+
+        if (dto.getDescriptionEn() != null) {
+            product.setDescriptionEn(dto.getDescriptionEn());
+        }
+
+        if (dto.getDescriptionAr() != null) {
+            product.setDescriptionAr(dto.getDescriptionAr());
+        }
+
+        if (dto.getUnit() != null) {
+            product.setUnit(dto.getUnit());
+        }
+
+        if (dto.getUnitSize() != null) {
+            product.setUnitSize(dto.getUnitSize());
+        }
+
+        if (dto.getSku() != null) {
+            product.setSku(dto.getSku());
+        }
+
+        if (dto.getBarcode() != null) {
+            product.setBarcode(dto.getBarcode());
+        }
+
+        // Active status
+        if (dto.getActive() != null) {
+            product.setActive(dto.getActive());
+        }
+
+   
+
+        /*
+         * Replace all existing details
+         */
+        if (dto.getDetails() != null) {
+
+            List<ProductDetail> existingDetails = new ArrayList<>(product.getDetails());
+
+            productDetailRepository.deleteAll(existingDetails);
+            product.getDetails().clear();
+
+            for (ProductDetailsDto detailDto : dto.getDetails()) {
+
+                AttributeKey attributeKey = attributeKeyRepository.findById(detailDto.getAttributeKeyId())
+                        .orElseThrow(() -> new RuntimeException("Attribute Key not found"));
+
+                ProductDetail detail = new ProductDetail();
+
+                detail.setProduct(product);
+                detail.setAttributeKey(attributeKey);
+                detail.setAttrValueEn(detailDto.getAttrValueEn());
+                detail.setAttrValueAr(detailDto.getAttrValueAr());
+                detail.setSortOrder(
+                        detailDto.getSortOrder() != null
+                                ? detailDto.getSortOrder()
+                                : 0);
+
+                productDetailRepository.save(detail);
+
+                product.getDetails().add(detail);
+            }
+        }
+
+        /*
+         * Replace all existing images
+         */
+        if (files != null && !files.isEmpty()) {
+
+            List<ProductImage> existingImages = new ArrayList<>(product.getImages());
+
+            for (ProductImage image : existingImages) {
+
+                // Optional: delete physical file
+                // fileStorageService.deleteFile(image.getImageUrl());
+
+                productImageRepository.delete(image);
+            }
+
+            product.getImages().clear();
+
+            for (MultipartFile file : files) {
+
+                try {
+
+                    String filePath = fileStorageService.storeFile(file, "products");
+
+                    ProductImage image = new ProductImage();
+
+                    image.setProduct(product);
+                    image.setImageUrl(filePath);
+                    image.setAltTextEn(file.getOriginalFilename());
+                    image.setAltTextAr(file.getOriginalFilename());
+
+                    productImageRepository.save(image);
+
+                    product.getImages().add(image);
+
+                } catch (IOException e) {
+
+                    throw new RuntimeException(
+                            "Failed to store file: "
+                                    + file.getOriginalFilename(),
+                            e);
+                }
+            }
+        }
+
+        Product updatedProduct = productRepository.save(product);
+
+        return ProductResponseDto.fromEntity(updatedProduct);
     }
 
 }

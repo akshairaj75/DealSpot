@@ -20,4 +20,8 @@ public interface ProductService {
 
     List<ProductResponseDto> fetchAllProducts();
 
+    ProductResponseDto editProduct(Long productId, ProductRegisterDto dto, List<MultipartFile> file);
+
+    ProductResponseDto getProductById(Long productId);
+
 }

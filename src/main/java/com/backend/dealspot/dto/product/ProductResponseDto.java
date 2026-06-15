@@ -11,6 +11,8 @@ public class ProductResponseDto {
 
     private Long id;
     private Long categoryId;
+    private Long categoryParentId;
+
     private String brand;
     private Long brandId;
     private String sku;
@@ -58,6 +60,14 @@ public class ProductResponseDto {
 
     public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public Long getCategoryParentId() {
+        return categoryParentId;
+    }
+
+    public void setCategoryParentId(Long categoryParentId) {
+        this.categoryParentId = categoryParentId;
     }
 
     public String getBrand() {
@@ -191,19 +201,29 @@ public class ProductResponseDto {
         responseDto.setUnit(product.getUnit());
         responseDto.setUnitSize(product.getUnitSize());
         responseDto.setActive(product.isActive());
-        
+
         if (product.getDetails() != null) {
             responseDto.setDetails(product.getDetails().stream()
                     .map(ProductDetailsDto::fromEntity)
                     .collect(Collectors.toList()));
         }
-        
+
         if (product.getImages() != null) {
             responseDto.setImages(product.getImages().stream()
                     .map(ProductImageDto::fromEntity)
                     .collect(Collectors.toList()));
         }
         
+
+        // if (product.getCategory() != null) {
+        //     responseDto.setCategoryId(product.getCategory().getId().longValue());
+        //     CategoryRepository rep.findById(product.getCategory().getId())
+        //             .ifPresent(category -> {
+        //                 if (category.getParentCategory() != null) {
+        //                     responseDto.setCategoryParentId(category.getParentCategory().getId().longValue());
+        //                 }
+        //             });
+        //         }
         responseDto.setCreatedAt(product.getCreatedAt());
         responseDto.setUpdatedAt(product.getUpdatedAt());
         return responseDto;

@@ -1,6 +1,8 @@
 package com.backend.dealspot.entity;
 
 import com.backend.dealspot.enums.ProductUnit;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -68,7 +70,7 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product")
     private List<ProductDetail> details = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "product")
@@ -100,7 +102,6 @@ public class Product extends BaseEntity {
     public void setBrand(Brand brand) {
         this.brand = brand;
     }
-
 
     public String getSku() {
         return sku;
