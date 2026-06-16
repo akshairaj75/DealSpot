@@ -17,7 +17,7 @@ public class ProductRegisterDto {
     private String primaryImageUrl;
     private ProductUnit unit;
     private BigDecimal unitSize;
-    private Boolean active ;
+    private Boolean active =true ;
     private List<ProductDetailsDto> details;
     private List<ProductImageDto> images;
 
