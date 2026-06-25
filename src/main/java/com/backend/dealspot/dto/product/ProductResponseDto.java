@@ -14,6 +14,7 @@ public class ProductResponseDto {
     private Long categoryParentId;
 
     private String brand;
+    private String brandImage;
     private Long brandId;
     private String sku;
     private String barcode;
@@ -76,6 +77,14 @@ public class ProductResponseDto {
 
     public void setBrand(String brand) {
         this.brand = brand;
+    }
+
+    public String getBrandImage() {
+        return brandImage;
+    }
+
+    public void setBrandImage(String brandImage) {
+        this.brandImage = brandImage;
     }
 
     public Long getBrandId() {
@@ -190,6 +199,8 @@ public class ProductResponseDto {
         }
         if (product.getBrand() != null) {
             responseDto.setBrandId(product.getBrand().getId());
+            responseDto.setBrand(product.getBrand().getNameAr());
+            responseDto.setBrandImage(product.getBrand().getLogoUrl());
         }
         responseDto.setSku(product.getSku());
         responseDto.setBarcode(product.getBarcode());
