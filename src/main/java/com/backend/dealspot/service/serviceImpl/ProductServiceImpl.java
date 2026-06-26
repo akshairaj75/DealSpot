@@ -77,6 +77,7 @@ public class ProductServiceImpl implements ProductService {
         product.setBarcode(dto.getBarcode());
         product.setNameEn(dto.getNameEn());
         product.setNameAr(dto.getNameAr());
+        product.setUnit(dto.getUnit());
         product.setDescriptionEn(dto.getDescriptionEn());
         product.setDescriptionAr(dto.getDescriptionAr());
         product.setUnitSize(dto.getUnitSize());
