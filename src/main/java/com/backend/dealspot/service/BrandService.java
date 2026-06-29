@@ -13,4 +13,10 @@ public interface BrandService {
 
     
     List<BrandDto> fetchBrands();
+
+
+    BrandDto getBrandById(Long id);
+
+
+	BrandDto updateBrand(Long id, BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile);
 }

@@ -50,13 +50,13 @@ public class BrandServiceImpl implements BrandService {
         // Handle Image Uploads
         try {
             if (logoFile != null && !logoFile.isEmpty()) {
-                brand.setLogoUrl(fileStorageService.storeFile(logoFile,"brands/logos"));
+                brand.setLogoUrl(fileStorageService.storeFile(logoFile, "brands/logos"));
             } else if (dto.getLogoUrl() != null) {
                 brand.setLogoUrl(dto.getLogoUrl()); // fallback to URL if provided in JSON
             }
 
             if (bannerFile != null && !bannerFile.isEmpty()) {
-                brand.setBannerUrl(fileStorageService.storeFile(bannerFile,"brands/banners"));
+                brand.setBannerUrl(fileStorageService.storeFile(bannerFile, "brands/banners"));
             } else if (dto.getBannerUrl() != null) {
                 brand.setBannerUrl(dto.getBannerUrl());
             }
@@ -92,5 +92,49 @@ public class BrandServiceImpl implements BrandService {
         return result.stream()
                 .map(BrandDto::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BrandDto getBrandById(Long id) {
+        return BrandDto
+                .fromEntity(brandRepository.findById(id).orElseThrow(() -> new RuntimeException("Brand not found")));
+    }
+
+    @Transactional
+    @Override
+    public BrandDto updateBrand(Long id, BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile) {
+
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
+
+        brand.setNameEn(dto.getNameEn());
+        brand.setNameAr(dto.getNameAr());
+        brand.setDescriptionEn(dto.getDescriptionEn());
+        brand.setDescriptionAr(dto.getDescriptionAr());
+        brand.setWebsiteUrl(dto.getWebsiteUrl());
+        brand.setFeatured(dto.isFeatured());
+        brand.setActive(dto.isActive());
+        try {
+
+            if (logoFile != null && !logoFile.isEmpty()) {
+                if (brand.getLogoUrl() != null) {
+                    fileStorageService.deleteFile(brand.getLogoUrl(), "brands/logos");
+                }
+                brand.setLogoUrl(fileStorageService.storeFile(logoFile, "brands/logos"));
+            }
+
+            if (bannerFile != null && !bannerFile.isEmpty()) {
+                if (brand.getBannerUrl() != null) {
+                    fileStorageService.deleteFile(brand.getBannerUrl(), "brands/banners");
+                }
+                if (bannerFile != null && !bannerFile.isEmpty()) {
+                    brand.setBannerUrl(fileStorageService.storeFile(bannerFile, "brands/banners"));
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload brand assets", e);
+        }
+        Brand savedBrand = brandRepository.save(brand);
+        return BrandDto.fromEntity(savedBrand);
     }
 }

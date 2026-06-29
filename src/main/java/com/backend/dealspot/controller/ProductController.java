@@ -10,14 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.attributeKey.AttributeKeyDto;
 import com.backend.dealspot.dto.attributeKey.AttributeKeyRegisterDto;
-import com.backend.dealspot.dto.product.ProductDto;
 import com.backend.dealspot.dto.product.ProductRegisterDto;
 import com.backend.dealspot.dto.product.ProductResponseDto;
 import com.backend.dealspot.service.ProductService;

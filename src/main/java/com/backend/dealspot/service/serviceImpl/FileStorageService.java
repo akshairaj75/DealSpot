@@ -42,6 +42,15 @@ public class FileStorageService {
 
     }
 
+    public void deleteFile(String logoUrl, String folder) {
+        Path path = Paths.get(uploadDir, folder, logoUrl);
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file", e);
+        }
+    }
+
     // public String storeCategoryFiled(MultipartFile file) throws IOException {
     // return storeFile(file, "categories");
     // }
