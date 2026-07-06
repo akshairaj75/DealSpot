@@ -1,4 +1,4 @@
-package com.backend.dealspot.service.serviceImpl;
+package com.backend.dealspot.serviceImpl;
 
 import java.io.IOException;
 import java.nio.file.Files;
