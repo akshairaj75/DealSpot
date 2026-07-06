@@ -14,6 +14,7 @@ import com.backend.dealspot.entity.Brand;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.repository.BrandRepository;
 import com.backend.dealspot.repository.CategoryRepository;
+import com.backend.dealspot.repository.ProductRepository;
 import com.backend.dealspot.service.BrandService;
 
 @Service
@@ -22,13 +23,16 @@ public class BrandServiceImpl implements BrandService {
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
     private final FileStorageService fileStorageService;
+    private final ProductRepository productRepository;
 
     public BrandServiceImpl(BrandRepository brandRepository,
             CategoryRepository categoryRepository,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            ProductRepository productRepository) {
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -136,5 +140,30 @@ public class BrandServiceImpl implements BrandService {
         }
         Brand savedBrand = brandRepository.save(brand);
         return BrandDto.fromEntity(savedBrand);
+    }
+
+    @Transactional
+    @Override
+    public void deleteBrand(Long id) {
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Brand not found"));
+
+        boolean exists = productRepository.existsByBrandId(id);
+
+        if (exists) {
+            throw new RuntimeException("Cannot delete brand because products are using this brand");
+        }
+
+        brandRepository.deleteById(id);
+
+        if (brand.getLogoUrl() != null) {
+            fileStorageService.deleteFile(brand.getLogoUrl(), "brands/logos");
+        }
+        if (brand.getBannerUrl() != null) {
+            fileStorageService.deleteFile(brand.getBannerUrl(), "brands/banners");
+        }
+
+        brandRepository.delete(brand);
+
     }
 }

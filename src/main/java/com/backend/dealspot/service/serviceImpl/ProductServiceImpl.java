@@ -220,8 +220,6 @@ public class ProductServiceImpl implements ProductService {
             product.setActive(dto.getActive());
         }
 
-   
-
         /*
          * Replace all existing details
          */

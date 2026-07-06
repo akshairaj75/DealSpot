@@ -19,4 +19,7 @@ public interface BrandService {
 
 
 	BrandDto updateBrand(Long id, BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile);
+
+
+    void deleteBrand(Long id);
 }

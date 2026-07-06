@@ -5,4 +5,6 @@ import com.backend.dealspot.entity.Product;
 
 public interface ProductRepository extends JpaRepository<Product, Long>{
 
+    boolean existsByBrandId(Long id);
+
 }
