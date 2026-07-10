@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.category.CategoryDto;
@@ -16,7 +17,6 @@ import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.CategoryService;
 
-import jakarta.transaction.Transactional;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
@@ -84,6 +84,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public CategoryDto updateCategory(Integer categoryId, CategoryRequestDto dto, MultipartFile file,
             CustomUserPrincipal authUser) {

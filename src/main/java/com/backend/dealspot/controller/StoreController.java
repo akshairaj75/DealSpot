@@ -1,0 +1,93 @@
+package com.backend.dealspot.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.backend.dealspot.dto.store.StoreRegisterDto;
+import com.backend.dealspot.dto.store.StoreResponseDto;
+import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.StoreService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+@RestController
+@RequestMapping("/api/dealspot/stores")
+public class StoreController {
+
+    @Autowired
+    private StoreService storeService;
+
+    @PostMapping("/create")
+    public ResponseEntity<StoreResponseDto> createStore(
+            @RequestBody StoreRegisterDto dto,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        StoreResponseDto createdStore = storeService.createStore(dto, authUser, request);
+        return ResponseEntity.ok(createdStore);
+    }
+
+    @PostMapping("/create/bulk")
+    public ResponseEntity<List<StoreResponseDto>> createStores(
+            @RequestBody List<StoreRegisterDto> dtos,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+
+        List<StoreResponseDto> stores = dtos.stream()
+                .map(dto -> storeService.createStore(dto, authUser, request))
+                .toList();
+
+        return ResponseEntity.ok(stores);
+    }
+
+    @GetMapping("/fetch-all-stores")
+    public ResponseEntity<List<StoreResponseDto>> fetchAllStores(
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        List<StoreResponseDto> allStores = storeService.fetchAllStores(authUser,
+                request);
+        return ResponseEntity.ok(allStores);
+    }
+
+    @GetMapping("/fetch-store/{storeId}")
+    public ResponseEntity<StoreResponseDto> fetchStore(
+            @PathVariable("storeId") Integer storeId,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        StoreResponseDto store = storeService.fetchStore(storeId, authUser, request);
+        return ResponseEntity.ok(store);
+    }
+
+    @PutMapping("/update-store/{storeId}")
+    public ResponseEntity<StoreResponseDto> updateStore(
+            @PathVariable("storeId") Integer storeId,
+            @RequestBody StoreRegisterDto dto,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        StoreResponseDto updatedStore = storeService.updateStore(storeId, dto,
+                authUser, request);
+        return ResponseEntity.ok(updatedStore);
+    }
+
+    @DeleteMapping("/delete-store/{storeId}")
+    public ResponseEntity<String> deleteStore(
+    @PathVariable("storeId") Integer storeId,
+    @AuthenticationPrincipal CustomUserPrincipal authUser,
+    HttpServletRequest request
+    ) {
+    storeService.deleteStore(storeId, authUser, request);
+    return ResponseEntity.ok("Store deleted successfully");
+    }
+
+}

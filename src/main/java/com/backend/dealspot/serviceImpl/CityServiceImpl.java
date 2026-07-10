@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.dealspot.dto.city.CityRegisterDto;
 import com.backend.dealspot.dto.city.CityResponseDto;
@@ -26,6 +27,7 @@ public class CityServiceImpl implements CityService {
     @Autowired
     CityRepository cityRepository;
 
+    @Transactional
     @Override
     public CityResponseDto createCity(CityRegisterDto dto, CustomUserPrincipal principal, HttpServletRequest request) {
 
@@ -51,6 +53,7 @@ public class CityServiceImpl implements CityService {
 
     }
 
+    @Transactional
     @Override
     public CityResponseDto updateCity(Integer cityId, CityRegisterDto dto, CustomUserPrincipal principal,
             HttpServletRequest request) {

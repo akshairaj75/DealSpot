@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,6 +39,17 @@ public class CategoryController {
 
     }
 
+    @PostMapping("/create/bulk")
+    public ResponseEntity<List<CategoryDto>> createCategories(
+            @RequestBody List<CategoryRequestDto> dtos) {
+
+        List<CategoryDto> categories = dtos.stream()
+                .map(dto -> categoryService.createCategory(dto, null))
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(categories);
+    }
+
     @GetMapping("/fetch-categories")
     public ResponseEntity<List<CategoryDto>> fetchCategories() {
         List<CategoryDto> dto = categoryService.fetchCategories();
@@ -49,7 +61,7 @@ public class CategoryController {
             @RequestPart("data") CategoryRequestDto dto,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @PathVariable Integer categoryId,
-        @AuthenticationPrincipal CustomUserPrincipal authUser) {
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
         CategoryDto editedCategory = categoryService.updateCategory(categoryId, dto, file, authUser);
         return ResponseEntity.ok(editedCategory);
     }

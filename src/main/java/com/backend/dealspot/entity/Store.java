@@ -48,6 +48,15 @@ public class Store extends BaseEntity {
     @Column(name = "banner_url", length = 255)
     private String bannerUrl;
 
+    @Column(name = "website", length = 255)
+    private String website;
+
+    @Column(name = "contact_phone", length = 20)
+    private String contactPhone;
+
+    @Column(name = "contact_email", length = 150)
+    private String contactEmail;
+
     @Column(name = "vat_number", length = 30)
     private String vatNumber;
 
@@ -148,6 +157,30 @@ public class Store extends BaseEntity {
 
     public void setBannerUrl(String bannerUrl) {
         this.bannerUrl = bannerUrl;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
     }
 
     public String getVatNumber() {

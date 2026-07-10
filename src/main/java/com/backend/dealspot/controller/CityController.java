@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,16 @@ public class CityController {
         CityResponseDto createdCity = cityService.createCity(dto, principal, request);
         return ResponseEntity.ok(createdCity);
 
+    }
+
+    @PostMapping("/create/bulk")
+    public ResponseEntity<List<CityResponseDto>> createBulkCities(
+            @RequestBody List<CityRegisterDto> dtos,
+            @AuthenticationPrincipal CustomUserPrincipal principal,
+            HttpServletRequest request) {
+        List<CityResponseDto> createdCities = dtos.stream()
+        .map(dto -> cityService.createCity(dto, principal, request)).toList();
+        return ResponseEntity.ok(createdCities);
     }
 
     @GetMapping("/fetch-all")

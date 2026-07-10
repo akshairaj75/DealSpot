@@ -1,0 +1,150 @@
+package com.backend.dealspot.serviceImpl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.backend.dealspot.dto.store.StoreRegisterDto;
+import com.backend.dealspot.dto.store.StoreResponseDto;
+import com.backend.dealspot.entity.AdminUser;
+import com.backend.dealspot.entity.Category;
+import com.backend.dealspot.entity.City;
+import com.backend.dealspot.entity.Store;
+import com.backend.dealspot.repository.AdminUserRepository;
+import com.backend.dealspot.repository.CategoryRepository;
+import com.backend.dealspot.repository.CityRepository;
+import com.backend.dealspot.repository.StoreRepository;
+import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.StoreService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+@Service
+public class StoreServiceImpl implements StoreService {
+
+    @Autowired
+    private StoreRepository storeRepository;
+
+    @Autowired
+    AdminUserRepository adminUserRepository;
+
+    @Autowired
+    CityRepository cityRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    @Transactional
+    @Override
+    public StoreResponseDto createStore(StoreRegisterDto dto, CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        AdminUser currentUser = adminUserRepository.findById(authUser.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        City city = cityRepository.findById(dto.getCityId())
+                .orElseThrow(() -> new RuntimeException("City not found"));
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        Store newStore = new Store();
+        newStore.setNameEn(dto.getNameEn());
+        newStore.setNameAr(dto.getNameAr());
+        newStore.setDescriptionEn(dto.getDescriptionEn());
+        newStore.setDescriptionAr(dto.getDescriptionAr());
+        newStore.setLogoUrl(dto.getLogoUrl());
+        newStore.setBannerUrl(dto.getBannerUrl());
+        newStore.setWebsite(dto.getWebsite());
+        newStore.setContactPhone(dto.getContactPhone());
+        newStore.setContactEmail(dto.getContactEmail());
+        newStore.setVatNumber(dto.getVatNumber());
+        newStore.setCrNumber(dto.getCrNumber());
+        newStore.setCity(city);
+        newStore.setCategory(category);
+        Store saved = storeRepository.save(newStore);
+        return StoreResponseDto.fromEntity(saved);
+    }
+
+    @Override
+    public List<StoreResponseDto> fetchAllStores(CustomUserPrincipal authUser, HttpServletRequest request) {
+
+        List<Store> stores = storeRepository.findAll();
+
+        return stores.stream().map(StoreResponseDto::fromEntity).toList();
+    }
+
+    @Override
+    public StoreResponseDto fetchStore(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+
+        return StoreResponseDto.fromEntity(store);
+    }
+
+    @Transactional
+    @Override
+    public StoreResponseDto updateStore(Integer storeId, StoreRegisterDto dto, CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+
+        if (dto.getNameEn() != null && !dto.getNameEn().isEmpty()) {
+            store.setNameEn(dto.getNameEn());
+        }
+        if (dto.getNameAr() != null && !dto.getNameAr().isEmpty()) {
+            store.setNameAr(dto.getNameAr());
+        }
+        if (dto.getDescriptionEn() != null && !dto.getDescriptionEn().isEmpty()) {
+            store.setDescriptionEn(dto.getDescriptionEn());
+        }
+        if (dto.getDescriptionAr() != null && !dto.getDescriptionAr().isEmpty()) {
+            store.setDescriptionAr(dto.getDescriptionAr());
+        }
+        if (dto.getLogoUrl() != null && !dto.getLogoUrl().isEmpty()) {
+            store.setLogoUrl(dto.getLogoUrl());
+        }
+        if (dto.getBannerUrl() != null && !dto.getBannerUrl().isEmpty()) {
+            store.setBannerUrl(dto.getBannerUrl());
+        }
+        if (dto.getWebsite() != null && !dto.getWebsite().isEmpty()) {
+            store.setWebsite(dto.getWebsite());
+        }
+        if (dto.getContactPhone() != null && !dto.getContactPhone().isEmpty()) {
+            store.setContactPhone(dto.getContactPhone());
+        }
+        if (dto.getContactEmail() != null && !dto.getContactEmail().isEmpty()) {
+            store.setContactEmail(dto.getContactEmail());
+        }
+        if (dto.getVatNumber() != null && !dto.getVatNumber().isEmpty()) {
+            store.setVatNumber(dto.getVatNumber());
+        }
+        if (dto.getCrNumber() != null && !dto.getCrNumber().isEmpty()) {
+            store.setCrNumber(dto.getCrNumber());
+        }
+        if (dto.getCityId() != null) {
+            City city = cityRepository.findById(dto.getCityId())
+                    .orElseThrow(() -> new RuntimeException("City not found"));
+            store.setCity(city);
+        }
+        if (dto.getCategoryId() != null) {
+            Category category = categoryRepository.findById(dto.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            store.setCategory(category);
+        }
+        Store saved = storeRepository.save(store);
+        return StoreResponseDto.fromEntity(saved);
+    }
+
+    @Transactional
+    @Override
+    public void deleteStore(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        storeRepository.delete(store);
+    }
+
+}
