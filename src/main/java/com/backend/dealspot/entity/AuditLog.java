@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import com.backend.dealspot.enums.AuditAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,7 +28,7 @@ public class AuditLog extends BaseEntity {
     private Long entityId;
 
     @Column(name = "action", nullable = false, length = 50)
-    private String action;
+    private AuditAction action;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "performed_by", nullable = false)
@@ -62,11 +64,11 @@ public class AuditLog extends BaseEntity {
         this.entityId = entityId;
     }
 
-    public String getAction() {
+    public AuditAction getAction() {
         return action;
     }
 
-    public void setAction(String action) {
+    public void setAction(AuditAction action) {
         this.action = action;
     }
 

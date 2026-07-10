@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 
 import com.backend.dealspot.entity.City;
 
-public class CityRegisterDto {
+public class CityResponseDto {
+
+    private Integer id;
     private String nameEn;
     private String nameAr;
     private String regionCode;
@@ -12,6 +14,15 @@ public class CityRegisterDto {
     private BigDecimal longitude;
     private boolean isActive;
 
+
+
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+    public void setId(Integer id) {
+        this.id = id;
+    }
     public String getNameEn() {
         return nameEn;
     }
@@ -49,8 +60,9 @@ public class CityRegisterDto {
         this.isActive = isActive;
     }
 
-    public static CityRegisterDto fromEntity(City city) {
-        CityRegisterDto dto = new CityRegisterDto();
+        public static CityResponseDto fromEntity(City city) {
+        CityResponseDto dto = new CityResponseDto();
+        dto.setId(city.getId());
         dto.setNameEn(city.getNameEn());
         dto.setNameAr(city.getNameAr());
         dto.setRegionCode(city.getRegionCode());
@@ -59,5 +71,5 @@ public class CityRegisterDto {
         dto.setActive(city.isActive());
         return dto;
     }
-
+    
 }

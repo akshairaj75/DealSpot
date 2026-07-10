@@ -1,4 +1,4 @@
-package com.backend.dealspot.service.serviceImpl;
+package com.backend.dealspot.serviceImpl;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,17 +22,17 @@ public class BrandServiceImpl implements BrandService {
 
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
-    private final FileStorageService fileStorageService;
     private final ProductRepository productRepository;
+    private final FileStorageService fileStorageService;
 
     public BrandServiceImpl(BrandRepository brandRepository,
             CategoryRepository categoryRepository,
-            FileStorageService fileStorageService,
-            ProductRepository productRepository) {
+            ProductRepository productRepository,
+            FileStorageService fileStorageService) {
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
-        this.fileStorageService = fileStorageService;
         this.productRepository = productRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     @Override

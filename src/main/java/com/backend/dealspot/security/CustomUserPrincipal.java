@@ -1,0 +1,106 @@
+package com.backend.dealspot.security;
+
+import java.util.Collection;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.backend.dealspot.enums.AccountType;
+import com.backend.dealspot.enums.AdminRole;
+
+public class CustomUserPrincipal implements UserDetails {
+    private Long id;
+    private String fullName;
+    private String email;
+    private String password;
+    private AccountType accountType;
+    private AdminRole role;
+
+    private Collection<? extends GrantedAuthority> authorities;
+    private boolean active;
+
+    public CustomUserPrincipal(
+            Long id,
+            String email,
+            String password,
+            AccountType accountType,
+            AdminRole role,
+            boolean active,
+            Collection<? extends GrantedAuthority> authorities
+
+    ) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.accountType = accountType;
+        this.role = role;
+        this.active = active;
+        this.authorities = authorities;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public AdminRole getRole() {
+        return role;
+    }
+
+    public void setRole(AdminRole role) {
+        this.role = role;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+}
