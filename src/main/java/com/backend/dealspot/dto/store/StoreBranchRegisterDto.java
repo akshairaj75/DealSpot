@@ -7,8 +7,11 @@ public class StoreBranchRegisterDto {
     private Integer storeId;
     private Integer cityId;
     private String branchName;
+    private String addressEn;
+    private String addressAr;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private String phone;
     private LocalTime openTime;
     private LocalTime closeTime;
     private Boolean twentyFourHours;
@@ -38,6 +41,22 @@ public class StoreBranchRegisterDto {
         this.branchName = branchName;
     }
 
+    public String getAddressEn() {
+        return addressEn;
+    }
+
+    public void setAddressEn(String addressEn) {
+        this.addressEn = addressEn;
+    }
+
+    public String getAddressAr() {
+        return addressAr;
+    }
+
+    public void setAddressAr(String addressAr) {
+        this.addressAr = addressAr;
+    }
+
     public BigDecimal getLatitude() {
         return latitude;
     }
@@ -52,6 +71,14 @@ public class StoreBranchRegisterDto {
 
     public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public LocalTime getOpenTime() {

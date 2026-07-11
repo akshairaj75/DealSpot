@@ -32,11 +32,20 @@ public class StoreBranch extends BaseEntity {
     @Column(name = "branch_name", nullable = false, length = 120)
     private String branchName;
 
+    @Column(name = "address_en", length = 255)
+    private String addressEn;
+
+    @Column(name = "address_ar", length = 255)
+    private String addressAr;
+
     @Column(name = "latitude", precision = 9, scale = 6)
     private BigDecimal latitude;
 
     @Column(name = "longitude", precision = 9, scale = 6)
     private BigDecimal longitude;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
 
     @Column(name = "open_time")
     private LocalTime openTime;
@@ -82,6 +91,22 @@ public class StoreBranch extends BaseEntity {
         this.branchName = branchName;
     }
 
+    public String getAddressEn() {
+        return addressEn;
+    }
+
+    public void setAddressEn(String addressEn) {
+        this.addressEn = addressEn;
+    }
+
+    public String getAddressAr() {
+        return addressAr;
+    }
+
+    public void setAddressAr(String addressAr) {
+        this.addressAr = addressAr;
+    }
+
     public BigDecimal getLatitude() {
         return latitude;
     }
@@ -96,6 +121,14 @@ public class StoreBranch extends BaseEntity {
 
     public void setLongitude(BigDecimal longitude) {
         this.longitude = longitude;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public LocalTime getOpenTime() {
