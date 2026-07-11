@@ -35,6 +35,16 @@ public class BrandController {
         return ResponseEntity.ok(res);
     }
 
+    @PostMapping("/register-brand/bulk")
+    public ResponseEntity<List<BrandDto>> registerBulkBrands(
+            @RequestPart("data") List<BrandRegisterDto> dto) {
+
+                List<BrandDto> res = dto.stream()
+                .map(brandRegisterDto -> brandService.registerBrand(brandRegisterDto, null, null))
+                .toList();
+                return ResponseEntity.ok(res);
+    }
+
     @GetMapping("/fetch-brands")
     public ResponseEntity<List<BrandDto>> fetchBrands() {
         return ResponseEntity.ok(brandService.fetchBrands());

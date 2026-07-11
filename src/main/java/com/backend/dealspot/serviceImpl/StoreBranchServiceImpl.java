@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.dealspot.dto.store.StoreBranchRegisterDto;
 import com.backend.dealspot.dto.store.StoreBranchResponseDto;
@@ -42,6 +43,7 @@ public class StoreBranchServiceImpl implements StoreBranchService {
         return res;
     }
 
+    @Transactional
     @Override
     public StoreBranchResponseDto addBranch(StoreBranchRegisterDto dto,  CustomUserPrincipal authUser) {
 
@@ -71,6 +73,8 @@ public class StoreBranchServiceImpl implements StoreBranchService {
         return StoreBranchResponseDto.fromEntity(savedBranch);
     }
 
+
+    @Transactional
     @Override
     public StoreBranchResponseDto updateBranch(Integer branchId, StoreBranchRegisterDto dto, CustomUserPrincipal authUser) {
         StoreBranch branch = storeBranchRepository.findById(branchId)

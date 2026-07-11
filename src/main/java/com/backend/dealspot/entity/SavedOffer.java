@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,7 +18,11 @@ import org.hibernate.annotations.CreationTimestamp;
 @Entity
 @Table(
     name = "saved_offers",
-    uniqueConstraints = @UniqueConstraint(name = "uq_saved_offer", columnNames = {"user_id", "offer_id"})
+    uniqueConstraints = @UniqueConstraint(name = "uq_saved_offer", columnNames = {"user_id", "offer_id"}),
+    indexes = {
+        @Index(name = "idx_saved_user", columnList = "user_id"),
+        @Index(name = "idx_saved_offer_id", columnList = "offer_id")
+    }
 )
 public class SavedOffer extends BaseEntity {
 

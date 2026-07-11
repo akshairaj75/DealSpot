@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import com.backend.dealspot.enums.NotificationChannel;
 import com.backend.dealspot.enums.NotificationRefType;
 import com.backend.dealspot.enums.NotificationType;
@@ -17,7 +19,16 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications")
+@Table(
+    name = "notifications",
+    indexes = {
+        @Index(name = "idx_notif_user", columnList = "user_id"),
+        @Index(name = "idx_notif_type", columnList = "type"),
+        @Index(name = "idx_notif_channel", columnList = "channel"),
+        @Index(name = "idx_notif_read", columnList = "is_read"),
+        @Index(name = "idx_notif_sent", columnList = "sent_at")
+    }
+)
 public class Notification extends BaseEntity {
 
     @Id

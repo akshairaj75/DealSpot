@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import org.hibernate.annotations.Check;
+
 import com.backend.dealspot.enums.OfferBadgeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,7 +22,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "offers")
+@Table(
+    name = "offers",
+    indexes = {
+        @Index(name = "idx_offers_store", columnList = "store_id"),
+        @Index(name = "idx_offers_product", columnList = "product_id"),
+        @Index(name = "idx_offers_category", columnList = "category_id"),
+        @Index(name = "idx_offers_city", columnList = "city_id"),
+        @Index(name = "idx_offers_validity", columnList = "valid_from, valid_until"),
+        @Index(name = "idx_offers_featured", columnList = "is_featured"),
+        @Index(name = "idx_offers_flash", columnList = "is_flash"),
+        @Index(name = "idx_offers_active", columnList = "is_active"),
+        @Index(name = "idx_offers_badge", columnList = "badge_type"),
+        @Index(name = "idx_offers_discount", columnList = "discount_pct")
+    }
+)
+@Check(name = "chk_offers_price", constraints = "offer_price <= original_price")
+@Check(name = "chk_offers_price_positive", constraints = "offer_price > 0")
+@Check(name = "chk_offers_discount", constraints = "discount_pct BETWEEN 0 AND 100")
+@Check(name = "chk_offers_dates", constraints = "valid_until >= valid_from")
 public class Offer extends BaseEntity {
 
     @Id
@@ -49,6 +70,18 @@ public class Offer extends BaseEntity {
     @Column(name = "title_ar", nullable = false, length = 200)
     private String titleAr;
 
+    @Column(name = "description_en", columnDefinition = "TEXT")
+    private String descriptionEn;
+
+    @Column(name = "description_ar", columnDefinition = "TEXT")
+    private String descriptionAr;
+
+    @Column(name = "terms_en", columnDefinition = "TEXT")
+    private String termsEn;
+
+    @Column(name = "terms_ar", columnDefinition = "TEXT")
+    private String termsAr;
+
     @Column(name = "original_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal originalPrice;
 
@@ -62,6 +95,12 @@ public class Offer extends BaseEntity {
     @Column(name = "badge_type", nullable = false, length = 20)
     private OfferBadgeType badgeType;
 
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
+    @Column(name = "thumbnail_url", length = 255)
+    private String thumbnailUrl;
+
     @Column(name = "valid_from", nullable = false)
     private LocalDate validFrom;
 
@@ -73,6 +112,15 @@ public class Offer extends BaseEntity {
 
     @Column(name = "is_flash", nullable = false)
     private boolean flash = false;
+
+    @Column(name = "is_online", nullable = false)
+    private boolean online = false;
+
+    @Column(name = "is_in_store", nullable = false)
+    private boolean inStore = true;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     @Column(name = "view_count", nullable = false)
     private Long viewCount = 0L;
@@ -148,6 +196,38 @@ public class Offer extends BaseEntity {
         this.titleAr = titleAr;
     }
 
+    public String getDescriptionEn() {
+        return descriptionEn;
+    }
+
+    public void setDescriptionEn(String descriptionEn) {
+        this.descriptionEn = descriptionEn;
+    }
+
+    public String getDescriptionAr() {
+        return descriptionAr;
+    }
+
+    public void setDescriptionAr(String descriptionAr) {
+        this.descriptionAr = descriptionAr;
+    }
+
+    public String getTermsEn() {
+        return termsEn;
+    }
+
+    public void setTermsEn(String termsEn) {
+        this.termsEn = termsEn;
+    }
+
+    public String getTermsAr() {
+        return termsAr;
+    }
+
+    public void setTermsAr(String termsAr) {
+        this.termsAr = termsAr;
+    }
+
     public BigDecimal getOriginalPrice() {
         return originalPrice;
     }
@@ -180,6 +260,22 @@ public class Offer extends BaseEntity {
         this.badgeType = badgeType;
     }
 
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
+
     public LocalDate getValidFrom() {
         return validFrom;
     }
@@ -210,6 +306,30 @@ public class Offer extends BaseEntity {
 
     public void setFlash(boolean flash) {
         this.flash = flash;
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+    public boolean isInStore() {
+        return inStore;
+    }
+
+    public void setInStore(boolean inStore) {
+        this.inStore = inStore;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Long getViewCount() {

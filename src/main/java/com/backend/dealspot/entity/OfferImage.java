@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,7 +13,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "offer_images")
+@Table(
+    name = "offer_images",
+    indexes = @Index(name = "idx_offer_images_offer", columnList = "offer_id")
+)
 public class OfferImage extends BaseEntity {
 
     @Id

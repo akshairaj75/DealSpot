@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,7 +15,10 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-@Table(name = "product_details")
+@Table(
+    name = "product_details",
+    indexes = @Index(name = "idx_product_details_pid", columnList = "product_id")
+)
 public class ProductDetail {
 
     @Id

@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
+
 import com.backend.dealspot.enums.AdminRole;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,7 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "admin_users")
+@Table(
+    name = "admin_users",
+    uniqueConstraints = @UniqueConstraint(name = "uq_admin_email", columnNames = "email"),
+    indexes = {
+        @Index(name = "idx_admin_role", columnList = "role"),
+        @Index(name = "idx_admin_active", columnList = "is_active")
+    }
+)
 public class AdminUser extends BaseEntity {
 
     @Id

@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
+
 import com.backend.dealspot.enums.DevicePlatform;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +17,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "user_devices")
+@Table(
+    name = "user_devices",
+    uniqueConstraints = @UniqueConstraint(name = "uq_device_token", columnNames = "device_token"),
+    indexes = {
+        @Index(name = "idx_devices_user", columnList = "user_id"),
+        @Index(name = "idx_devices_platform", columnList = "platform")
+    }
+)
 public class UserDevice extends BaseEntity {
 
     @Id

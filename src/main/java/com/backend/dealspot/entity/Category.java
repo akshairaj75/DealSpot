@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "categories")
+@Table(
+    name = "categories",
+    indexes = {
+        @Index(name = "idx_categories_parent", columnList = "parent_id"),
+        @Index(name = "idx_categories_active", columnList = "is_active"),
+        @Index(name = "idx_categories_sort", columnList = "sort_order")
+    }
+)
 public class Category extends BaseEntity {
 
     @Id
@@ -30,10 +39,10 @@ public class Category extends BaseEntity {
     @OneToMany(mappedBy = "parent")
     private List<Category> children = new ArrayList<>();
 
-    @Column(name = "name_en", nullable = false, length = 80, unique = true)
+    @Column(name = "name_en", nullable = false, length = 80)
     private String nameEn;
 
-    @Column(name = "name_ar", nullable = false, length = 80, unique = true)
+    @Column(name = "name_ar", nullable = false, length = 80)
     private String nameAr;
 
     @Column(name = "icon_slug", length = 60)

@@ -34,6 +34,16 @@ public class ProductController {
         return ResponseEntity.ok(productService.addAttributeKey(dto));
     }
 
+    @PostMapping("/add-key/bulk")
+    public ResponseEntity<List<AttributeKeyRegisterDto>> addBulkAttributeKeys(
+            @RequestBody List<AttributeKeyRegisterDto> dto) {
+
+        List<AttributeKeyRegisterDto> res = dto.stream()
+                .map(attributeKeyRegisterDto -> productService.addAttributeKey(attributeKeyRegisterDto))
+                .toList();
+        return ResponseEntity.ok(res);
+    }
+
     @GetMapping("/fetch-attribute-keys")
     public ResponseEntity<List<AttributeKeyDto>> fetchAttributeKeys() {
 
@@ -48,6 +58,17 @@ public class ProductController {
         ProductResponseDto res = productService.registerProduct(dto, file);
         return ResponseEntity.ok(res);
 
+    }
+
+    @PostMapping("/add-product/bulk")
+    public ResponseEntity<List<ProductResponseDto>> addBulkProducts(
+            @RequestBody List<ProductRegisterDto> dto,
+            @RequestPart(value = "file", required = false) List<MultipartFile> file) {
+
+        List<ProductResponseDto> res = dto.stream()
+                .map(productRegisterDto -> productService.registerProduct(productRegisterDto, file))
+                .toList();
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/fetch-all-products")

@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
+
 import com.backend.dealspot.enums.ProductUnit;
 
 import jakarta.persistence.CascadeType;
@@ -20,7 +23,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "products")
+@Table(
+    name = "products",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_products_sku", columnNames = "sku"),
+        @UniqueConstraint(name = "uq_products_barcode", columnNames = "barcode")
+    },
+    indexes = {
+        @Index(name = "idx_products_category", columnList = "category_id"),
+        @Index(name = "idx_products_active", columnList = "is_active")
+    }
+)
 public class Product extends BaseEntity {
 
     @Id

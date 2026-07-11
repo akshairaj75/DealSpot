@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import org.hibernate.annotations.Check;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +18,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "flyers")
+@Table(
+    name = "flyers",
+    indexes = {
+        @Index(name = "idx_flyers_store", columnList = "store_id"),
+        @Index(name = "idx_flyers_city", columnList = "city_id"),
+        @Index(name = "idx_flyers_validity", columnList = "valid_from, valid_until")
+    }
+)
+@Check(name = "chk_flyers_dates", constraints = "valid_until >= valid_from")
 public class Flyer extends BaseEntity {
 
     @Id

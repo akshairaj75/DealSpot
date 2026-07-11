@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,7 +16,8 @@ import jakarta.persistence.UniqueConstraint;
 @Entity
 @Table(
     name = "flyer_pages",
-    uniqueConstraints = @UniqueConstraint(name = "uq_flyer_page", columnNames = {"flyer_id", "page_number"})
+    uniqueConstraints = @UniqueConstraint(name = "uq_flyer_page", columnNames = {"flyer_id", "page_number"}),
+    indexes = @Index(name = "idx_flyer_pages_fid", columnList = "flyer_id")
 )
 public class FlyerPage extends BaseEntity {
 

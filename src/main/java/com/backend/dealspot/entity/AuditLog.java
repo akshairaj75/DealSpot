@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import com.backend.dealspot.enums.AuditAction;
 
 import jakarta.persistence.Column;
@@ -13,7 +15,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "audit_logs")
+@Table(
+    name = "audit_logs",
+    indexes = {
+        @Index(name = "idx_audit_entity", columnList = "entity_type, entity_id"),
+        @Index(name = "idx_audit_actor", columnList = "performed_by"),
+        @Index(name = "idx_audit_action", columnList = "action"),
+        @Index(name = "idx_audit_created", columnList = "created_at")
+    }
+)
 public class AuditLog extends BaseEntity {
 
     @Id

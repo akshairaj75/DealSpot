@@ -1,5 +1,7 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,7 +15,15 @@ import java.math.BigDecimal;
 import java.time.LocalTime;
 
 @Entity
-@Table(name = "store_branches")
+@Table(
+    name = "store_branches",
+    indexes = {
+        @Index(name = "idx_branches_store", columnList = "store_id"),
+        @Index(name = "idx_branches_city", columnList = "city_id"),
+        @Index(name = "idx_branches_active", columnList = "is_active"),
+        @Index(name = "idx_branches_geo", columnList = "latitude, longitude")
+    }
+)
 public class StoreBranch extends BaseEntity {
 
     @Id

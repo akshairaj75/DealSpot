@@ -1,5 +1,9 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
+import org.hibernate.annotations.Check;
+
 import com.backend.dealspot.enums.DiscountType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +20,18 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "coupon_codes")
+@Table(
+    name = "coupon_codes",
+    uniqueConstraints = @UniqueConstraint(name = "uq_coupon_code", columnNames = "code"),
+    indexes = {
+        @Index(name = "idx_coupon_offer", columnList = "offer_id"),
+        @Index(name = "idx_coupon_store", columnList = "store_id"),
+        @Index(name = "idx_coupon_product", columnList = "product_id"),
+        @Index(name = "idx_coupon_validity", columnList = "valid_from, valid_until")
+    }
+)
+@Check(name = "chk_coupon_dates", constraints = "valid_until >= valid_from")
+@Check(name = "chk_coupon_discount", constraints = "discount_value > 0")
 public class CouponCode extends BaseEntity {
 
     @Id

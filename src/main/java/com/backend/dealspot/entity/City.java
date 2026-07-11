@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,7 +15,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "cities")
+@Table(
+    name = "cities",
+    uniqueConstraints = @UniqueConstraint(name = "uq_cities_region_code", columnNames = "region_code"),
+    indexes = @Index(name = "idx_cities_active", columnList = "is_active")
+)
 public class City extends BaseEntity {
 
     @Id

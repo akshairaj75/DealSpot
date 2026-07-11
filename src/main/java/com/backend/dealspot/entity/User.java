@@ -1,5 +1,8 @@
 package com.backend.dealspot.entity;
 
+import jakarta.persistence.Index;
+import jakarta.persistence.UniqueConstraint;
+
 import com.backend.dealspot.enums.Gender;
 import com.backend.dealspot.enums.PreferredLang;
 import jakarta.persistence.Column;
@@ -18,7 +21,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_users_email", columnNames = "email"),
+        @UniqueConstraint(name = "uq_users_phone", columnNames = "phone")
+    },
+    indexes = {
+        @Index(name = "idx_users_city", columnList = "city_id"),
+        @Index(name = "idx_users_lang", columnList = "preferred_lang")
+    }
+)
 public class User extends BaseEntity {
 
     @Id
