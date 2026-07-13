@@ -1,20 +1,25 @@
 package com.backend.dealspot.serviceImpl;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.offer.OfferRequestDto;
 import com.backend.dealspot.dto.offer.OfferResponseDto;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Offer;
+import com.backend.dealspot.entity.OfferImage;
 import com.backend.dealspot.entity.Product;
+import com.backend.dealspot.entity.ProductImage;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
+import com.backend.dealspot.repository.OfferImageRepository;
 import com.backend.dealspot.repository.OfferRepository;
 import com.backend.dealspot.repository.ProductRepository;
 import com.backend.dealspot.repository.StoreRepository;
@@ -44,10 +49,14 @@ public class OfferServiceImpl implements OfferService {
         @Autowired
         FileStorageService fileStorageService;
 
+        @Autowired
+        OfferImageRepository offerImageRepository;
+
         @Transactional
         @Override
         public OfferResponseDto addOffer(
                         OfferRequestDto dto,
+                        List<MultipartFile> images,
                         CustomUserPrincipal authUser,
                         HttpServletRequest request) {
 
@@ -79,8 +88,8 @@ public class OfferServiceImpl implements OfferService {
                 offer.setDiscountPct(dto.getDiscountPct());
                 offer.setBadgeType(dto.getBadgeType());
 
-                offer.setImageUrl(dto.getImageUrl());
-                offer.setThumbnailUrl(dto.getThumbnailUrl());
+                // offer.setImageUrl(dto.getImageUrl());
+                // offer.setThumbnailUrl(dto.getThumbnailUrl());
 
                 offer.setValidFrom(dto.getValidFrom());
                 offer.setValidUntil(dto.getValidUntil());
@@ -91,21 +100,40 @@ public class OfferServiceImpl implements OfferService {
                 offer.setInStore(dto.getInStore());
                 offer.setActive(dto.getActive());
 
+                offer.setViewCount(0L);
                 offer.setSaveCount(0);
                 offer.setShareCount(0);
 
                 Offer savedOffer = offerRepository.save(offer);
 
-                // if (dto.getImageUrl() != null) {
-                // String folderName = "offer_images/" + savedOffer.getId();
-                // String url = fileStorageService.storeFile(dto.getImageUrl(), folderName);
-                // savedOffer.setImageUrl(url);
-                // }
-                // if (dto.getThumbnailUrl() != null) {
-                // String folderName = "offer_thumbnails/" + savedOffer.getId();
-                // String url = fileStorageService.storeFile(dto.getThumbnailUrl(), folderName);
-                // savedOffer.setThumbnailUrl(url);
-                // }
+                if (images != null && !images.isEmpty()) {
+
+                        for (int i = 0; i < images.size(); i++) {
+
+                                try {
+                                        String filePath = fileStorageService.storeFile(
+                                                        images.get(i),
+                                                        "offers/offer-images");
+
+                                        if (i == 0) {
+                                                savedOffer.setImageUrl(filePath);
+                                                savedOffer.setThumbnailUrl(filePath);
+                                        }
+
+                                        OfferImage offerImage = new OfferImage();
+                                        offerImage.setOffer(savedOffer);
+                                        offerImage.setImageUrl(filePath);
+
+                                        offerImageRepository.save(offerImage);
+                                        savedOffer.getImages().add(offerImage);
+
+                                } catch (IOException e) {
+                                        throw new RuntimeException("Failed to upload image", e);
+                                }
+                        }
+
+                        offerRepository.save(savedOffer);
+                }
 
                 return OfferResponseDto.fromEntity(savedOffer);
 
@@ -114,10 +142,52 @@ public class OfferServiceImpl implements OfferService {
         @Override
         public List<OfferResponseDto> fetchAllOffers() {
 
-                List<Offer> offers = offerRepository.findAll();
+                List<Offer> offers = offerRepository.findAllByActive(true);
 
                 return offers.stream()
                                 .map(OfferResponseDto::fromEntity).toList();
+        }
+
+        @Override
+        public OfferResponseDto getOfferById(Long offerId) {
+                Offer offer = offerRepository.findById(offerId)
+                                .orElseThrow(() -> new RuntimeException("Offer not found"));
+                return OfferResponseDto.fromEntity(offer);
+        }
+
+        @Transactional
+        @Override
+        public OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, CustomUserPrincipal authUser,
+                        HttpServletRequest request) {
+
+                Offer offer = offerRepository.findById(offerId)
+                                .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+                offer.setTitleEn(dto.getTitleEn());
+                offer.setTitleAr(dto.getTitleAr());
+                offer.setDescriptionEn(dto.getDescriptionEn());
+                offer.setDescriptionAr(dto.getDescriptionAr());
+                offer.setTermsEn(dto.getTermsEn());
+                offer.setTermsAr(dto.getTermsAr());
+                offer.setOriginalPrice(dto.getOriginalPrice());
+                offer.setOfferPrice(dto.getOfferPrice());
+                offer.setDiscountPct(dto.getDiscountPct());
+                offer.setBadgeType(dto.getBadgeType());
+
+                // offer.setImageUrl(dto.getImageUrl());
+                // offer.setThumbnailUrl(dto.getThumbnailUrl());
+
+                offer.setValidFrom(dto.getValidFrom());
+                offer.setValidUntil(dto.getValidUntil());
+
+                offer.setFeatured(dto.getFeatured());
+                offer.setFlash(dto.getFlash());
+                offer.setOnline(dto.getOnline());
+                offer.setInStore(dto.getInStore());
+                offer.setActive(dto.getActive());
+
+                Offer savedOffer = offerRepository.save(offer);
+                return OfferResponseDto.fromEntity(savedOffer);
         }
 
 }
