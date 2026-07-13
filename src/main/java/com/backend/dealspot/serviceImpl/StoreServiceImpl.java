@@ -1,10 +1,12 @@
 package com.backend.dealspot.serviceImpl;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.store.StoreRegisterDto;
 import com.backend.dealspot.dto.store.StoreResponseDto;
@@ -36,9 +38,12 @@ public class StoreServiceImpl implements StoreService {
     @Autowired
     CategoryRepository categoryRepository;
 
+    @Autowired
+    FileStorageService fileStorageService;
+
     @Transactional
     @Override
-    public StoreResponseDto createStore(StoreRegisterDto dto, CustomUserPrincipal authUser,
+    public StoreResponseDto createStore(StoreRegisterDto dto, MultipartFile file, CustomUserPrincipal authUser,
             HttpServletRequest request) {
         AdminUser currentUser = adminUserRepository.findById(authUser.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -54,7 +59,6 @@ public class StoreServiceImpl implements StoreService {
         newStore.setNameAr(dto.getNameAr());
         newStore.setDescriptionEn(dto.getDescriptionEn());
         newStore.setDescriptionAr(dto.getDescriptionAr());
-        newStore.setLogoUrl(dto.getLogoUrl());
         newStore.setBannerUrl(dto.getBannerUrl());
         newStore.setWebsite(dto.getWebsite());
         newStore.setContactPhone(dto.getContactPhone());
@@ -63,7 +67,17 @@ public class StoreServiceImpl implements StoreService {
         newStore.setCrNumber(dto.getCrNumber());
         newStore.setCity(city);
         newStore.setCategory(category);
+        if (file != null && !file.isEmpty()) {
+            try {
+                String imageFile = fileStorageService.storeFile(file, "stores/logo");
+                newStore.setLogoUrl(imageFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload store logo", e);
+            }
+        }
+
         Store saved = storeRepository.save(newStore);
+
         return StoreResponseDto.fromEntity(saved);
     }
 
@@ -86,7 +100,11 @@ public class StoreServiceImpl implements StoreService {
 
     @Transactional
     @Override
-    public StoreResponseDto updateStore(Integer storeId, StoreRegisterDto dto, CustomUserPrincipal authUser,
+    public StoreResponseDto updateStore(
+            Integer storeId,
+            StoreRegisterDto dto,
+            MultipartFile file,
+            CustomUserPrincipal authUser,
             HttpServletRequest request) {
 
         Store store = storeRepository.findById(storeId)
@@ -104,9 +122,9 @@ public class StoreServiceImpl implements StoreService {
         if (dto.getDescriptionAr() != null && !dto.getDescriptionAr().isEmpty()) {
             store.setDescriptionAr(dto.getDescriptionAr());
         }
-        if (dto.getLogoUrl() != null && !dto.getLogoUrl().isEmpty()) {
-            store.setLogoUrl(dto.getLogoUrl());
-        }
+        // if (dto.getLogoUrl() != null && !dto.getLogoUrl().isEmpty()) {
+        //     store.setLogoUrl(dto.getLogoUrl());
+        // }
         if (dto.getBannerUrl() != null && !dto.getBannerUrl().isEmpty()) {
             store.setBannerUrl(dto.getBannerUrl());
         }
@@ -135,6 +153,23 @@ public class StoreServiceImpl implements StoreService {
                     .orElseThrow(() -> new RuntimeException("Category not found"));
             store.setCategory(category);
         }
+
+        if (file != null && !file.isEmpty()) {
+        try {
+            String logoUrl = fileStorageService.storeFile(
+                    file,
+                    "stores/logo"
+            );
+
+            store.setLogoUrl(logoUrl);
+
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Failed to upload store logo",
+                    e
+            );
+        }
+    }
         Store saved = storeRepository.save(store);
         return StoreResponseDto.fromEntity(saved);
     }

@@ -12,20 +12,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(
-    name = "flyers",
-    indexes = {
+@Table(name = "flyers", indexes = {
         @Index(name = "idx_flyers_store", columnList = "store_id"),
         @Index(name = "idx_flyers_city", columnList = "city_id"),
-        @Index(name = "idx_flyers_validity", columnList = "valid_from, valid_until")
-    }
-)
+        @Index(name = "idx_flyers_validity", columnList = "valid_from, valid_until"),
+        @Index(name = "idx_flyers_active", columnList = "is_active")
+})
 @Check(name = "chk_flyers_dates", constraints = "valid_until >= valid_from")
 public class Flyer extends BaseEntity {
 
@@ -48,6 +47,15 @@ public class Flyer extends BaseEntity {
     @Column(name = "title_ar", nullable = false, length = 200)
     private String titleAr;
 
+    @Column(name = "description_en", columnDefinition = "TEXT")
+    private String descriptionEn;
+
+    @Column(name = "description_ar", columnDefinition = "TEXT")
+    private String descriptionAr;
+
+    @Column(name = "cover_image_url", length = 255)
+    private String coverImageUrl;
+
     @Column(name = "pdf_url", length = 255)
     private String pdfUrl;
 
@@ -60,7 +68,14 @@ public class Flyer extends BaseEntity {
     @Column(name = "valid_until", nullable = false)
     private LocalDate validUntil;
 
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
+
+    @Column(name = "view_count", nullable = false)
+    private Long viewCount = 0L;
+
     @OneToMany(mappedBy = "flyer")
+    @OrderBy("pageNumber ASC")
     private List<FlyerPage> pages = new ArrayList<>();
 
     public Integer getId() {
@@ -103,6 +118,30 @@ public class Flyer extends BaseEntity {
         this.titleAr = titleAr;
     }
 
+    public String getDescriptionEn() {
+        return descriptionEn;
+    }
+
+    public void setDescriptionEn(String descriptionEn) {
+        this.descriptionEn = descriptionEn;
+    }
+
+    public String getDescriptionAr() {
+        return descriptionAr;
+    }
+
+    public void setDescriptionAr(String descriptionAr) {
+        this.descriptionAr = descriptionAr;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
+    }
+
     public String getPdfUrl() {
         return pdfUrl;
     }
@@ -133,6 +172,22 @@ public class Flyer extends BaseEntity {
 
     public void setValidUntil(LocalDate validUntil) {
         this.validUntil = validUntil;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public Long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount;
     }
 
     public List<FlyerPage> getPages() {

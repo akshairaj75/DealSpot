@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.store.StoreRegisterDto;
 import com.backend.dealspot.dto.store.StoreResponseDto;
@@ -31,25 +33,26 @@ public class StoreController {
 
     @PostMapping("/create")
     public ResponseEntity<StoreResponseDto> createStore(
-            @RequestBody StoreRegisterDto dto,
+            @RequestPart("body") StoreRegisterDto dto,
+            @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             HttpServletRequest request) {
-        StoreResponseDto createdStore = storeService.createStore(dto, authUser, request);
+        StoreResponseDto createdStore = storeService.createStore(dto, file, authUser, request);
         return ResponseEntity.ok(createdStore);
     }
 
-    @PostMapping("/create/bulk")
-    public ResponseEntity<List<StoreResponseDto>> createStores(
-            @RequestBody List<StoreRegisterDto> dtos,
-            @AuthenticationPrincipal CustomUserPrincipal authUser,
-            HttpServletRequest request) {
+    // @PostMapping("/create/bulk")
+    // public ResponseEntity<List<StoreResponseDto>> createStores(
+    // @RequestBody List<StoreRegisterDto> dtos,
+    // @AuthenticationPrincipal CustomUserPrincipal authUser,
+    // HttpServletRequest request) {
 
-        List<StoreResponseDto> stores = dtos.stream()
-                .map(dto -> storeService.createStore(dto, authUser, request))
-                .toList();
+    // List<StoreResponseDto> stores = dtos.stream()
+    // .map(dto -> storeService.createStore(dto, authUser, request))
+    // .toList();
 
-        return ResponseEntity.ok(stores);
-    }
+    // return ResponseEntity.ok(stores);
+    // }
 
     @GetMapping("/fetch-all-stores")
     public ResponseEntity<List<StoreResponseDto>> fetchAllStores(
@@ -72,22 +75,22 @@ public class StoreController {
     @PutMapping("/update-store/{storeId}")
     public ResponseEntity<StoreResponseDto> updateStore(
             @PathVariable("storeId") Integer storeId,
-            @RequestBody StoreRegisterDto dto,
+            @RequestPart("body") StoreRegisterDto dto,
+            @RequestPart("file") MultipartFile file,
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             HttpServletRequest request) {
         StoreResponseDto updatedStore = storeService.updateStore(storeId, dto,
-                authUser, request);
+            file, authUser, request);
         return ResponseEntity.ok(updatedStore);
     }
 
     @DeleteMapping("/delete-store/{storeId}")
     public ResponseEntity<String> deleteStore(
-    @PathVariable("storeId") Integer storeId,
-    @AuthenticationPrincipal CustomUserPrincipal authUser,
-    HttpServletRequest request
-    ) {
-    storeService.deleteStore(storeId, authUser, request);
-    return ResponseEntity.ok("Store deleted successfully");
+            @PathVariable("storeId") Integer storeId,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        storeService.deleteStore(storeId, authUser, request);
+        return ResponseEntity.ok("Store deleted successfully");
     }
 
 }
