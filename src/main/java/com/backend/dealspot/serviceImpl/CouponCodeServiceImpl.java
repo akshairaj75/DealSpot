@@ -1,5 +1,7 @@
 package com.backend.dealspot.serviceImpl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,52 +25,81 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class CouponCodeServiceImpl implements CouponCodeService {
 
-    @Autowired
-    AdminUserRepository adminUserRepository;
+        @Autowired
+        AdminUserRepository adminUserRepository;
 
-    @Autowired
-    CouponCodeRepository couponCodeRepository;
+        @Autowired
+        CouponCodeRepository couponCodeRepository;
 
-    @Autowired
-    ProductRepository productRepository;
+        @Autowired
+        ProductRepository productRepository;
 
-    @Autowired
-    OfferRepository offerRepository;
+        @Autowired
+        OfferRepository offerRepository;
 
-    @Autowired
-    StoreRepository storeRepository;
+        @Autowired
+        StoreRepository storeRepository;
 
-    @Override
-    public CouponCodeResponseDto addCoupon(CouponCodeRequestDto dto, CustomUserPrincipal authUser,
-            HttpServletRequest request) {
-        AdminUser user = adminUserRepository.findById(authUser.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        @Override
+        public CouponCodeResponseDto addCoupon(CouponCodeRequestDto dto, CustomUserPrincipal authUser,
+                        HttpServletRequest request) {
+                AdminUser user = adminUserRepository.findById(authUser.getId())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        Offer offer = offerRepository.findById(dto.getOfferId())
-                .orElseThrow(() -> new RuntimeException("Offer not found"));
+                Offer offer = offerRepository.findById(dto.getOfferId())
+                                .orElseThrow(() -> new RuntimeException("Offer not found"));
 
-        Product product = productRepository.findById(dto.getProductId())
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                Product product = productRepository.findById(dto.getProductId())
+                                .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        Store store = storeRepository.findById(dto.getStoreId())
-                .orElseThrow(() -> new RuntimeException("Store not found"));
+                Store store = storeRepository.findById(dto.getStoreId())
+                                .orElseThrow(() -> new RuntimeException("Store not found"));
 
-        CouponCode coupon = new CouponCode();
-        coupon.setOffer(offer);
-        coupon.setProduct(product);
-        coupon.setStore(store);
-        coupon.setCode(dto.getCode());
-        coupon.setMaxUses(dto.getMaxUses());
-        coupon.setDiscountType(dto.getDiscountType());
-        coupon.setDiscountValue(dto.getDiscountValue());
-        coupon.setMinCartValue(dto.getMinCartValue());
-        coupon.setValidFrom(dto.getValidFrom());
-        coupon.setValidUntil(dto.getValidUntil());
-        coupon.setActive(dto.getActive());
+                CouponCode coupon = new CouponCode();
+                coupon.setOffer(offer);
+                coupon.setProduct(product);
+                coupon.setStore(store);
+                coupon.setCode(dto.getCode());
+                coupon.setMaxUses(dto.getMaxUses());
+                coupon.setDiscountType(dto.getDiscountType());
+                coupon.setDiscountValue(dto.getDiscountValue());
+                coupon.setMinCartValue(dto.getMinCartValue());
+                coupon.setValidFrom(dto.getValidFrom());
+                coupon.setValidUntil(dto.getValidUntil());
+                coupon.setActive(dto.getActive());
 
-        CouponCode savedCoupon = couponCodeRepository.save(coupon);
+                CouponCode savedCoupon = couponCodeRepository.save(coupon);
 
-        return CouponCodeResponseDto.fromEntity(savedCoupon);
-    }
+                return CouponCodeResponseDto.fromEntity(savedCoupon);
+        }
+
+        @Override
+        public List<CouponCodeResponseDto> fetchAllCoupon(CustomUserPrincipal authUser, HttpServletRequest request) {
+                AdminUser user = adminUserRepository.findById(authUser.getId())
+                                .orElseThrow(() -> new RuntimeException("User not found"));
+
+                List<CouponCode> coupons = couponCodeRepository.findAll();
+                return coupons.stream().map(CouponCodeResponseDto::fromEntity).toList();
+        }
+
+        @Override
+        public CouponCodeResponseDto updateCoupon(CouponCodeRequestDto dto, Long couponId, CustomUserPrincipal authUser,
+                        HttpServletRequest request) {
+                CouponCode coupon = couponCodeRepository.findById(couponId)
+                                .orElseThrow(() -> new RuntimeException("Coupon not found"));
+
+                coupon.setCode(dto.getCode());
+                coupon.setMaxUses(dto.getMaxUses());
+                coupon.setDiscountType(dto.getDiscountType());
+                coupon.setDiscountValue(dto.getDiscountValue());
+                coupon.setMinCartValue(dto.getMinCartValue());
+                coupon.setValidFrom(dto.getValidFrom());
+                coupon.setValidUntil(dto.getValidUntil());
+                coupon.setActive(dto.getActive());
+
+                CouponCode savedCoupon = couponCodeRepository.save(coupon);
+
+                return CouponCodeResponseDto.fromEntity(savedCoupon);
+        }
 
 }

@@ -301,4 +301,12 @@ public class ProductServiceImpl implements ProductService {
         return ProductResponseDto.fromEntity(updatedProduct);
     }
 
+    @Override
+    public List<ProductDetailsDto> getProductDetails(Long productId) {
+        List<ProductDetail> details = productDetailRepository.findByProductId(productId);
+        return details.stream()
+                .map(ProductDetailsDto::fromEntity)
+                .toList();
+    }
+
 }

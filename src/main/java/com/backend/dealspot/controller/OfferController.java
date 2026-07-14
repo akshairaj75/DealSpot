@@ -30,15 +30,15 @@ public class OfferController {
     @Autowired
     OfferService offerService;
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/create")
     public ResponseEntity<OfferResponseDto> addOffer(
             @RequestPart("data") OfferRequestDto dto,
-            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             HttpServletRequest request) {
 
         return ResponseEntity.ok(
-                offerService.addOffer(dto, images, authUser, request));
+                offerService.addOffer(dto, files, authUser, request));
     }
 
     @GetMapping("/fetch-all-offers")

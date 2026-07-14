@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.attributeKey.AttributeKeyDto;
 import com.backend.dealspot.dto.attributeKey.AttributeKeyRegisterDto;
+import com.backend.dealspot.dto.product.ProductDetailsDto;
 import com.backend.dealspot.dto.product.ProductRegisterDto;
 import com.backend.dealspot.dto.product.ProductResponseDto;
 import com.backend.dealspot.service.ProductService;
@@ -43,6 +44,7 @@ public class ProductController {
                 .toList();
         return ResponseEntity.ok(res);
     }
+//  ======================================================================
 
     @GetMapping("/fetch-attribute-keys")
     public ResponseEntity<List<AttributeKeyDto>> fetchAttributeKeys() {
@@ -92,6 +94,13 @@ public class ProductController {
         ProductResponseDto result = productService.editProduct(productId, dto, file);
         return ResponseEntity.ok(result);
 
+    }
+
+    @GetMapping("/get-product-details/{productId}")
+    public ResponseEntity<List<ProductDetailsDto>> getProductDetails(
+        @PathVariable("productId") Long productId) {
+        List<ProductDetailsDto> productDetails = productService.getProductDetails(productId);
+        return ResponseEntity.ok(productDetails);
     }
 
 }

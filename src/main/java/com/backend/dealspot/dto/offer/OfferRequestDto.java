@@ -20,8 +20,6 @@ public class OfferRequestDto {
     private BigDecimal offerPrice;
     private Integer discountPct;
     private OfferBadgeType badgeType;
-    private String imageUrl;
-    private String thumbnailUrl;
     private LocalDate validFrom;
     private LocalDate validUntil;
     private Boolean featured;
@@ -140,22 +138,6 @@ public class OfferRequestDto {
 
     public void setBadgeType(OfferBadgeType badgeType) {
         this.badgeType = badgeType;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
     }
 
     public LocalDate getValidFrom() {
