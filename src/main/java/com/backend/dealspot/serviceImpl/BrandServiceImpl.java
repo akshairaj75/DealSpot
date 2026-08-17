@@ -8,8 +8,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import com.backend.dealspot.dto.brand.BrandDto;
 import com.backend.dealspot.dto.brand.BrandRegisterDto;
+import com.backend.dealspot.dto.brand.BrandResponseDto;
 import com.backend.dealspot.entity.Brand;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.repository.BrandRepository;
@@ -37,7 +42,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     @Transactional
-    public BrandDto registerBrand(BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile) {
+    public BrandResponseDto registerBrand(BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile) {
         if (dto == null) {
             throw new IllegalArgumentException("Brand registration payload is required");
         }
@@ -85,28 +90,28 @@ public class BrandServiceImpl implements BrandService {
         }
 
         Brand savedBrand = brandRepository.save(brand);
-        return BrandDto.fromEntity(savedBrand);
+        return BrandResponseDto.fromEntity(savedBrand);
     }
 
     @Override
-    public List<BrandDto> fetchBrands() {
+    public List<BrandResponseDto> fetchBrands() {
 
         List<Brand> result = brandRepository.findAll();
 
         return result.stream()
-                .map(BrandDto::fromEntity)
+                .map(BrandResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public BrandDto getBrandById(Long id) {
-        return BrandDto
+    public BrandResponseDto getBrandById(Long id) {
+        return BrandResponseDto
                 .fromEntity(brandRepository.findById(id).orElseThrow(() -> new RuntimeException("Brand not found")));
     }
 
     @Transactional
     @Override
-    public BrandDto updateBrand(Long id, BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile) {
+    public BrandResponseDto updateBrand(Long id, BrandRegisterDto dto, MultipartFile logoFile, MultipartFile bannerFile) {
 
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Brand not found"));
@@ -139,7 +144,7 @@ public class BrandServiceImpl implements BrandService {
             throw new RuntimeException("Failed to upload brand assets", e);
         }
         Brand savedBrand = brandRepository.save(brand);
-        return BrandDto.fromEntity(savedBrand);
+        return BrandResponseDto.fromEntity(savedBrand);
     }
 
     @Transactional
@@ -165,5 +170,17 @@ public class BrandServiceImpl implements BrandService {
 
         brandRepository.delete(brand);
 
+    }
+
+    @Override
+    public Page<BrandDto> searchBrands(String q, int page, int size) {
+        if (q == null || q.trim().isEmpty()) {
+            return Page.empty(PageRequest.of(page, size, Sort.by("nameEn").ascending()));
+        }
+
+        String trimmedQuery = q.trim();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nameEn").ascending());
+        Page<Brand> brands = brandRepository.findByNameEnContainingIgnoreCaseOrNameArContainingIgnoreCase(trimmedQuery, trimmedQuery, pageable);
+        return brands.map(BrandDto::fromEntity);
     }
 }

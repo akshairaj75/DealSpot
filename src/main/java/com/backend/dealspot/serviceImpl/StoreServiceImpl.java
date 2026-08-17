@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.store.StoreRegisterDto;
 import com.backend.dealspot.dto.store.StoreResponseDto;
-import com.backend.dealspot.entity.AdminUser;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Store;
@@ -45,8 +44,6 @@ public class StoreServiceImpl implements StoreService {
     @Override
     public StoreResponseDto createStore(StoreRegisterDto dto, MultipartFile file, CustomUserPrincipal authUser,
             HttpServletRequest request) {
-        AdminUser currentUser = adminUserRepository.findById(authUser.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
 
         City city = cityRepository.findById(dto.getCityId())
                 .orElseThrow(() -> new RuntimeException("City not found"));

@@ -6,6 +6,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -14,7 +15,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "brands")
+@Table(
+    name = "brands",
+    indexes = {
+        @Index(name = "idx_brands_name_en", columnList = "name_en"),
+        @Index(name = "idx_brands_name_ar", columnList = "name_ar")
+    }
+)
 public class Brand extends BaseEntity {
 
     @Id
