@@ -123,6 +123,25 @@ public class BrandServiceImpl implements BrandService {
         brand.setWebsiteUrl(dto.getWebsiteUrl());
         brand.setFeatured(dto.isFeatured());
         brand.setActive(dto.isActive());
+
+        // Map Categories
+        if (dto.getCategoryIds() != null) {
+            if (!dto.getCategoryIds().isEmpty()) {
+                List<Integer> categoryIds = dto.getCategoryIds().stream()
+                        .map(Long::intValue)
+                        .toList();
+
+                List<Category> categories = categoryRepository.findAllById(categoryIds);
+
+                if (categories.isEmpty() || categories.size() != categoryIds.size()) {
+                    throw new IllegalArgumentException("One or more provided Category IDs do not exist in the database.");
+                }
+
+                brand.setCategories(categories);
+            } else {
+                brand.setCategories(new java.util.ArrayList<>());
+            }
+        }
         try {
 
             if (logoFile != null && !logoFile.isEmpty()) {

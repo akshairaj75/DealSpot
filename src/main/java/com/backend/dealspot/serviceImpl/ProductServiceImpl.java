@@ -174,6 +174,13 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        if (dto.getBrandId() != null) {
+            Brand brand = brandRepository.findById(dto.getBrandId())
+                    .orElseThrow(() -> new RuntimeException("Brand not found"));
+
+            product.setBrand(brand);
+        }
+
         // Category
         if (dto.getCategoryId() != null) {
             Category category = categoryRepository.findById(dto.getCategoryId().intValue())

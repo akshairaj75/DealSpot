@@ -2,14 +2,13 @@ package com.backend.dealspot.controller;
 
 import com.backend.dealspot.dto.category.CategoryDto;
 import com.backend.dealspot.dto.category.CategoryRequestDto;
-import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.CategoryService;
 
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,9 +59,14 @@ public class CategoryController {
     public ResponseEntity<CategoryDto> editCategory(
             @RequestPart("data") CategoryRequestDto dto,
             @RequestPart(value = "file", required = false) MultipartFile file,
-            @PathVariable Integer categoryId,
-            @AuthenticationPrincipal CustomUserPrincipal authUser) {
-        CategoryDto editedCategory = categoryService.updateCategory(categoryId, dto, file, authUser);
+            @PathVariable Integer categoryId) {
+        CategoryDto editedCategory = categoryService.updateCategory(categoryId, dto, file);
         return ResponseEntity.ok(editedCategory);
+    }
+
+    @DeleteMapping("/delete/{categoryId}")
+    public ResponseEntity<String> deleteCategory(@PathVariable Integer categoryId) {
+        categoryService.deleteCategory(categoryId);
+        return ResponseEntity.ok("Category deleted successfully");
     }
 }

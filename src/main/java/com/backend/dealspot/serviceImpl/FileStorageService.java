@@ -43,11 +43,14 @@ public class FileStorageService {
     }
 
     public void deleteFile(String logoUrl, String folder) {
-        Path path = Paths.get(uploadDir, folder, logoUrl);
+        if (logoUrl == null || logoUrl.trim().isEmpty() || logoUrl.startsWith("http://") || logoUrl.startsWith("https://")) {
+            return;
+        }
         try {
+            Path path = logoUrl.startsWith(uploadDir) ? Paths.get(logoUrl) : Paths.get(uploadDir, folder, logoUrl);
             Files.deleteIfExists(path);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete file", e);
+        } catch (Exception e) {
+            // Silently ignore if file doesn't exist
         }
     }
 

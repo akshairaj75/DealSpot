@@ -2,7 +2,6 @@ package com.backend.dealspot.serviceImpl;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,11 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.category.CategoryDto;
 import com.backend.dealspot.dto.category.CategoryRequestDto;
-import com.backend.dealspot.entity.AdminUser;
 import com.backend.dealspot.entity.Category;
-import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CategoryRepository;
-import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.CategoryService;
 
 
@@ -23,14 +19,11 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final FileStorageService fileStorageService;
-    private final AdminUserRepository adminUserRepository;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository,
-            FileStorageService fileStorageService,
-            AdminUserRepository adminUserRepository) {
+            FileStorageService fileStorageService) {
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
-        this.adminUserRepository = adminUserRepository;
     }
 
     @Transactional
@@ -44,12 +37,11 @@ public class CategoryServiceImpl implements CategoryService {
             throw new IllegalArgumentException("Category with the same English or Arabic name already exists");
         }
 
-
         Category category = new Category();
 
         category.setNameEn(dto.getNameEn());
         category.setNameAr(dto.getNameAr());
-        category.setIconSlug(dto.getIconSlug());
+        category.setIconSlug(dto.getIconSlug() != null ? dto.getIconSlug() : "folder");
 
         if (dto.getSortOrder() != null) {
             category.setSortOrder(dto.getSortOrder());
@@ -86,13 +78,10 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Transactional
     @Override
-    public CategoryDto updateCategory(Integer categoryId, CategoryRequestDto dto, MultipartFile file,
-            CustomUserPrincipal authUser) {
+    public CategoryDto updateCategory(Integer categoryId, CategoryRequestDto dto, MultipartFile file) {
         
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found"));
-
-        Optional<AdminUser> user = adminUserRepository.findById(authUser.getId());
 
         if (dto.getNameEn() != null && !dto.getNameEn().isEmpty()) {
             category.setNameEn(dto.getNameEn());
@@ -115,13 +104,21 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         if (dto.getParentId() != null) {
+            if (dto.getParentId().equals(categoryId)) {
+                throw new IllegalArgumentException("A category cannot be its own parent");
+            }
             Category parentCategory = categoryRepository.findById(dto.getParentId())
                     .orElseThrow(() -> new IllegalArgumentException("Parent category not found"));
             category.setParent(parentCategory);
+        } else {
+            category.setParent(null);
         }
 
         if (file != null && !file.isEmpty()) {
             try {
+                if (category.getImageUrl() != null) {
+                    fileStorageService.deleteFile(category.getImageUrl(), "categories");
+                }
                 String imageFile = fileStorageService.storeFile(file, "categories");
                 category.setImageUrl(imageFile);
             } catch (IOException e) {
@@ -130,5 +127,28 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category saved = categoryRepository.save(category);
         return CategoryDto.fromEntity(saved);
+    }
+
+    @Transactional
+    @Override
+    public void deleteCategory(Integer categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Category not found"));
+
+        if (category.getChildren() != null && !category.getChildren().isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete category because it has subcategories");
+        }
+        if (category.getProducts() != null && !category.getProducts().isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete category because products are associated with it");
+        }
+        if (category.getStores() != null && !category.getStores().isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete category because stores are associated with it");
+        }
+
+        if (category.getImageUrl() != null) {
+            fileStorageService.deleteFile(category.getImageUrl(), "categories");
+        }
+
+        categoryRepository.delete(category);
     }
 }
