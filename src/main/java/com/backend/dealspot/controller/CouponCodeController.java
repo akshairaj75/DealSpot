@@ -2,7 +2,6 @@ package com.backend.dealspot.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,8 +23,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api/coupons")
 public class CouponCodeController {
 
-    @Autowired
-    CouponCodeService couponService;
+    private final CouponCodeService couponService;
+
+    public CouponCodeController(CouponCodeService couponService) {
+        this.couponService = couponService;
+    }
 
     @PostMapping("/add-coupon")
     public ResponseEntity<CouponCodeResponseDto> addCoupon(

@@ -2,7 +2,6 @@ package com.backend.dealspot.serviceImpl.auth;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,20 +25,25 @@ import com.backend.dealspot.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-        @Autowired
-        private UserRepository userRepository;
+        private final UserRepository userRepository;
 
-        @Autowired
-        private PasswordEncoder passwordEncoder;
+        private final PasswordEncoder passwordEncoder;
 
-        @Autowired
-        private AdminUserRepository adminUserRepository;
+        private final AdminUserRepository adminUserRepository;
 
-        @Autowired
-        private CityRepository cityRepository;
+        private final CityRepository cityRepository;
 
-        @Autowired
-        private JwtService jwtService;
+        private final JwtService jwtService;
+
+        public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
+                        AdminUserRepository adminUserRepository, CityRepository cityRepository,
+                        JwtService jwtService) {
+                this.userRepository = userRepository;
+                this.passwordEncoder = passwordEncoder;
+                this.adminUserRepository = adminUserRepository;
+                this.cityRepository = cityRepository;
+                this.jwtService = jwtService;
+        }
 
         // @Override
         // public AuthResponseDto register(AdminRegisterDto dto) {

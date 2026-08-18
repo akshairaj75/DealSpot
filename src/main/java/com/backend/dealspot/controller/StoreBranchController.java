@@ -2,7 +2,6 @@ package com.backend.dealspot.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,8 +25,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api/dealspot/store-branches")
 public class StoreBranchController {
 
-    @Autowired
-    StoreBranchService storeBranchService;
+    private final StoreBranchService storeBranchService;
+
+    public StoreBranchController(StoreBranchService storeBranchService) {
+        this.storeBranchService = storeBranchService;
+    }
 
     @GetMapping("/store/{storeId}/branches")
     public ResponseEntity<List<StoreBranchResponseDto>> fetchAllStoreBranches(

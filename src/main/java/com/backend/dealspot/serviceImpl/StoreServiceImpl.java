@@ -3,7 +3,6 @@ package com.backend.dealspot.serviceImpl;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +12,6 @@ import com.backend.dealspot.dto.store.StoreResponseDto;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Store;
-import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.StoreRepository;
@@ -25,20 +23,22 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class StoreServiceImpl implements StoreService {
 
-    @Autowired
-    private StoreRepository storeRepository;
+    private final StoreRepository storeRepository;
 
-    @Autowired
-    AdminUserRepository adminUserRepository;
+    private final CityRepository cityRepository;
 
-    @Autowired
-    CityRepository cityRepository;
+    private final CategoryRepository categoryRepository;
 
-    @Autowired
-    CategoryRepository categoryRepository;
+    private final FileStorageService fileStorageService;
 
-    @Autowired
-    FileStorageService fileStorageService;
+    public StoreServiceImpl(StoreRepository storeRepository, CityRepository cityRepository,
+            CategoryRepository categoryRepository,
+            FileStorageService fileStorageService) {
+        this.storeRepository = storeRepository;
+        this.cityRepository = cityRepository;
+        this.categoryRepository = categoryRepository;
+        this.fileStorageService = fileStorageService;
+    }
 
     @Transactional
     @Override
@@ -120,7 +120,7 @@ public class StoreServiceImpl implements StoreService {
             store.setDescriptionAr(dto.getDescriptionAr());
         }
         // if (dto.getLogoUrl() != null && !dto.getLogoUrl().isEmpty()) {
-        //     store.setLogoUrl(dto.getLogoUrl());
+        // store.setLogoUrl(dto.getLogoUrl());
         // }
         if (dto.getBannerUrl() != null && !dto.getBannerUrl().isEmpty()) {
             store.setBannerUrl(dto.getBannerUrl());
@@ -152,21 +152,19 @@ public class StoreServiceImpl implements StoreService {
         }
 
         if (file != null && !file.isEmpty()) {
-        try {
-            String logoUrl = fileStorageService.storeFile(
-                    file,
-                    "stores/logo"
-            );
+            try {
+                String logoUrl = fileStorageService.storeFile(
+                        file,
+                        "stores/logo");
 
-            store.setLogoUrl(logoUrl);
+                store.setLogoUrl(logoUrl);
 
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Failed to upload store logo",
-                    e
-            );
+            } catch (IOException e) {
+                throw new RuntimeException(
+                        "Failed to upload store logo",
+                        e);
+            }
         }
-    }
         Store saved = storeRepository.save(store);
         return StoreResponseDto.fromEntity(saved);
     }

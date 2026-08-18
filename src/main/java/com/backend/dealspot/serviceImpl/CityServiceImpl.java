@@ -2,16 +2,13 @@ package com.backend.dealspot.serviceImpl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.backend.dealspot.dto.city.CityRegisterDto;
 import com.backend.dealspot.dto.city.CityResponseDto;
-import com.backend.dealspot.entity.AdminUser;
 import com.backend.dealspot.entity.City;
-import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.CityService;
@@ -21,18 +18,19 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class CityServiceImpl implements CityService {
 
-    @Autowired
-    AdminUserRepository adminUserRepository;
 
-    @Autowired
-    CityRepository cityRepository;
+    private final CityRepository cityRepository;
+
+    public CityServiceImpl(CityRepository cityRepository) {
+        this.cityRepository = cityRepository;
+    }
 
     @Transactional
     @Override
     public CityResponseDto createCity(CityRegisterDto dto, CustomUserPrincipal principal, HttpServletRequest request) {
 
-        AdminUser user = adminUserRepository.findById(principal.getId())
-                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+        // AdminUser user = adminUserRepository.findById(principal.getId())
+        //         .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
         City city = new City();
         city.setNameEn(dto.getNameEn());
@@ -61,8 +59,8 @@ public class CityServiceImpl implements CityService {
         City city = cityRepository.findById(cityId)
                 .orElseThrow(() -> new UsernameNotFoundException("City not found"));
 
-        AdminUser user = adminUserRepository.findById(principal.getId())
-                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+        // AdminUser user = adminUserRepository.findById(principal.getId())
+        //         .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
                 if (dto.getNameEn() != null && !dto.getNameEn().isEmpty()) {
                     city.setNameEn(dto.getNameEn());
@@ -98,8 +96,8 @@ public class CityServiceImpl implements CityService {
         City city = cityRepository.findById(cityId)
                 .orElseThrow(() -> new UsernameNotFoundException("City not found"));
 
-        AdminUser user = adminUserRepository.findById(principal.getId())
-                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+        // AdminUser user = adminUserRepository.findById(principal.getId())
+        //         .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
         cityRepository.delete(city);
     }

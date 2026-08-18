@@ -3,7 +3,6 @@ package com.backend.dealspot.serviceImpl;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.backend.dealspot.dto.audit.AuditLogResponseDto;
@@ -25,12 +24,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class AuditServiceImpl implements AuditLogService {
 
-    @Autowired
-    AuditLogRepository auditLogRepository;
+
+    private final AuditLogRepository auditLogRepository;
 
     private final ObjectMapper objectMapper;
 
-    public AuditServiceImpl(ObjectMapper objectMapper) {
+    public AuditServiceImpl(AuditLogRepository auditLogRepository, ObjectMapper objectMapper) {
+        this.auditLogRepository = auditLogRepository;
         this.objectMapper = objectMapper;
     }
 

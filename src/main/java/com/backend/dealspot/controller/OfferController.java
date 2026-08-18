@@ -2,8 +2,6 @@ package com.backend.dealspot.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +25,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api/dealspot/offers")
 public class OfferController {
 
-    @Autowired
-    OfferService offerService;
+    private final OfferService offerService;
+
+    public OfferController(OfferService offerService) {
+        this.offerService = offerService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<OfferResponseDto> addOffer(

@@ -2,7 +2,6 @@ package com.backend.dealspot.serviceImpl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,14 +21,18 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class StoreBranchServiceImpl implements StoreBranchService {
 
-    @Autowired
-    StoreBranchRepository storeBranchRepository;
+    private final StoreBranchRepository storeBranchRepository;
 
-    @Autowired
-    StoreRepository storeRepository;
+    private final StoreRepository storeRepository;
 
-    @Autowired
-    CityRepository cityRepository;
+    private final CityRepository cityRepository;
+
+    public StoreBranchServiceImpl(StoreBranchRepository storeBranchRepository, StoreRepository storeRepository,
+            CityRepository cityRepository) {
+        this.storeBranchRepository = storeBranchRepository;
+        this.storeRepository = storeRepository;
+        this.cityRepository = cityRepository;
+    }
 
     @Override
     public List<StoreBranchResponseDto> fetchAllStoreBranches(Integer storeId) {
@@ -65,8 +68,8 @@ public class StoreBranchServiceImpl implements StoreBranchService {
         branch.setPhone(dto.getPhone());
         branch.setOpenTime(dto.getOpenTime());
         branch.setCloseTime(dto.getCloseTime());
-        branch.setTwentyFourHours(dto.getTwentyFourHours());
-        branch.setActive(dto.getActive());
+        branch.setTwentyFourHours(dto.getTwentyFourHours() != null ? dto.getTwentyFourHours() : false);
+        branch.setActive(dto.getActive() != null ? dto.getActive() : true);
 
         StoreBranch savedBranch = storeBranchRepository.save(branch);
 
@@ -92,8 +95,8 @@ public class StoreBranchServiceImpl implements StoreBranchService {
         branch.setPhone(dto.getPhone());
         branch.setOpenTime(dto.getOpenTime());
         branch.setCloseTime(dto.getCloseTime());
-        branch.setTwentyFourHours(dto.getTwentyFourHours());
-        branch.setActive(dto.getActive());
+        branch.setTwentyFourHours(dto.getTwentyFourHours() != null ? dto.getTwentyFourHours() : false);
+        branch.setActive(dto.getActive() != null ? dto.getActive() : true);
 
         StoreBranch savedBranch = storeBranchRepository.save(branch);
 

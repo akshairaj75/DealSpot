@@ -3,7 +3,6 @@ package com.backend.dealspot.serviceImpl;
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +14,6 @@ import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Offer;
 import com.backend.dealspot.entity.OfferImage;
 import com.backend.dealspot.entity.Product;
-import com.backend.dealspot.entity.ProductImage;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
@@ -31,26 +29,32 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class OfferServiceImpl implements OfferService {
 
-        @Autowired
-        StoreRepository storeRepository;
+        private final StoreRepository storeRepository;
 
-        @Autowired
-        ProductRepository productRepository;
+        private final ProductRepository productRepository;
 
-        @Autowired
-        CategoryRepository categoryRepository;
+        private final CategoryRepository categoryRepository;
 
-        @Autowired
-        CityRepository cityRepository;
+        private final CityRepository cityRepository;
 
-        @Autowired
-        OfferRepository offerRepository;
+        private final OfferRepository offerRepository;
 
-        @Autowired
-        FileStorageService fileStorageService;
+        private final FileStorageService fileStorageService;
 
-        @Autowired
-        OfferImageRepository offerImageRepository;
+        private final OfferImageRepository offerImageRepository;
+
+        public OfferServiceImpl(StoreRepository storeRepository, ProductRepository productRepository,
+                        CategoryRepository categoryRepository, CityRepository cityRepository,
+                        OfferRepository offerRepository, FileStorageService fileStorageService,
+                        OfferImageRepository offerImageRepository) {
+                this.storeRepository = storeRepository;
+                this.productRepository = productRepository;
+                this.categoryRepository = categoryRepository;
+                this.cityRepository = cityRepository;
+                this.offerRepository = offerRepository;
+                this.fileStorageService = fileStorageService;
+                this.offerImageRepository = offerImageRepository;
+        }
 
         @Transactional
         @Override

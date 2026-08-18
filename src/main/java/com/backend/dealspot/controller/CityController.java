@@ -19,17 +19,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
 @RequestMapping("/api/dealspot/cities")
 public class CityController {
 
-    @Autowired
-    private CityService cityService;
+    private final CityService cityService;
+
+    public CityController(CityService cityService) {
+        this.cityService = cityService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<CityResponseDto> createCity(

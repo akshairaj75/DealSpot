@@ -2,7 +2,7 @@ package com.backend.dealspot.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,8 +25,11 @@ import com.backend.dealspot.service.ProductService;
 @RequestMapping("/api/dealspot/products")
 public class ProductController {
 
-    @Autowired
-    ProductService productService;
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @PostMapping("/add-key")
     public ResponseEntity<AttributeKeyRegisterDto> addAttributeKey(

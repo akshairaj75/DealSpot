@@ -2,7 +2,6 @@ package com.backend.dealspot.security;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -16,11 +15,15 @@ import com.backend.dealspot.repository.UserRepository;
 @Service
 public class CustomUserDetailsService{
 
-        @Autowired
-        private UserRepository userRepository;
 
-        @Autowired
-        private AdminUserRepository adminUserRepository;
+        private final UserRepository userRepository;
+
+        private final AdminUserRepository adminUserRepository;
+
+        public CustomUserDetailsService(UserRepository userRepository, AdminUserRepository adminUserRepository) {
+            this.userRepository = userRepository;
+            this.adminUserRepository = adminUserRepository;
+        }
 
         // @Override
         // public UserDetails loadUserByUsername(String email) {

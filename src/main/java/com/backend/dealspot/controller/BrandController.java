@@ -2,7 +2,6 @@ package com.backend.dealspot.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +22,11 @@ import com.backend.dealspot.service.BrandService;
 @RestController
 public class BrandController {
 
-    @Autowired
-    BrandService brandService;
+    private final BrandService brandService;
+
+    public BrandController(BrandService brandService) {
+        this.brandService = brandService;
+    }
 
     @PostMapping("/api/dealspot/brands/register-brand")
     public ResponseEntity<BrandResponseDto> registerBrand(

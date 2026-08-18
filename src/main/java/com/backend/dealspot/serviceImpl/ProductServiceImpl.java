@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +39,6 @@ public class ProductServiceImpl implements ProductService {
     private final BrandRepository brandRepository;
     private final AttributeKeyRepository attributeKeyRepository;
 
-    @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
             CategoryRepository categoryRepository,
             FileStorageService fileStorageService,

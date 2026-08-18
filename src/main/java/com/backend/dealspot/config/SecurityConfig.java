@@ -1,6 +1,5 @@
 package com.backend.dealspot.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,8 +42,13 @@ public class SecurityConfig {
     // return http.build();
     // }
 
-    @Autowired
-    private JwtAuthenticationFilter jwtFilter;
+
+
+    private final JwtAuthenticationFilter jwtFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }   
 
     @Bean
     public AuthenticationManager authenticationManager(
