@@ -39,6 +39,8 @@ public class OfferResponseDto {
     private Long productId;
     private String productNameEn;
     private String productNameAr;
+    private String productPrimaryImageUrl;
+    private String productImageUrl;
     private String titleEn;
     private String titleAr;
     private String descriptionEn;
@@ -166,6 +168,22 @@ public class OfferResponseDto {
 
     public void setProductNameAr(String productNameAr) {
         this.productNameAr = productNameAr;
+    }
+
+    public String getProductPrimaryImageUrl() {
+        return productPrimaryImageUrl;
+    }
+
+    public void setProductPrimaryImageUrl(String productPrimaryImageUrl) {
+        this.productPrimaryImageUrl = productPrimaryImageUrl;
+    }
+
+    public String getProductImageUrl() {
+        return productImageUrl;
+    }
+
+    public void setProductImageUrl(String productImageUrl) {
+        this.productImageUrl = productImageUrl;
     }
 
     public String getTitleEn() {
@@ -416,6 +434,8 @@ public class OfferResponseDto {
             dto.setProductId(offer.getProduct().getId());
             dto.setProductNameEn(offer.getProduct().getNameEn());
             dto.setProductNameAr(offer.getProduct().getNameAr());
+            dto.setProductPrimaryImageUrl(offer.getProduct().getPrimaryImageUrl());
+            dto.setProductImageUrl(offer.getProduct().getPrimaryImageUrl());
         }
 
         return dto;
