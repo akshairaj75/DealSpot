@@ -17,10 +17,12 @@ public interface OfferService {
 
     OfferResponseDto getOfferById(Long offerId);
 
-    OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, CustomUserPrincipal authUser,
+    OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, List<MultipartFile> images, CustomUserPrincipal authUser,
             HttpServletRequest request);
 
     OfferResponseDto addOffer(OfferRequestDto dto, List<MultipartFile> images, CustomUserPrincipal authUser,
             HttpServletRequest request);
+
+    void deleteOffer(Long offerId);
 
 }

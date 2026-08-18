@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,7 +32,7 @@ public class OfferController {
         this.offerService = offerService;
     }
 
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = { "multipart/form-data" })
     public ResponseEntity<OfferResponseDto> addOffer(
             @RequestPart("data") OfferRequestDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
@@ -40,6 +41,16 @@ public class OfferController {
 
         return ResponseEntity.ok(
                 offerService.addOffer(dto, files, authUser, request));
+    }
+
+    @PostMapping(value = "/create", consumes = { "application/json" })
+    public ResponseEntity<OfferResponseDto> addOfferJson(
+            @RequestBody OfferRequestDto dto,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+
+        return ResponseEntity.ok(
+                offerService.addOffer(dto, null, authUser, request));
     }
 
     @GetMapping("/fetch-all-offers")
@@ -55,14 +66,31 @@ public class OfferController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/update/{offerId}")
-    public ResponseEntity<OfferResponseDto> updateOffer(
+    @PutMapping(value = "/update/{offerId}", consumes = { "multipart/form-data" })
+    public ResponseEntity<OfferResponseDto> updateOfferMultipart(
+            @PathVariable("offerId") Long offerId,
+            @RequestPart("data") OfferRequestDto dto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        OfferResponseDto result = offerService.updateOffer(offerId, dto, files, authUser, request);
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping(value = "/update/{offerId}", consumes = { "application/json" })
+    public ResponseEntity<OfferResponseDto> updateOfferJson(
             @PathVariable("offerId") Long offerId,
             @RequestBody OfferRequestDto dto,
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             HttpServletRequest request) {
-        OfferResponseDto result = offerService.updateOffer(offerId, dto, authUser, request);
+        OfferResponseDto result = offerService.updateOffer(offerId, dto, null, authUser, request);
         return ResponseEntity.ok(result);
+    }
+
+    @org.springframework.web.bind.annotation.DeleteMapping("/delete/{offerId}")
+    public ResponseEntity<String> deleteOffer(@PathVariable("offerId") Long offerId) {
+        offerService.deleteOffer(offerId);
+        return ResponseEntity.ok("Offer deleted successfully");
     }
 
 }

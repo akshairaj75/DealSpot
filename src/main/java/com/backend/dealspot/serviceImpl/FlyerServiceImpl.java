@@ -190,11 +190,17 @@ public class FlyerServiceImpl implements FlyerService {
         return flyers.stream().map(FlyerResponseDto::fromEntity).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public FlyerResponseDto fetchFlyerById(Integer flyerId) {
         Flyer flyer = flyerRepository.findById(flyerId)
                 .orElseThrow(() -> new RuntimeException("Flyer not found"));
-        return FlyerResponseDto.fromEntity(flyer);
+        FlyerResponseDto dto = FlyerResponseDto.fromEntity(flyer);
+        List<FlyerPage> pages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyerId);
+        if (pages != null && !pages.isEmpty()) {
+            dto.setPages(pages.stream().map(FlyerPageResponseDto::fromEntity).toList());
+        }
+        return dto;
     }
 
     @Transactional

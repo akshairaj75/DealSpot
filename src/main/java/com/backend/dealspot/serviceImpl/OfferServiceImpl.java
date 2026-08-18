@@ -65,16 +65,18 @@ public class OfferServiceImpl implements OfferService {
                         HttpServletRequest request) {
 
                 Store store = storeRepository.findById(dto.getStoreId())
-                                .orElseThrow(() -> new RuntimeException("store not found"));
+                                .orElseThrow(() -> new RuntimeException("Store not found"));
 
                 City city = cityRepository.findById(dto.getCityId())
-                                .orElseThrow(() -> new RuntimeException("city not found"));
+                                .orElseThrow(() -> new RuntimeException("City not found"));
 
                 Category category = categoryRepository.findById(dto.getCategoryId())
-                                .orElseThrow(() -> new RuntimeException("category not found"));
+                                .orElseThrow(() -> new RuntimeException("Category not found"));
 
-                Product product = productRepository.findById(dto.getProductId())
-                                .orElseThrow(() -> new RuntimeException("product not found"));
+                Product product = null;
+                if (dto.getProductId() != null) {
+                        product = productRepository.findById(dto.getProductId()).orElse(null);
+                }
 
                 Offer offer = new Offer();
                 offer.setStore(store);
@@ -92,17 +94,14 @@ public class OfferServiceImpl implements OfferService {
                 offer.setDiscountPct(dto.getDiscountPct());
                 offer.setBadgeType(dto.getBadgeType());
 
-                // offer.setImageUrl(dto.getImageUrl());
-                // offer.setThumbnailUrl(dto.getThumbnailUrl());
-
                 offer.setValidFrom(dto.getValidFrom());
                 offer.setValidUntil(dto.getValidUntil());
 
-                offer.setFeatured(dto.getFeatured());
-                offer.setFlash(dto.getFlash());
-                offer.setOnline(dto.getOnline());
-                offer.setInStore(dto.getInStore());
-                offer.setActive(dto.getActive());
+                offer.setFeatured(dto.getFeatured() != null ? dto.getFeatured() : false);
+                offer.setFlash(dto.getFlash() != null ? dto.getFlash() : false);
+                offer.setOnline(dto.getOnline() != null ? dto.getOnline() : false);
+                offer.setInStore(dto.getInStore() != null ? dto.getInStore() : true);
+                offer.setActive(dto.getActive() != null ? dto.getActive() : true);
 
                 offer.setViewCount(0L);
                 offer.setSaveCount(0);
@@ -111,9 +110,7 @@ public class OfferServiceImpl implements OfferService {
                 Offer savedOffer = offerRepository.save(offer);
 
                 if (images != null && !images.isEmpty()) {
-
                         for (int i = 0; i < images.size(); i++) {
-
                                 try {
                                         String filePath = fileStorageService.storeFile(
                                                         images.get(i),
@@ -135,19 +132,15 @@ public class OfferServiceImpl implements OfferService {
                                         throw new RuntimeException("Failed to upload image", e);
                                 }
                         }
-
-                        offerRepository.save(savedOffer);
+                        savedOffer = offerRepository.save(savedOffer);
                 }
 
                 return OfferResponseDto.fromEntity(savedOffer);
-
         }
 
         @Override
         public List<OfferResponseDto> fetchAllOffers() {
-
-                List<Offer> offers = offerRepository.findAllByActive(true);
-
+                List<Offer> offers = offerRepository.findAll();
                 return offers.stream()
                                 .map(OfferResponseDto::fromEntity).toList();
         }
@@ -161,11 +154,26 @@ public class OfferServiceImpl implements OfferService {
 
         @Transactional
         @Override
-        public OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, CustomUserPrincipal authUser,
-                        HttpServletRequest request) {
+        public OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, List<MultipartFile> images,
+                        CustomUserPrincipal authUser, HttpServletRequest request) {
 
                 Offer offer = offerRepository.findById(offerId)
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+                if (dto.getStoreId() != null) {
+                        storeRepository.findById(dto.getStoreId()).ifPresent(offer::setStore);
+                }
+                if (dto.getCityId() != null) {
+                        cityRepository.findById(dto.getCityId()).ifPresent(offer::setCity);
+                }
+                if (dto.getCategoryId() != null) {
+                        categoryRepository.findById(dto.getCategoryId()).ifPresent(offer::setCategory);
+                }
+                if (dto.getProductId() != null) {
+                        offer.setProduct(productRepository.findById(dto.getProductId()).orElse(null));
+                } else {
+                        offer.setProduct(null);
+                }
 
                 offer.setTitleEn(dto.getTitleEn());
                 offer.setTitleAr(dto.getTitleAr());
@@ -178,20 +186,51 @@ public class OfferServiceImpl implements OfferService {
                 offer.setDiscountPct(dto.getDiscountPct());
                 offer.setBadgeType(dto.getBadgeType());
 
-                // offer.setImageUrl(dto.getImageUrl());
-                // offer.setThumbnailUrl(dto.getThumbnailUrl());
-
                 offer.setValidFrom(dto.getValidFrom());
                 offer.setValidUntil(dto.getValidUntil());
 
-                offer.setFeatured(dto.getFeatured());
-                offer.setFlash(dto.getFlash());
-                offer.setOnline(dto.getOnline());
-                offer.setInStore(dto.getInStore());
-                offer.setActive(dto.getActive());
+                if (dto.getFeatured() != null) offer.setFeatured(dto.getFeatured());
+                if (dto.getFlash() != null) offer.setFlash(dto.getFlash());
+                if (dto.getOnline() != null) offer.setOnline(dto.getOnline());
+                if (dto.getInStore() != null) offer.setInStore(dto.getInStore());
+                if (dto.getActive() != null) offer.setActive(dto.getActive());
+
+                if (images != null && !images.isEmpty()) {
+                        for (int i = 0; i < images.size(); i++) {
+                                try {
+                                        String filePath = fileStorageService.storeFile(
+                                                        images.get(i),
+                                                        "offers/offer-images");
+
+                                        if (i == 0) {
+                                                offer.setImageUrl(filePath);
+                                                offer.setThumbnailUrl(filePath);
+                                        }
+
+                                        OfferImage offerImage = new OfferImage();
+                                        offerImage.setOffer(offer);
+                                        offerImage.setImageUrl(filePath);
+
+                                        offerImageRepository.save(offerImage);
+                                        offer.getImages().add(offerImage);
+
+                                } catch (IOException e) {
+                                        throw new RuntimeException("Failed to upload image", e);
+                                }
+                        }
+                }
 
                 Offer savedOffer = offerRepository.save(offer);
                 return OfferResponseDto.fromEntity(savedOffer);
+        }
+
+        @Transactional
+        @Override
+        public void deleteOffer(Long offerId) {
+                Offer offer = offerRepository.findById(offerId)
+                                .orElseThrow(() -> new RuntimeException("Offer not found"));
+                offerImageRepository.deleteAll(offer.getImages());
+                offerRepository.delete(offer);
         }
 
 }
