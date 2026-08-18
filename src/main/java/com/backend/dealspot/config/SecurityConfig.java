@@ -84,6 +84,17 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/ws/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, 
+                                "/api/dealspot/stores/**",
+                                "/api/dealspot/store-branches/**",
+                                "/api/dealspot/categories/**",
+                                "/api/dealspot/offers/**",
+                                "/api/dealspot/flyers/**",
+                                "/api/dealspot/cities/**",
+                                "/api/dealspot/products/**",
+                                "/api/dealspot/coupons/**",
+                                "/api/dealspot/brands/**"
+                        ).permitAll()
                         .requestMatchers("/api/chat/**")
                         .authenticated()
                         .anyRequest().authenticated())
