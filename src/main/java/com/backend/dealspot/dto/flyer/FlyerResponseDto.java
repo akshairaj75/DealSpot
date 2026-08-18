@@ -13,7 +13,25 @@ public class FlyerResponseDto {
     private Integer storeId;
     private String storeNameEn;
     private String storeNameAr;
+    private String storeLogoUrl;
+    private boolean storeVerified;
     private Integer cityId;
+
+    public String getStoreLogoUrl() {
+        return storeLogoUrl;
+    }
+
+    public void setStoreLogoUrl(String storeLogoUrl) {
+        this.storeLogoUrl = storeLogoUrl;
+    }
+
+    public boolean isStoreVerified() {
+        return storeVerified;
+    }
+
+    public void setStoreVerified(boolean storeVerified) {
+        this.storeVerified = storeVerified;
+    }
     private String cityNameEn;
     private String cityNameAr;
     private String titleEn;
@@ -204,6 +222,8 @@ public class FlyerResponseDto {
             dto.setStoreId(flyer.getStore().getId());
             dto.setStoreNameEn(flyer.getStore().getNameEn());
             dto.setStoreNameAr(flyer.getStore().getNameAr());
+            dto.setStoreLogoUrl(flyer.getStore().getLogoUrl());
+            dto.setStoreVerified(flyer.getStore().isVerified());
         }
 
         if (flyer.getCity() != null) {

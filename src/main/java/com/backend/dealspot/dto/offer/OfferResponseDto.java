@@ -12,9 +12,27 @@ public class OfferResponseDto {
     private Integer storeId;
     private String storeNameEn;
     private String storeNameAr;
+    private String storeLogoUrl;
+    private boolean storeVerified;
     private Integer categoryId;
     private String categoryNameEn;
     private String categoryNameAr;
+
+    public String getStoreLogoUrl() {
+        return storeLogoUrl;
+    }
+
+    public void setStoreLogoUrl(String storeLogoUrl) {
+        this.storeLogoUrl = storeLogoUrl;
+    }
+
+    public boolean isStoreVerified() {
+        return storeVerified;
+    }
+
+    public void setStoreVerified(boolean storeVerified) {
+        this.storeVerified = storeVerified;
+    }
     private Integer cityId;
     private String cityNameEn;
     private String cityNameAr;
@@ -378,6 +396,8 @@ public class OfferResponseDto {
             dto.setStoreId(offer.getStore().getId());
             dto.setStoreNameEn(offer.getStore().getNameEn());
             dto.setStoreNameAr(offer.getStore().getNameAr());
+            dto.setStoreLogoUrl(offer.getStore().getLogoUrl());
+            dto.setStoreVerified(offer.getStore().isVerified());
         }
 
         if (offer.getCategory() != null) {
