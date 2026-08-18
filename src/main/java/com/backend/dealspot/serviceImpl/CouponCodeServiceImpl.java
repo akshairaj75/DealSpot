@@ -44,43 +44,49 @@ public class CouponCodeServiceImpl implements CouponCodeService {
         @Override
         public CouponCodeResponseDto addCoupon(CouponCodeRequestDto dto, CustomUserPrincipal authUser,
                         HttpServletRequest request) {
-                // AdminUser user = adminUserRepository.findById(authUser.getId())
-                //                 .orElseThrow(() -> new RuntimeException("User not found"));
-
-                Offer offer = offerRepository.findById(dto.getOfferId())
-                                .orElseThrow(() -> new RuntimeException("Offer not found"));
-
-                Product product = productRepository.findById(dto.getProductId())
-                                .orElseThrow(() -> new RuntimeException("Product not found"));
 
                 Store store = storeRepository.findById(dto.getStoreId())
                                 .orElseThrow(() -> new RuntimeException("Store not found"));
 
+                Offer offer = null;
+                if (dto.getOfferId() != null) {
+                        offer = offerRepository.findById(dto.getOfferId()).orElse(null);
+                }
+
+                Product product = null;
+                if (dto.getProductId() != null) {
+                        product = productRepository.findById(dto.getProductId()).orElse(null);
+                }
+
                 CouponCode coupon = new CouponCode();
+                coupon.setStore(store);
                 coupon.setOffer(offer);
                 coupon.setProduct(product);
-                coupon.setStore(store);
                 coupon.setCode(dto.getCode());
                 coupon.setMaxUses(dto.getMaxUses());
+                coupon.setUsedCount(dto.getUsedCount() != null ? dto.getUsedCount() : 0);
                 coupon.setDiscountType(dto.getDiscountType());
                 coupon.setDiscountValue(dto.getDiscountValue());
-                coupon.setMinCartValue(dto.getMinCartValue());
+                coupon.setMinCartValue(dto.getMinCartValue() != null ? dto.getMinCartValue() : java.math.BigDecimal.ZERO);
                 coupon.setValidFrom(dto.getValidFrom());
                 coupon.setValidUntil(dto.getValidUntil());
-                coupon.setActive(dto.getActive());
+                coupon.setActive(dto.getActive() != null ? dto.getActive() : true);
 
                 CouponCode savedCoupon = couponCodeRepository.save(coupon);
-
                 return CouponCodeResponseDto.fromEntity(savedCoupon);
         }
 
         @Override
         public List<CouponCodeResponseDto> fetchAllCoupon(CustomUserPrincipal authUser, HttpServletRequest request) {
-                // AdminUser user = adminUserRepository.findById(authUser.getId())
-                //                 .orElseThrow(() -> new RuntimeException("User not found"));
-
                 List<CouponCode> coupons = couponCodeRepository.findAll();
                 return coupons.stream().map(CouponCodeResponseDto::fromEntity).toList();
+        }
+
+        @Override
+        public CouponCodeResponseDto getCouponById(Long couponId) {
+                CouponCode coupon = couponCodeRepository.findById(couponId)
+                                .orElseThrow(() -> new RuntimeException("Coupon not found"));
+                return CouponCodeResponseDto.fromEntity(coupon);
         }
 
         @Override
@@ -89,18 +95,45 @@ public class CouponCodeServiceImpl implements CouponCodeService {
                 CouponCode coupon = couponCodeRepository.findById(couponId)
                                 .orElseThrow(() -> new RuntimeException("Coupon not found"));
 
+                if (dto.getStoreId() != null) {
+                        storeRepository.findById(dto.getStoreId()).ifPresent(coupon::setStore);
+                }
+
+                if (dto.getOfferId() != null) {
+                        coupon.setOffer(offerRepository.findById(dto.getOfferId()).orElse(null));
+                } else {
+                        coupon.setOffer(null);
+                }
+
+                if (dto.getProductId() != null) {
+                        coupon.setProduct(productRepository.findById(dto.getProductId()).orElse(null));
+                } else {
+                        coupon.setProduct(null);
+                }
+
                 coupon.setCode(dto.getCode());
                 coupon.setMaxUses(dto.getMaxUses());
+                if (dto.getUsedCount() != null) {
+                        coupon.setUsedCount(dto.getUsedCount());
+                }
                 coupon.setDiscountType(dto.getDiscountType());
                 coupon.setDiscountValue(dto.getDiscountValue());
-                coupon.setMinCartValue(dto.getMinCartValue());
+                coupon.setMinCartValue(dto.getMinCartValue() != null ? dto.getMinCartValue() : java.math.BigDecimal.ZERO);
                 coupon.setValidFrom(dto.getValidFrom());
                 coupon.setValidUntil(dto.getValidUntil());
-                coupon.setActive(dto.getActive());
+                if (dto.getActive() != null) {
+                        coupon.setActive(dto.getActive());
+                }
 
                 CouponCode savedCoupon = couponCodeRepository.save(coupon);
-
                 return CouponCodeResponseDto.fromEntity(savedCoupon);
+        }
+
+        @Override
+        public void deleteCoupon(Long couponId) {
+                CouponCode coupon = couponCodeRepository.findById(couponId)
+                                .orElseThrow(() -> new RuntimeException("Coupon not found"));
+                couponCodeRepository.delete(coupon);
         }
 
 }

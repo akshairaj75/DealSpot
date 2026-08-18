@@ -17,4 +17,7 @@ public interface CouponCodeService {
     CouponCodeResponseDto updateCoupon(CouponCodeRequestDto dto, Long couponId, CustomUserPrincipal authUser,
             HttpServletRequest request);
 
+    CouponCodeResponseDto getCouponById(Long couponId);
+
+    void deleteCoupon(Long couponId);
 }

@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +18,6 @@ import com.backend.dealspot.dto.coupon.CouponCodeResponseDto;
 import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.CouponCodeService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -46,6 +47,13 @@ public class CouponCodeController {
         return ResponseEntity.ok(res);
     }
 
+    @GetMapping("/fetch/{couponId}")
+    public ResponseEntity<CouponCodeResponseDto> getCouponById(
+            @PathVariable Long couponId) {
+        CouponCodeResponseDto res = couponService.getCouponById(couponId);
+        return ResponseEntity.ok(res);
+    }
+
     @PutMapping("/update/{couponId}")
     public ResponseEntity<CouponCodeResponseDto> updateCoupon(
             @RequestBody CouponCodeRequestDto dto,
@@ -55,6 +63,11 @@ public class CouponCodeController {
         CouponCodeResponseDto res = couponService.updateCoupon(dto, couponId, authUser, request);
         return ResponseEntity.ok(res);
     }
-    
+
+    @DeleteMapping("/delete/{couponId}")
+    public ResponseEntity<String> deleteCoupon(@PathVariable Long couponId) {
+        couponService.deleteCoupon(couponId);
+        return ResponseEntity.ok("Coupon deleted successfully");
+    }
 
 }
