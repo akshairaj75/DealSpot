@@ -33,6 +33,7 @@ public class OfferResponseDto {
     public void setStoreVerified(boolean storeVerified) {
         this.storeVerified = storeVerified;
     }
+
     private Integer cityId;
     private String cityNameEn;
     private String cityNameAr;
@@ -436,6 +437,14 @@ public class OfferResponseDto {
             dto.setProductNameAr(offer.getProduct().getNameAr());
             dto.setProductPrimaryImageUrl(offer.getProduct().getPrimaryImageUrl());
             dto.setProductImageUrl(offer.getProduct().getPrimaryImageUrl());
+
+            // If offer does not have its own custom image, fall back directly to the product's primary image
+            if (dto.getImageUrl() == null || dto.getImageUrl().trim().isEmpty()) {
+                dto.setImageUrl(offer.getProduct().getPrimaryImageUrl());
+            }
+            if (dto.getThumbnailUrl() == null || dto.getThumbnailUrl().trim().isEmpty()) {
+                dto.setThumbnailUrl(offer.getProduct().getPrimaryImageUrl());
+            }
         }
 
         return dto;

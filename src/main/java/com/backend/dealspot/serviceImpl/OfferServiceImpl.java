@@ -133,6 +133,11 @@ public class OfferServiceImpl implements OfferService {
                                 }
                         }
                         savedOffer = offerRepository.save(savedOffer);
+                } else if (product != null && product.getPrimaryImageUrl() != null && !product.getPrimaryImageUrl().trim().isEmpty()) {
+                        // Fall back to product primary image if no offer image uploaded
+                        savedOffer.setImageUrl(product.getPrimaryImageUrl());
+                        savedOffer.setThumbnailUrl(product.getPrimaryImageUrl());
+                        savedOffer = offerRepository.save(savedOffer);
                 }
 
                 return OfferResponseDto.fromEntity(savedOffer);
@@ -189,11 +194,16 @@ public class OfferServiceImpl implements OfferService {
                 offer.setValidFrom(dto.getValidFrom());
                 offer.setValidUntil(dto.getValidUntil());
 
-                if (dto.getFeatured() != null) offer.setFeatured(dto.getFeatured());
-                if (dto.getFlash() != null) offer.setFlash(dto.getFlash());
-                if (dto.getOnline() != null) offer.setOnline(dto.getOnline());
-                if (dto.getInStore() != null) offer.setInStore(dto.getInStore());
-                if (dto.getActive() != null) offer.setActive(dto.getActive());
+                if (dto.getFeatured() != null)
+                        offer.setFeatured(dto.getFeatured());
+                if (dto.getFlash() != null)
+                        offer.setFlash(dto.getFlash());
+                if (dto.getOnline() != null)
+                        offer.setOnline(dto.getOnline());
+                if (dto.getInStore() != null)
+                        offer.setInStore(dto.getInStore());
+                if (dto.getActive() != null)
+                        offer.setActive(dto.getActive());
 
                 if (images != null && !images.isEmpty()) {
                         for (int i = 0; i < images.size(); i++) {
@@ -218,6 +228,11 @@ public class OfferServiceImpl implements OfferService {
                                         throw new RuntimeException("Failed to upload image", e);
                                 }
                         }
+                } else if ((offer.getImageUrl() == null || offer.getImageUrl().trim().isEmpty()) &&
+                                offer.getProduct() != null && offer.getProduct().getPrimaryImageUrl() != null &&
+                                !offer.getProduct().getPrimaryImageUrl().trim().isEmpty()) {
+                        offer.setImageUrl(offer.getProduct().getPrimaryImageUrl());
+                        offer.setThumbnailUrl(offer.getProduct().getPrimaryImageUrl());
                 }
 
                 Offer savedOffer = offerRepository.save(offer);
