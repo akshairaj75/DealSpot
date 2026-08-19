@@ -1,6 +1,7 @@
 package com.backend.dealspot.controller;
 
 import com.backend.dealspot.dto.category.CategoryDto;
+import com.backend.dealspot.dto.category.CategoryOrderDto;
 import com.backend.dealspot.dto.category.CategoryRequestDto;
 import com.backend.dealspot.service.CategoryService;
 
@@ -27,6 +28,12 @@ public class CategoryController {
 
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
+    }
+
+    @PutMapping("/reorder")
+    public ResponseEntity<String> reorderCategories(@RequestBody List<CategoryOrderDto> orderList) {
+        categoryService.updateCategoriesOrder(orderList);
+        return ResponseEntity.ok("Category orders updated successfully");
     }
 
     @PostMapping(value = "/create")

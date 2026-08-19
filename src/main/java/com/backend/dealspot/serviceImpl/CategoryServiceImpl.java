@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.category.CategoryDto;
+import com.backend.dealspot.dto.category.CategoryOrderDto;
 import com.backend.dealspot.dto.category.CategoryRequestDto;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.repository.CategoryRepository;
@@ -70,10 +71,26 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> fetchCategories() {
-        List<Category> result = categoryRepository.findAll();
+        List<Category> result = categoryRepository.findAllByOrderBySortOrderAsc();
         return result.stream()
                 .map(CategoryDto::fromEntity)
                 .toList();
+    }
+
+    @Transactional
+    @Override
+    public void updateCategoriesOrder(List<CategoryOrderDto> orderList) {
+        if (orderList == null || orderList.isEmpty()) {
+            return;
+        }
+        for (CategoryOrderDto item : orderList) {
+            if (item.getId() != null && item.getSortOrder() != null) {
+                categoryRepository.findById(item.getId()).ifPresent(cat -> {
+                    cat.setSortOrder(item.getSortOrder());
+                    categoryRepository.save(cat);
+                });
+            }
+        }
     }
 
     @Transactional
