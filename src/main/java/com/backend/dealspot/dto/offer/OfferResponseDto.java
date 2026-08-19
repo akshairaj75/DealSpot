@@ -432,18 +432,23 @@ public class OfferResponseDto {
         }
 
         if (offer.getProduct() != null) {
+            String prodImg = offer.getProduct().getPrimaryImageUrl();
+            if ((prodImg == null || prodImg.trim().isEmpty()) && offer.getProduct().getImages() != null && !offer.getProduct().getImages().isEmpty()) {
+                prodImg = offer.getProduct().getImages().get(0).getImageUrl();
+            }
+
             dto.setProductId(offer.getProduct().getId());
             dto.setProductNameEn(offer.getProduct().getNameEn());
             dto.setProductNameAr(offer.getProduct().getNameAr());
-            dto.setProductPrimaryImageUrl(offer.getProduct().getPrimaryImageUrl());
-            dto.setProductImageUrl(offer.getProduct().getPrimaryImageUrl());
+            dto.setProductPrimaryImageUrl(prodImg);
+            dto.setProductImageUrl(prodImg);
 
             // If offer does not have its own custom image, fall back directly to the product's primary image
             if (dto.getImageUrl() == null || dto.getImageUrl().trim().isEmpty()) {
-                dto.setImageUrl(offer.getProduct().getPrimaryImageUrl());
+                dto.setImageUrl(prodImg);
             }
             if (dto.getThumbnailUrl() == null || dto.getThumbnailUrl().trim().isEmpty()) {
-                dto.setThumbnailUrl(offer.getProduct().getPrimaryImageUrl());
+                dto.setThumbnailUrl(prodImg);
             }
         }
 

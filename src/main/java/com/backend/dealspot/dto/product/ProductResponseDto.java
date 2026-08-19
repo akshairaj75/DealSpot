@@ -227,8 +227,11 @@ public class ProductResponseDto {
         responseDto.setNameEn(product.getNameEn());
         responseDto.setNameAr(product.getNameAr());
         responseDto.setDescriptionEn(product.getDescriptionEn());
-        responseDto.setDescriptionAr(product.getDescriptionAr());
-        responseDto.setPrimaryImageUrl(product.getPrimaryImageUrl());
+        String primaryImg = product.getPrimaryImageUrl();
+        if ((primaryImg == null || primaryImg.trim().isEmpty()) && product.getImages() != null && !product.getImages().isEmpty()) {
+            primaryImg = product.getImages().get(0).getImageUrl();
+        }
+        responseDto.setPrimaryImageUrl(primaryImg);
         responseDto.setUnit(product.getUnit());
         responseDto.setUnitSize(product.getUnitSize());
         responseDto.setActive(product.isActive());

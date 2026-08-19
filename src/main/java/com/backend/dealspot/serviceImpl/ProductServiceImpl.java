@@ -102,8 +102,8 @@ public class ProductServiceImpl implements ProductService {
 
         if (files != null && !files.isEmpty()) {
 
-            for (MultipartFile file : files) {
-
+            for (int i = 0; i < files.size(); i++) {
+                MultipartFile file = files.get(i);
                 String filePath;
                 ProductImage image = new ProductImage();
                 image.setProduct(savedProduct);
@@ -114,11 +114,16 @@ public class ProductServiceImpl implements ProductService {
                     image.setAltTextAr(file.getOriginalFilename());
                     productImageRepository.save(image);
                     savedProduct.getImages().add(image);
+
+                    if (i == 0) {
+                        savedProduct.setPrimaryImageUrl(filePath);
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
 
             }
+            savedProduct = productRepository.save(savedProduct);
         }
 
         return ProductResponseDto.fromEntity(savedProduct);
@@ -274,8 +279,8 @@ public class ProductServiceImpl implements ProductService {
 
             product.getImages().clear();
 
-            for (MultipartFile file : files) {
-
+            for (int i = 0; i < files.size(); i++) {
+                MultipartFile file = files.get(i);
                 try {
 
                     String filePath = fileStorageService.storeFile(file, "products");
@@ -290,6 +295,10 @@ public class ProductServiceImpl implements ProductService {
                     productImageRepository.save(image);
 
                     product.getImages().add(image);
+
+                    if (i == 0) {
+                        product.setPrimaryImageUrl(filePath);
+                    }
 
                 } catch (IOException e) {
 

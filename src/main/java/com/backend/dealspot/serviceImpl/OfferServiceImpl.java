@@ -133,11 +133,16 @@ public class OfferServiceImpl implements OfferService {
                                 }
                         }
                         savedOffer = offerRepository.save(savedOffer);
-                } else if (product != null && product.getPrimaryImageUrl() != null && !product.getPrimaryImageUrl().trim().isEmpty()) {
-                        // Fall back to product primary image if no offer image uploaded
-                        savedOffer.setImageUrl(product.getPrimaryImageUrl());
-                        savedOffer.setThumbnailUrl(product.getPrimaryImageUrl());
-                        savedOffer = offerRepository.save(savedOffer);
+                } else if (product != null) {
+                        String pImg = product.getPrimaryImageUrl();
+                        if ((pImg == null || pImg.trim().isEmpty()) && product.getImages() != null && !product.getImages().isEmpty()) {
+                                pImg = product.getImages().get(0).getImageUrl();
+                        }
+                        if (pImg != null && !pImg.trim().isEmpty()) {
+                                savedOffer.setImageUrl(pImg);
+                                savedOffer.setThumbnailUrl(pImg);
+                                savedOffer = offerRepository.save(savedOffer);
+                        }
                 }
 
                 return OfferResponseDto.fromEntity(savedOffer);
@@ -228,11 +233,15 @@ public class OfferServiceImpl implements OfferService {
                                         throw new RuntimeException("Failed to upload image", e);
                                 }
                         }
-                } else if ((offer.getImageUrl() == null || offer.getImageUrl().trim().isEmpty()) &&
-                                offer.getProduct() != null && offer.getProduct().getPrimaryImageUrl() != null &&
-                                !offer.getProduct().getPrimaryImageUrl().trim().isEmpty()) {
-                        offer.setImageUrl(offer.getProduct().getPrimaryImageUrl());
-                        offer.setThumbnailUrl(offer.getProduct().getPrimaryImageUrl());
+                } else if ((offer.getImageUrl() == null || offer.getImageUrl().trim().isEmpty()) && offer.getProduct() != null) {
+                        String pImg = offer.getProduct().getPrimaryImageUrl();
+                        if ((pImg == null || pImg.trim().isEmpty()) && offer.getProduct().getImages() != null && !offer.getProduct().getImages().isEmpty()) {
+                                pImg = offer.getProduct().getImages().get(0).getImageUrl();
+                        }
+                        if (pImg != null && !pImg.trim().isEmpty()) {
+                                offer.setImageUrl(pImg);
+                                offer.setThumbnailUrl(pImg);
+                        }
                 }
 
                 Offer savedOffer = offerRepository.save(offer);
