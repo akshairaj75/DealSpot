@@ -64,8 +64,19 @@ public class OfferResponseDto {
     private Long viewCount;
     private Integer saveCount;
     private Integer shareCount;
+    private boolean isSaved;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+
+    public boolean isSaved() {
+        return isSaved;
+    }
+
+    public void setSaved(boolean isSaved) {
+        this.isSaved = isSaved;
+    }
+
 
     public Long getId() {
         return id;
