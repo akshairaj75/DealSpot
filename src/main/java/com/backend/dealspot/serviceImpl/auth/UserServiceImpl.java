@@ -118,6 +118,7 @@ public class UserServiceImpl implements UserService {
                 }
 
                 String role = admin.getRole().name();
+                Integer storeId = admin.getStore() != null ? admin.getStore().getId() : null;
 
                 CustomUserPrincipal principal = new CustomUserPrincipal(
                                 admin.getId(),
@@ -125,6 +126,7 @@ public class UserServiceImpl implements UserService {
                                 admin.getPasswordHash(),
                                 AccountType.ADMIN,
                                 admin.getRole(),
+                                storeId,
                                 admin.isActive(),
                                 List.of(new SimpleGrantedAuthority("ROLE_" + role)));
 
@@ -136,8 +138,10 @@ public class UserServiceImpl implements UserService {
                                 admin.getId(),
                                 admin.getEmail(),
                                 "ADMIN",
-                                role);
+                                role,
+                                storeId);
         }
+
 
         @Override
         public AuthResponseDto userRegister(RegisterRequest request) {

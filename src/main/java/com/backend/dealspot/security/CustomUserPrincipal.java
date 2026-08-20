@@ -15,6 +15,7 @@ public class CustomUserPrincipal implements UserDetails {
     private String password;
     private AccountType accountType;
     private AdminRole role;
+    private Integer storeId;
 
     private Collection<? extends GrantedAuthority> authorities;
     private boolean active;
@@ -27,16 +28,45 @@ public class CustomUserPrincipal implements UserDetails {
             AdminRole role,
             boolean active,
             Collection<? extends GrantedAuthority> authorities
+    ) {
+        this(id, email, password, accountType, role, null, active, authorities);
+    }
 
+    public CustomUserPrincipal(
+            Long id,
+            String email,
+            String password,
+            AccountType accountType,
+            AdminRole role,
+            Integer storeId,
+            boolean active,
+            Collection<? extends GrantedAuthority> authorities
     ) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.accountType = accountType;
         this.role = role;
+        this.storeId = storeId;
         this.active = active;
         this.authorities = authorities;
     }
+
+    public Integer getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Integer storeId) {
+        this.storeId = storeId;
+    }
+
+    public boolean canManageStore(Integer targetStoreId) {
+        if (role == AdminRole.SUPER_ADMIN) {
+            return true;
+        }
+        return storeId != null && storeId.equals(targetStoreId);
+    }
+
 
     public String getFullName() {
         return fullName;

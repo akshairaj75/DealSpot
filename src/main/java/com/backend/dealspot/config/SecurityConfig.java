@@ -76,6 +76,7 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 "/api/dealspot/auth/**",
+                                "/api/dealspot/partner-requests/apply",
                                 "/api/oauth2/**",
                                 "/uploads/**",
                                 "/login/oauth2/**",
@@ -84,6 +85,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/ws/**")
                         .permitAll()
+
                         .requestMatchers(HttpMethod.GET, 
                                 "/api/dealspot/stores/**",
                                 "/api/dealspot/store-branches/**",

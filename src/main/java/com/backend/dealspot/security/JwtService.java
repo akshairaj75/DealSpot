@@ -27,12 +27,14 @@ public class JwtService {
                                 .claim("id", principal.getId())
                                 .claim("accountType", principal.getAccountType().name())
                                 .claim("role", principal.getRole() == null ? "USER" : principal.getRole().name())
+                                .claim("storeId", principal.getStoreId())
                                 .setIssuedAt(new Date())
                                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                                 .signWith(getSigningKey(),
                                                 SignatureAlgorithm.HS256)
                                 .compact();
         }
+
 
         private Key getSigningKey() {
                 byte[] keyBytes = Decoders.BASE64.decode(secretKey);
