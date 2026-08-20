@@ -3,15 +3,19 @@ package com.backend.dealspot.serviceImpl;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.store.StoreRegisterDto;
 import com.backend.dealspot.dto.store.StoreResponseDto;
+import com.backend.dealspot.entity.AdminUser;
 import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Store;
+import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.StoreRepository;
@@ -24,20 +28,23 @@ import jakarta.servlet.http.HttpServletRequest;
 public class StoreServiceImpl implements StoreService {
 
     private final StoreRepository storeRepository;
-
     private final CityRepository cityRepository;
-
     private final CategoryRepository categoryRepository;
-
     private final FileStorageService fileStorageService;
+    private final AdminUserRepository adminUserRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public StoreServiceImpl(StoreRepository storeRepository, CityRepository cityRepository,
             CategoryRepository categoryRepository,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            AdminUserRepository adminUserRepository,
+            PasswordEncoder passwordEncoder) {
         this.storeRepository = storeRepository;
         this.cityRepository = cityRepository;
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
+        this.adminUserRepository = adminUserRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -75,8 +82,38 @@ public class StoreServiceImpl implements StoreService {
 
         Store saved = storeRepository.save(newStore);
 
+        // Auto-provision or link Store Manager account if managerEmail is provided
+        String managerEmail = (dto.getManagerEmail() != null && !dto.getManagerEmail().trim().isEmpty())
+                ? dto.getManagerEmail().trim()
+                : (dto.getContactEmail() != null && !dto.getContactEmail().trim().isEmpty() ? dto.getContactEmail().trim() : null);
+
+        if (managerEmail != null && !managerEmail.isEmpty()) {
+            final String finalManagerEmail = managerEmail;
+            AdminUser manager = adminUserRepository.findByEmail(finalManagerEmail)
+                    .orElseGet(() -> {
+                        AdminUser newAdmin = new AdminUser();
+                        String name = (dto.getManagerName() != null && !dto.getManagerName().trim().isEmpty())
+                                ? dto.getManagerName().trim()
+                                : dto.getNameEn();
+                        newAdmin.setFullName(name);
+                        newAdmin.setEmail(finalManagerEmail);
+                        String rawPass = (dto.getManagerPassword() != null && !dto.getManagerPassword().trim().isEmpty())
+                                ? dto.getManagerPassword().trim()
+                                : "Partner@123";
+                        newAdmin.setPasswordHash(passwordEncoder.encode(rawPass));
+                        return newAdmin;
+                    });
+
+
+            manager.setRole(AdminRole.STORE_MANAGER);
+            manager.setStore(saved);
+            manager.setActive(true);
+            adminUserRepository.save(manager);
+        }
+
         return StoreResponseDto.fromEntity(saved);
     }
+
 
     @Override
     public List<StoreResponseDto> fetchAllStores(CustomUserPrincipal authUser, HttpServletRequest request) {

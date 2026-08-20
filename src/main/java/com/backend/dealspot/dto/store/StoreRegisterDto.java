@@ -15,6 +15,12 @@ public class StoreRegisterDto {
     private String crNumber;
     private String vatNumber;
 
+    // Optional Manager Account creation details
+    private String managerName;
+    private String managerEmail;
+    private String managerPassword;
+    private String managerPhone;
+
     public String getNameEn() {
         return nameEn;
     }
@@ -117,6 +123,38 @@ public class StoreRegisterDto {
 
     public void setVatNumber(String vatNumber) {
         this.vatNumber = vatNumber;
+    }
+
+    public String getManagerName() {
+        return managerName;
+    }
+
+    public void setManagerName(String managerName) {
+        this.managerName = managerName;
+    }
+
+    public String getManagerEmail() {
+        return managerEmail;
+    }
+
+    public void setManagerEmail(String managerEmail) {
+        this.managerEmail = managerEmail;
+    }
+
+    public String getManagerPassword() {
+        return managerPassword;
+    }
+
+    public void setManagerPassword(String managerPassword) {
+        this.managerPassword = managerPassword;
+    }
+
+    public String getManagerPhone() {
+        return managerPhone;
+    }
+
+    public void setManagerPhone(String managerPhone) {
+        this.managerPhone = managerPhone;
     }
 
 }

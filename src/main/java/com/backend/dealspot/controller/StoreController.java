@@ -36,12 +36,13 @@ public class StoreController {
     @PostMapping("/create")
     public ResponseEntity<StoreResponseDto> createStore(
             @RequestPart("body") StoreRegisterDto dto,
-            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             HttpServletRequest request) {
         StoreResponseDto createdStore = storeService.createStore(dto, file, authUser, request);
         return ResponseEntity.ok(createdStore);
     }
+
 
     // @PostMapping("/create/bulk")
     // public ResponseEntity<List<StoreResponseDto>> createStores(
