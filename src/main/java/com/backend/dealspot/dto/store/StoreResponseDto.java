@@ -22,12 +22,31 @@ public class StoreResponseDto {
     private boolean verified;
     private boolean featured;
     private boolean active;
+    private long followersCount;
+    private boolean isFollowed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public long getFollowersCount() {
+        return followersCount;
+    }
+
+    public void setFollowersCount(long followersCount) {
+        this.followersCount = followersCount;
+    }
+
+    public boolean isFollowed() {
+        return isFollowed;
+    }
+
+    public void setFollowed(boolean isFollowed) {
+        this.isFollowed = isFollowed;
+    }
 
     public Integer getId() {
         return id;
     }
+
 
     public void setId(Integer id) {
         this.id = id;
@@ -217,6 +236,11 @@ public class StoreResponseDto {
             dto.setCategoryNameAr(store.getCategory().getNameAr());
         }
 
+        if (store.getFollowers() != null) {
+            dto.setFollowersCount(store.getFollowers().size());
+        }
+
         return dto;
     }
 }
+
