@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.backend.dealspot.dto.auth.AdminRegisterRequest;
+import com.backend.dealspot.dto.auth.AdminUserResponseDto;
 import com.backend.dealspot.dto.auth.AuthResponseDto;
 import com.backend.dealspot.dto.auth.LoginRequest;
 import com.backend.dealspot.dto.auth.RegisterRequest;
@@ -222,4 +223,46 @@ public class UserServiceImpl implements UserService {
                                 savedAdmin.getRole().name());
         }
 
-}
+        @Override
+        public List<com.backend.dealspot.dto.auth.AdminUserResponseDto> getAllAdmins() {
+                return adminUserRepository.findAll().stream()
+                                .map(com.backend.dealspot.dto.auth.AdminUserResponseDto::fromEntity)
+                                .toList();
+        }
+
+        @Override
+        public com.backend.dealspot.dto.auth.AdminUserResponseDto createAdminUser(AdminRegisterRequest request) {
+                if (adminUserRepository.findByEmail(request.getEmail()).isPresent()) {
+                        throw new RuntimeException("Admin with this email already exists");
+                }
+
+                AdminUser admin = new AdminUser();
+                admin.setFullName(request.getFullName());
+                admin.setEmail(request.getEmail());
+                admin.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+                admin.setRole(request.getRole() != null ? request.getRole() : com.backend.dealspot.enums.AdminRole.CONTENT_MANAGER);
+                admin.setActive(true);
+
+                AdminUser saved = adminUserRepository.save(admin);
+                return com.backend.dealspot.dto.auth.AdminUserResponseDto.fromEntity(saved);
+        }
+
+        @Override
+        public com.backend.dealspot.dto.auth.AdminUserResponseDto toggleAdminStatus(Long id) {
+                AdminUser admin = adminUserRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Admin user not found with id: " + id));
+
+                admin.setActive(!admin.isActive());
+                AdminUser updated = adminUserRepository.save(admin);
+                return com.backend.dealspot.dto.auth.AdminUserResponseDto.fromEntity(updated);
+        }
+
+        @Override
+        public void deleteAdmin(Long id) {
+                if (!adminUserRepository.existsById(id)) {
+                        throw new RuntimeException("Admin user not found with id: " + id);
+                }
+                adminUserRepository.deleteById(id);
+        }
+
+}
