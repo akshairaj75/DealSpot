@@ -57,8 +57,10 @@ public class FlyerController {
     }
 
     @GetMapping("/fetch-all-flyers")
-    public ResponseEntity<List<FlyerResponseDto>> fetchAllFlyers() {
-        List<FlyerResponseDto> list = flyerService.fetchAllFlyers();
+    public ResponseEntity<List<FlyerResponseDto>> fetchAllFlyers(
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            @RequestParam(value = "storeId", required = false) Integer storeId) {
+        List<FlyerResponseDto> list = flyerService.fetchAllFlyers(authUser, storeId);
         return ResponseEntity.ok(list);
     }
 
@@ -71,8 +73,9 @@ public class FlyerController {
 
     @DeleteMapping("/delete/{flyerId}")
     public ResponseEntity<String> deleteFlyer(
-            @PathVariable Integer flyerId) {
-        flyerService.deleteFlyer(flyerId);
+            @PathVariable Integer flyerId,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        flyerService.deleteFlyer(flyerId, authUser);
         return ResponseEntity.ok("Flyer deleted successfully");
     }
 
@@ -88,8 +91,9 @@ public class FlyerController {
     public ResponseEntity<FlyerPageResponseDto> addFlyerPage(
             @PathVariable Integer flyerId,
             @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-            @RequestPart("file") MultipartFile file) {
-        FlyerPageResponseDto page = flyerService.addFlyerPage(flyerId, pageNumber, file);
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        FlyerPageResponseDto page = flyerService.addFlyerPage(flyerId, pageNumber, file, authUser);
         return ResponseEntity.ok(page);
     }
 
@@ -97,16 +101,19 @@ public class FlyerController {
     public ResponseEntity<FlyerPageResponseDto> updateFlyerPage(
             @PathVariable Integer pageId,
             @RequestParam(value = "pageNumber", required = false) Integer pageNumber,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
-        FlyerPageResponseDto page = flyerService.updateFlyerPage(pageId, pageNumber, file);
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        FlyerPageResponseDto page = flyerService.updateFlyerPage(pageId, pageNumber, file, authUser);
         return ResponseEntity.ok(page);
     }
 
     @DeleteMapping("/pages/{pageId}")
     public ResponseEntity<String> deleteFlyerPage(
-            @PathVariable Integer pageId) {
-        flyerService.deleteFlyerPage(pageId);
+            @PathVariable Integer pageId,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        flyerService.deleteFlyerPage(pageId, authUser);
         return ResponseEntity.ok("Flyer page deleted successfully");
     }
+
 
 }

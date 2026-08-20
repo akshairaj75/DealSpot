@@ -19,18 +19,19 @@ public interface FlyerService {
     FlyerResponseDto updateFlyer(Integer flyerId, FlyerRequestDto flyerRequestDto, List<MultipartFile> pages, MultipartFile pdf, CustomUserPrincipal authUser,
             HttpServletRequest request);
 
-    List<FlyerResponseDto> fetchAllFlyers();
+    List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId);
 
     FlyerResponseDto fetchFlyerById(Integer flyerId);
 
-    void deleteFlyer(Integer flyerId);
+    void deleteFlyer(Integer flyerId, CustomUserPrincipal authUser);
 
     List<FlyerPageResponseDto> fetchPagesByFlyerId(Integer flyerId);
 
-    FlyerPageResponseDto addFlyerPage(Integer flyerId, Integer pageNumber, MultipartFile file);
+    FlyerPageResponseDto addFlyerPage(Integer flyerId, Integer pageNumber, MultipartFile file, CustomUserPrincipal authUser);
 
-    FlyerPageResponseDto updateFlyerPage(Integer pageId, Integer pageNumber, MultipartFile file);
+    FlyerPageResponseDto updateFlyerPage(Integer pageId, Integer pageNumber, MultipartFile file, CustomUserPrincipal authUser);
 
-    void deleteFlyerPage(Integer pageId);
+    void deleteFlyerPage(Integer pageId, CustomUserPrincipal authUser);
 
 }
+

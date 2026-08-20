@@ -12,8 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface OfferService {
 
-
-    List<OfferResponseDto> fetchAllOffers();
+    List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId);
 
     OfferResponseDto getOfferById(Long offerId);
 
@@ -23,6 +22,7 @@ public interface OfferService {
     OfferResponseDto addOffer(OfferRequestDto dto, List<MultipartFile> images, CustomUserPrincipal authUser,
             HttpServletRequest request);
 
-    void deleteOffer(Long offerId);
+    void deleteOffer(Long offerId, CustomUserPrincipal authUser);
 
 }
+

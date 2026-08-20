@@ -2,6 +2,7 @@ package com.backend.dealspot.serviceImpl;
 
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.backend.dealspot.dto.coupon.CouponCodeRequestDto;
@@ -10,6 +11,7 @@ import com.backend.dealspot.entity.CouponCode;
 import com.backend.dealspot.entity.Offer;
 import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.entity.Store;
+import com.backend.dealspot.enums.AdminRole;
 import com.backend.dealspot.repository.CouponCodeRepository;
 import com.backend.dealspot.repository.OfferRepository;
 import com.backend.dealspot.repository.ProductRepository;
@@ -21,8 +23,6 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class CouponCodeServiceImpl implements CouponCodeService {
-
-
 
         private final CouponCodeRepository couponCodeRepository;
 
@@ -44,6 +44,12 @@ public class CouponCodeServiceImpl implements CouponCodeService {
         @Override
         public CouponCodeResponseDto addCoupon(CouponCodeRequestDto dto, CustomUserPrincipal authUser,
                         HttpServletRequest request) {
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (authUser.getStoreId() != null) {
+                                dto.setStoreId(authUser.getStoreId());
+                        }
+                }
 
                 Store store = storeRepository.findById(dto.getStoreId())
                                 .orElseThrow(() -> new RuntimeException("Store not found"));
@@ -78,6 +84,12 @@ public class CouponCodeServiceImpl implements CouponCodeService {
 
         @Override
         public List<CouponCodeResponseDto> fetchAllCoupon(CustomUserPrincipal authUser, HttpServletRequest request) {
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (authUser.getStoreId() != null) {
+                                return couponCodeRepository.findByStoreId(authUser.getStoreId())
+                                                .stream().map(CouponCodeResponseDto::fromEntity).toList();
+                        }
+                }
                 List<CouponCode> coupons = couponCodeRepository.findAll();
                 return coupons.stream().map(CouponCodeResponseDto::fromEntity).toList();
         }
@@ -94,6 +106,15 @@ public class CouponCodeServiceImpl implements CouponCodeService {
                         HttpServletRequest request) {
                 CouponCode coupon = couponCodeRepository.findById(couponId)
                                 .orElseThrow(() -> new RuntimeException("Coupon not found"));
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (coupon.getStore() == null || !coupon.getStore().getId().equals(authUser.getStoreId())) {
+                                throw new AccessDeniedException("You are not authorized to update coupons for another store");
+                        }
+                        if (authUser.getStoreId() != null) {
+                                dto.setStoreId(authUser.getStoreId());
+                        }
+                }
 
                 if (dto.getStoreId() != null) {
                         storeRepository.findById(dto.getStoreId()).ifPresent(coupon::setStore);
@@ -130,10 +151,18 @@ public class CouponCodeServiceImpl implements CouponCodeService {
         }
 
         @Override
-        public void deleteCoupon(Long couponId) {
+        public void deleteCoupon(Long couponId, CustomUserPrincipal authUser) {
                 CouponCode coupon = couponCodeRepository.findById(couponId)
                                 .orElseThrow(() -> new RuntimeException("Coupon not found"));
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (coupon.getStore() == null || !coupon.getStore().getId().equals(authUser.getStoreId())) {
+                                throw new AccessDeniedException("You are not authorized to delete coupons for another store");
+                        }
+                }
+
                 couponCodeRepository.delete(coupon);
         }
 
 }
+

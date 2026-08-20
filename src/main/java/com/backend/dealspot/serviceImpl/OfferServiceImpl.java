@@ -3,6 +3,7 @@ package com.backend.dealspot.serviceImpl;
 import java.io.IOException;
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,7 @@ import com.backend.dealspot.entity.Offer;
 import com.backend.dealspot.entity.OfferImage;
 import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.entity.Store;
+import com.backend.dealspot.enums.AdminRole;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.OfferImageRepository;
@@ -64,8 +66,15 @@ public class OfferServiceImpl implements OfferService {
                         CustomUserPrincipal authUser,
                         HttpServletRequest request) {
 
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (authUser.getStoreId() != null) {
+                                dto.setStoreId(authUser.getStoreId());
+                        }
+                }
+
                 Store store = storeRepository.findById(dto.getStoreId())
                                 .orElseThrow(() -> new RuntimeException("Store not found"));
+
 
                 City city = cityRepository.findById(dto.getCityId())
                                 .orElseThrow(() -> new RuntimeException("City not found"));
@@ -149,7 +158,23 @@ public class OfferServiceImpl implements OfferService {
         }
 
         @Override
-        public List<OfferResponseDto> fetchAllOffers() {
+        public List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId) {
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (authUser.getStoreId() != null) {
+                                return offerRepository.findByStoreId(authUser.getStoreId())
+                                                .stream()
+                                                .map(OfferResponseDto::fromEntity)
+                                                .toList();
+                        }
+                }
+
+                if (storeId != null) {
+                        return offerRepository.findByStoreId(storeId)
+                                        .stream()
+                                        .map(OfferResponseDto::fromEntity)
+                                        .toList();
+                }
+
                 List<Offer> offers = offerRepository.findAll();
                 return offers.stream()
                                 .map(OfferResponseDto::fromEntity).toList();
@@ -169,6 +194,15 @@ public class OfferServiceImpl implements OfferService {
 
                 Offer offer = offerRepository.findById(offerId)
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId())) {
+                                throw new AccessDeniedException("You are not authorized to update offers for another store");
+                        }
+                        if (authUser.getStoreId() != null) {
+                                dto.setStoreId(authUser.getStoreId());
+                        }
+                }
 
                 if (dto.getStoreId() != null) {
                         storeRepository.findById(dto.getStoreId()).ifPresent(offer::setStore);
@@ -218,7 +252,7 @@ public class OfferServiceImpl implements OfferService {
                                                         "offers/offer-images");
 
                                         if (i == 0) {
-                                                offer.setImageUrl(filePath);
+                                                 offer.setImageUrl(filePath);
                                                 offer.setThumbnailUrl(filePath);
                                         }
 
@@ -250,11 +284,19 @@ public class OfferServiceImpl implements OfferService {
 
         @Transactional
         @Override
-        public void deleteOffer(Long offerId) {
+        public void deleteOffer(Long offerId, CustomUserPrincipal authUser) {
                 Offer offer = offerRepository.findById(offerId)
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId())) {
+                                throw new AccessDeniedException("You are not authorized to delete offers for another store");
+                        }
+                }
+
                 offerImageRepository.deleteAll(offer.getImages());
                 offerRepository.delete(offer);
         }
 
 }
+

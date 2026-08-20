@@ -2,6 +2,7 @@ package com.backend.dealspot.serviceImpl;
 
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,6 +11,7 @@ import com.backend.dealspot.dto.store.StoreBranchResponseDto;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.entity.StoreBranch;
+import com.backend.dealspot.enums.AdminRole;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.StoreBranchRepository;
 import com.backend.dealspot.repository.StoreRepository;
@@ -48,7 +50,12 @@ public class StoreBranchServiceImpl implements StoreBranchService {
 
     @Transactional
     @Override
-    public StoreBranchResponseDto addBranch(StoreBranchRegisterDto dto,  CustomUserPrincipal authUser) {
+    public StoreBranchResponseDto addBranch(StoreBranchRegisterDto dto, CustomUserPrincipal authUser) {
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (authUser.getStoreId() != null) {
+                dto.setStoreId(authUser.getStoreId());
+            }
+        }
 
         Store store = storeRepository.findById(dto.getStoreId())
                 .orElseThrow(() -> new RuntimeException("Store not found"));
@@ -76,12 +83,20 @@ public class StoreBranchServiceImpl implements StoreBranchService {
         return StoreBranchResponseDto.fromEntity(savedBranch);
     }
 
-
     @Transactional
     @Override
     public StoreBranchResponseDto updateBranch(Integer branchId, StoreBranchRegisterDto dto, CustomUserPrincipal authUser) {
         StoreBranch branch = storeBranchRepository.findById(branchId)
                 .orElseThrow(() -> new RuntimeException("Branch not found"));
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (branch.getStore() == null || !branch.getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to update branches for another store");
+            }
+            if (authUser.getStoreId() != null) {
+                dto.setStoreId(authUser.getStoreId());
+            }
+        }
 
         City city = cityRepository.findById(dto.getCityId())
                 .orElseThrow(() -> new RuntimeException("City not found"));
@@ -108,7 +123,14 @@ public class StoreBranchServiceImpl implements StoreBranchService {
         StoreBranch branch = storeBranchRepository.findById(branchId)
                 .orElseThrow(() -> new RuntimeException("Branch not found"));
 
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (branch.getStore() == null || !branch.getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to delete branches for another store");
+            }
+        }
+
         storeBranchRepository.delete(branch);
     }
 
 }
+

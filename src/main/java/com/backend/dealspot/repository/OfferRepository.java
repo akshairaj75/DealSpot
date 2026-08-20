@@ -9,4 +9,9 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     List<Offer> findAllByActive(boolean b);
 
+    List<Offer> findByStoreId(Integer storeId);
+
+    List<Offer> findByStoreIdAndActive(Integer storeId, boolean active);
+
 }
+

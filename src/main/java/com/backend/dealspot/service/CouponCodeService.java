@@ -19,5 +19,6 @@ public interface CouponCodeService {
 
     CouponCodeResponseDto getCouponById(Long couponId);
 
-    void deleteCoupon(Long couponId);
+    void deleteCoupon(Long couponId, CustomUserPrincipal authUser);
 }
+

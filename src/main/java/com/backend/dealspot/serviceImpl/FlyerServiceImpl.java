@@ -3,6 +3,8 @@ package com.backend.dealspot.serviceImpl;
 import java.io.IOException;
 import java.util.List;
 
+
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,7 @@ import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Flyer;
 import com.backend.dealspot.entity.FlyerPage;
 import com.backend.dealspot.entity.Store;
+import com.backend.dealspot.enums.AdminRole;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.FlyerPageRepository;
 import com.backend.dealspot.repository.FlyerRepository;
@@ -47,8 +50,15 @@ public class FlyerServiceImpl implements FlyerService {
         public FlyerResponseDto addFlyer(FlyerRequestDto dto, List<MultipartFile> pages, MultipartFile pdf,
                         CustomUserPrincipal authUser, HttpServletRequest request) {
 
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (authUser.getStoreId() != null) {
+                dto.setStoreId(authUser.getStoreId());
+            }
+        }
+
         Store store = storeRepository.findById(dto.getStoreId())
                 .orElseThrow(() -> new RuntimeException("Store not found"));
+
 
         City city = cityRepository.findById(dto.getCityId())
                 .orElseThrow(() -> new RuntimeException("City not found"));
@@ -185,7 +195,17 @@ public class FlyerServiceImpl implements FlyerService {
     }
 
     @Override
-    public List<FlyerResponseDto> fetchAllFlyers() {
+    public List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId) {
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (authUser.getStoreId() != null) {
+                return flyerRepository.findByStoreId(authUser.getStoreId())
+                        .stream().map(FlyerResponseDto::fromEntity).toList();
+            }
+        }
+        if (storeId != null) {
+            return flyerRepository.findByStoreId(storeId)
+                    .stream().map(FlyerResponseDto::fromEntity).toList();
+        }
         List<Flyer> flyers = flyerRepository.findAll();
         return flyers.stream().map(FlyerResponseDto::fromEntity).toList();
     }
@@ -205,9 +225,16 @@ public class FlyerServiceImpl implements FlyerService {
 
     @Transactional
     @Override
-    public void deleteFlyer(Integer flyerId) {
+    public void deleteFlyer(Integer flyerId, CustomUserPrincipal authUser) {
         Flyer flyer = flyerRepository.findById(flyerId)
                 .orElseThrow(() -> new RuntimeException("Flyer not found"));
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (flyer.getStore() == null || !flyer.getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to delete flyers for another store");
+            }
+        }
+
         flyerPageRepository.deleteAll(flyer.getPages());
         flyerRepository.delete(flyer);
     }
@@ -220,9 +247,15 @@ public class FlyerServiceImpl implements FlyerService {
 
     @Transactional
     @Override
-    public FlyerPageResponseDto addFlyerPage(Integer flyerId, Integer pageNumber, MultipartFile file) {
+    public FlyerPageResponseDto addFlyerPage(Integer flyerId, Integer pageNumber, MultipartFile file, CustomUserPrincipal authUser) {
         Flyer flyer = flyerRepository.findById(flyerId)
                 .orElseThrow(() -> new RuntimeException("Flyer not found"));
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (flyer.getStore() == null || !flyer.getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to manage flyer pages for another store");
+            }
+        }
 
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Page image file is required");
@@ -259,9 +292,15 @@ public class FlyerServiceImpl implements FlyerService {
 
     @Transactional
     @Override
-    public FlyerPageResponseDto updateFlyerPage(Integer pageId, Integer pageNumber, MultipartFile file) {
+    public FlyerPageResponseDto updateFlyerPage(Integer pageId, Integer pageNumber, MultipartFile file, CustomUserPrincipal authUser) {
         FlyerPage flyerPage = flyerPageRepository.findById(pageId)
                 .orElseThrow(() -> new RuntimeException("Flyer page not found"));
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (flyerPage.getFlyer().getStore() == null || !flyerPage.getFlyer().getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to manage flyer pages for another store");
+            }
+        }
 
         if (pageNumber != null && pageNumber > 0) {
             flyerPage.setPageNumber(pageNumber);
@@ -288,9 +327,15 @@ public class FlyerServiceImpl implements FlyerService {
 
     @Transactional
     @Override
-    public void deleteFlyerPage(Integer pageId) {
+    public void deleteFlyerPage(Integer pageId, CustomUserPrincipal authUser) {
         FlyerPage flyerPage = flyerPageRepository.findById(pageId)
                 .orElseThrow(() -> new RuntimeException("Flyer page not found"));
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (flyerPage.getFlyer().getStore() == null || !flyerPage.getFlyer().getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to delete flyer pages for another store");
+            }
+        }
 
         Flyer flyer = flyerPage.getFlyer();
         flyerPageRepository.delete(flyerPage);
@@ -307,3 +352,4 @@ public class FlyerServiceImpl implements FlyerService {
     }
 
 }
+

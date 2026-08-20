@@ -53,8 +53,10 @@ public class OfferController {
     }
 
     @GetMapping("/fetch-all-offers")
-    public ResponseEntity<List<OfferResponseDto>> fetchAllOffers() {
-        List<OfferResponseDto> result = offerService.fetchAllOffers();
+    public ResponseEntity<List<OfferResponseDto>> fetchAllOffers(
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            @org.springframework.web.bind.annotation.RequestParam(value = "storeId", required = false) Integer storeId) {
+        List<OfferResponseDto> result = offerService.fetchAllOffers(authUser, storeId);
         return ResponseEntity.ok(result);
     }
 
@@ -87,9 +89,12 @@ public class OfferController {
     }
 
     @org.springframework.web.bind.annotation.DeleteMapping("/delete/{offerId}")
-    public ResponseEntity<String> deleteOffer(@PathVariable("offerId") Long offerId) {
-        offerService.deleteOffer(offerId);
+    public ResponseEntity<String> deleteOffer(
+            @PathVariable("offerId") Long offerId,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        offerService.deleteOffer(offerId, authUser);
         return ResponseEntity.ok("Offer deleted successfully");
     }
+
 
 }
