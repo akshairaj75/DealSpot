@@ -227,6 +227,7 @@ public class ProductResponseDto {
         responseDto.setNameEn(product.getNameEn());
         responseDto.setNameAr(product.getNameAr());
         responseDto.setDescriptionEn(product.getDescriptionEn());
+        responseDto.setDescriptionAr(product.getDescriptionAr());
         String primaryImg = product.getPrimaryImageUrl();
         if ((primaryImg == null || primaryImg.trim().isEmpty()) && product.getImages() != null && !product.getImages().isEmpty()) {
             primaryImg = product.getImages().get(0).getImageUrl();
