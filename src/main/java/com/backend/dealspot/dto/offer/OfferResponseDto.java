@@ -42,6 +42,10 @@ public class OfferResponseDto {
     private String productNameAr;
     private String productPrimaryImageUrl;
     private String productImageUrl;
+    private Long brandId;
+    private String brandNameEn;
+    private String brandNameAr;
+    private String brandLogoUrl;
     private String titleEn;
     private String titleAr;
     private String descriptionEn;
@@ -196,6 +200,38 @@ public class OfferResponseDto {
 
     public void setProductImageUrl(String productImageUrl) {
         this.productImageUrl = productImageUrl;
+    }
+
+    public Long getBrandId() {
+        return brandId;
+    }
+
+    public void setBrandId(Long brandId) {
+        this.brandId = brandId;
+    }
+
+    public String getBrandNameEn() {
+        return brandNameEn;
+    }
+
+    public void setBrandNameEn(String brandNameEn) {
+        this.brandNameEn = brandNameEn;
+    }
+
+    public String getBrandNameAr() {
+        return brandNameAr;
+    }
+
+    public void setBrandNameAr(String brandNameAr) {
+        this.brandNameAr = brandNameAr;
+    }
+
+    public String getBrandLogoUrl() {
+        return brandLogoUrl;
+    }
+
+    public void setBrandLogoUrl(String brandLogoUrl) {
+        this.brandLogoUrl = brandLogoUrl;
     }
 
     public String getTitleEn() {
@@ -453,6 +489,13 @@ public class OfferResponseDto {
             dto.setProductNameAr(offer.getProduct().getNameAr());
             dto.setProductPrimaryImageUrl(prodImg);
             dto.setProductImageUrl(prodImg);
+
+            if (offer.getProduct().getBrand() != null) {
+                dto.setBrandId(offer.getProduct().getBrand().getId());
+                dto.setBrandNameEn(offer.getProduct().getBrand().getNameEn());
+                dto.setBrandNameAr(offer.getProduct().getBrand().getNameAr());
+                dto.setBrandLogoUrl(offer.getProduct().getBrand().getLogoUrl());
+            }
 
             // If offer does not have its own custom image, fall back directly to the product's primary image
             if (dto.getImageUrl() == null || dto.getImageUrl().trim().isEmpty()) {
