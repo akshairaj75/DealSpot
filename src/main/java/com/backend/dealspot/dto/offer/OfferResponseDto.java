@@ -461,6 +461,14 @@ public class OfferResponseDto {
             if (dto.getThumbnailUrl() == null || dto.getThumbnailUrl().trim().isEmpty()) {
                 dto.setThumbnailUrl(prodImg);
             }
+
+            // If offer description is empty, fall back to product description
+            if (dto.getDescriptionEn() == null || dto.getDescriptionEn().trim().isEmpty()) {
+                dto.setDescriptionEn(offer.getProduct().getDescriptionEn());
+            }
+            if (dto.getDescriptionAr() == null || dto.getDescriptionAr().trim().isEmpty()) {
+                dto.setDescriptionAr(offer.getProduct().getDescriptionAr());
+            }
         }
 
         return dto;
