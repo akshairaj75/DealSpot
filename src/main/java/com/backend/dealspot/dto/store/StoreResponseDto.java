@@ -19,6 +19,9 @@ public class StoreResponseDto {
     private String bannerUrl;
     private String vatNumber;
     private String crNumber;
+    private String website;
+    private String contactPhone;
+    private String contactEmail;
     private boolean verified;
     private boolean featured;
     private boolean active;
@@ -26,6 +29,30 @@ public class StoreResponseDto {
     private boolean isFollowed;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getContactPhone() {
+        return contactPhone;
+    }
+
+    public void setContactPhone(String contactPhone) {
+        this.contactPhone = contactPhone;
+    }
+
+    public String getContactEmail() {
+        return contactEmail;
+    }
+
+    public void setContactEmail(String contactEmail) {
+        this.contactEmail = contactEmail;
+    }
 
     public long getFollowersCount() {
         return followersCount;
@@ -218,6 +245,9 @@ public class StoreResponseDto {
         dto.setBannerUrl(store.getBannerUrl());
         dto.setVatNumber(store.getVatNumber());
         dto.setCrNumber(store.getCrNumber());
+        dto.setWebsite(store.getWebsite());
+        dto.setContactPhone(store.getContactPhone());
+        dto.setContactEmail(store.getContactEmail());
         dto.setVerified(store.isVerified());
         dto.setFeatured(store.isFeatured());
         dto.setActive(store.isActive());
