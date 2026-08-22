@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -159,6 +163,25 @@ public class ProductServiceImpl implements ProductService {
         return result.stream()
                 .map(ProductResponseDto::fromEntity)
                 .toList();
+    }
+
+    @Override
+    public Page<ProductResponseDto> fetchPagedProducts(int page, int size, String search, Integer categoryId, Long brandId, String sortBy, String direction) {
+        String sortField = (sortBy != null && !sortBy.trim().isEmpty()) ? sortBy.trim() : "createdAt";
+        if ("id".equalsIgnoreCase(sortField)) {
+            sortField = "id";
+        } else if ("name".equalsIgnoreCase(sortField) || "nameEn".equalsIgnoreCase(sortField)) {
+            sortField = "nameEn";
+        } else if ("createdAt".equalsIgnoreCase(sortField)) {
+            sortField = "createdAt";
+        }
+        Sort sort = "asc".equalsIgnoreCase(direction) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), sort);
+
+        String cleanSearch = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+
+        Page<Product> productPage = productRepository.searchProducts(cleanSearch, categoryId, brandId, pageable);
+        return productPage.map(ProductResponseDto::fromEntity);
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.backend.dealspot.controller;
 
 import java.util.List;
 
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -79,6 +80,19 @@ public class ProductController {
     @GetMapping("/fetch-all-products")
     public ResponseEntity<List<ProductResponseDto>> fetchAllProducts() {
         List<ProductResponseDto> result = productService.fetchAllProducts();
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<Page<ProductResponseDto>> getPagedProducts(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "categoryId", required = false) Integer categoryId,
+            @RequestParam(name = "brandId", required = false) Long brandId,
+            @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(name = "direction", defaultValue = "desc") String direction) {
+        Page<ProductResponseDto> result = productService.fetchPagedProducts(page, size, search, categoryId, brandId, sortBy, direction);
         return ResponseEntity.ok(result);
     }
 

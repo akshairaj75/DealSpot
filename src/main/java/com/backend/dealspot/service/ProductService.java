@@ -1,7 +1,7 @@
 package com.backend.dealspot.service;
 
 import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.backend.dealspot.dto.attributeKey.AttributeKeyDto;
@@ -16,10 +16,11 @@ public interface ProductService {
 
     AttributeKeyRegisterDto addAttributeKey(AttributeKeyRegisterDto dto);
 
-   
     List<AttributeKeyDto> fetchAttributeKeys();
 
     List<ProductResponseDto> fetchAllProducts();
+
+    Page<ProductResponseDto> fetchPagedProducts(int page, int size, String search, Integer categoryId, Long brandId, String sortBy, String direction);
 
     ProductResponseDto editProduct(Long productId, ProductRegisterDto dto, List<MultipartFile> file);
 
