@@ -23,4 +23,5 @@ public interface StoreService {
 
     void deleteStore(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request);
 
+    StoreResponseDto toggleFeatured(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request);
 }

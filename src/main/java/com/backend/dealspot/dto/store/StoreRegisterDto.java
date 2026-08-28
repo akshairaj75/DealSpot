@@ -14,6 +14,9 @@ public class StoreRegisterDto {
     private Integer categoryId;
     private String crNumber;
     private String vatNumber;
+    private Boolean verified;
+    private Boolean featured;
+    private Boolean active;
 
     // Optional Manager Account creation details
     private String managerName;
@@ -32,17 +35,17 @@ public class StoreRegisterDto {
     public String getNameAr() {
         return nameAr;
     }
+
+    public void setNameAr(String nameAr) {
+        this.nameAr = nameAr;
+    }
+
     public String getDescriptionEn() {
         return descriptionEn;
     }
 
     public void setDescriptionEn(String descriptionEn) {
         this.descriptionEn = descriptionEn;
-    }
-
-
-    public void setNameAr(String nameAr) {
-        this.nameAr = nameAr;
     }
 
     public String getDescriptionAr() {
@@ -125,6 +128,30 @@ public class StoreRegisterDto {
         this.vatNumber = vatNumber;
     }
 
+    public Boolean getVerified() {
+        return verified;
+    }
+
+    public void setVerified(Boolean verified) {
+        this.verified = verified;
+    }
+
+    public Boolean getFeatured() {
+        return featured;
+    }
+
+    public void setFeatured(Boolean featured) {
+        this.featured = featured;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
     public String getManagerName() {
         return managerName;
     }
@@ -156,5 +183,4 @@ public class StoreRegisterDto {
     public void setManagerPhone(String managerPhone) {
         this.managerPhone = managerPhone;
     }
-
 }

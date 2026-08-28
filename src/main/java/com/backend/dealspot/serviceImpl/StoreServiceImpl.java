@@ -71,6 +71,15 @@ public class StoreServiceImpl implements StoreService {
         newStore.setCrNumber(dto.getCrNumber());
         newStore.setCity(city);
         newStore.setCategory(category);
+        if (dto.getVerified() != null) {
+            newStore.setVerified(dto.getVerified());
+        }
+        if (dto.getFeatured() != null) {
+            newStore.setFeatured(dto.getFeatured());
+        }
+        if (dto.getActive() != null) {
+            newStore.setActive(dto.getActive());
+        }
         if (file != null && !file.isEmpty()) {
             try {
                 String imageFile = fileStorageService.storeFile(file, "stores/logo");
@@ -177,6 +186,15 @@ public class StoreServiceImpl implements StoreService {
         if (dto.getCrNumber() != null && !dto.getCrNumber().isEmpty()) {
             store.setCrNumber(dto.getCrNumber());
         }
+        if (dto.getVerified() != null) {
+            store.setVerified(dto.getVerified());
+        }
+        if (dto.getFeatured() != null) {
+            store.setFeatured(dto.getFeatured());
+        }
+        if (dto.getActive() != null) {
+            store.setActive(dto.getActive());
+        }
         if (dto.getCityId() != null) {
             City city = cityRepository.findById(dto.getCityId())
                     .orElseThrow(() -> new RuntimeException("City not found"));
@@ -202,6 +220,16 @@ public class StoreServiceImpl implements StoreService {
                         e);
             }
         }
+        Store saved = storeRepository.save(store);
+        return StoreResponseDto.fromEntity(saved);
+    }
+
+    @Transactional
+    @Override
+    public StoreResponseDto toggleFeatured(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        store.setFeatured(!store.isFeatured());
         Store saved = storeRepository.save(store);
         return StoreResponseDto.fromEntity(saved);
     }

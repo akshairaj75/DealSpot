@@ -79,12 +79,21 @@ public class StoreController {
     public ResponseEntity<StoreResponseDto> updateStore(
             @PathVariable("storeId") Integer storeId,
             @RequestPart("body") StoreRegisterDto dto,
-            @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             HttpServletRequest request) {
         StoreResponseDto updatedStore = storeService.updateStore(storeId, dto,
             file, authUser, request);
         return ResponseEntity.ok(updatedStore);
+    }
+
+    @PutMapping("/toggle-featured/{storeId}")
+    public ResponseEntity<StoreResponseDto> toggleFeatured(
+            @PathVariable("storeId") Integer storeId,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        StoreResponseDto updated = storeService.toggleFeatured(storeId, authUser, request);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/delete-store/{storeId}")
