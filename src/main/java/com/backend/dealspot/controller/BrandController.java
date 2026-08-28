@@ -77,14 +77,16 @@ public class BrandController {
         return ResponseEntity.ok("Brand deleted successfully");
     }
 
-    @GetMapping("/api/admin/brands/search")
-    public ResponseEntity<Page<BrandDto>> searchBrands(
+    @GetMapping({"/api/dealspot/brands/search", "/api/dealspot/brands/paged", "/api/admin/brands/search"})
+    public ResponseEntity<Page<BrandResponseDto>> searchBrands(
             @RequestParam(value = "q", required = false) String q,
+            @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", required = false) Integer size) {
 
+        String query = (q != null && !q.trim().isEmpty()) ? q : search;
         int pageSize = (size != null) ? size : 20;
-        Page<BrandDto> res = brandService.searchBrands(q, page, pageSize);
+        Page<BrandResponseDto> res = brandService.searchBrands(query, page, pageSize);
         return ResponseEntity.ok(res);
     }
 

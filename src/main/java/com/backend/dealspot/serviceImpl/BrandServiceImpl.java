@@ -192,14 +192,15 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public Page<BrandDto> searchBrands(String q, int page, int size) {
-        if (q == null || q.trim().isEmpty()) {
-            return Page.empty(PageRequest.of(page, size, Sort.by("nameEn").ascending()));
-        }
-
-        String trimmedQuery = q.trim();
+    public Page<BrandResponseDto> searchBrands(String q, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("nameEn").ascending());
-        Page<Brand> brands = brandRepository.findByNameEnContainingIgnoreCaseOrNameArContainingIgnoreCase(trimmedQuery, trimmedQuery, pageable);
-        return brands.map(BrandDto::fromEntity);
+        Page<Brand> brands;
+        if (q != null && !q.trim().isEmpty()) {
+            String trimmedQuery = q.trim();
+            brands = brandRepository.findByNameEnContainingIgnoreCaseOrNameArContainingIgnoreCase(trimmedQuery, trimmedQuery, pageable);
+        } else {
+            brands = brandRepository.findAll(pageable);
+        }
+        return brands.map(BrandResponseDto::fromEntity);
     }
 }
