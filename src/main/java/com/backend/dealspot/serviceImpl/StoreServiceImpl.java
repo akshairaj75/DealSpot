@@ -75,7 +75,11 @@ public class StoreServiceImpl implements StoreService {
             newStore.setVerified(dto.getVerified());
         }
         if (dto.getFeatured() != null) {
-            newStore.setFeatured(dto.getFeatured());
+            if (authUser != null && authUser.getRole() == AdminRole.SUPER_ADMIN) {
+                newStore.setFeatured(dto.getFeatured());
+            } else {
+                newStore.setFeatured(false);
+            }
         }
         if (dto.getActive() != null) {
             newStore.setActive(dto.getActive());
@@ -190,7 +194,9 @@ public class StoreServiceImpl implements StoreService {
             store.setVerified(dto.getVerified());
         }
         if (dto.getFeatured() != null) {
-            store.setFeatured(dto.getFeatured());
+            if (authUser != null && authUser.getRole() == AdminRole.SUPER_ADMIN) {
+                store.setFeatured(dto.getFeatured());
+            }
         }
         if (dto.getActive() != null) {
             store.setActive(dto.getActive());
@@ -227,6 +233,9 @@ public class StoreServiceImpl implements StoreService {
     @Transactional
     @Override
     public StoreResponseDto toggleFeatured(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request) {
+        if (authUser == null || authUser.getRole() != AdminRole.SUPER_ADMIN) {
+            throw new RuntimeException("Access Denied: Only SUPER_ADMIN can mark or unmark stores as featured");
+        }
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("Store not found"));
         store.setFeatured(!store.isFeatured());
