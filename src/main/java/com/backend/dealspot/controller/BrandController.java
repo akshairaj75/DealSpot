@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.backend.dealspot.dto.brand.BrandDto;
 import com.backend.dealspot.dto.brand.BrandRegisterDto;
 import com.backend.dealspot.dto.brand.BrandResponseDto;
 import com.backend.dealspot.service.BrandService;
@@ -81,12 +80,13 @@ public class BrandController {
     public ResponseEntity<Page<BrandResponseDto>> searchBrands(
             @RequestParam(value = "q", required = false) String q,
             @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "featured", required = false) Boolean featured,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", required = false) Integer size) {
 
         String query = (q != null && !q.trim().isEmpty()) ? q : search;
         int pageSize = (size != null) ? size : 20;
-        Page<BrandResponseDto> res = brandService.searchBrands(query, page, pageSize);
+        Page<BrandResponseDto> res = brandService.searchBrands(query, featured, page, pageSize);
         return ResponseEntity.ok(res);
     }
 

@@ -192,14 +192,24 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public Page<BrandResponseDto> searchBrands(String q, int page, int size) {
+    public Page<BrandResponseDto> searchBrands(String q, Boolean featured, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("nameEn").ascending());
         Page<Brand> brands;
+        boolean isFeaturedFilter = Boolean.TRUE.equals(featured);
+
         if (q != null && !q.trim().isEmpty()) {
             String trimmedQuery = q.trim();
-            brands = brandRepository.findByNameEnContainingIgnoreCaseOrNameArContainingIgnoreCase(trimmedQuery, trimmedQuery, pageable);
+            if (isFeaturedFilter) {
+                brands = brandRepository.searchFeaturedBrands(trimmedQuery, pageable);
+            } else {
+                brands = brandRepository.findByNameEnContainingIgnoreCaseOrNameArContainingIgnoreCase(trimmedQuery, trimmedQuery, pageable);
+            }
         } else {
-            brands = brandRepository.findAll(pageable);
+            if (isFeaturedFilter) {
+                brands = brandRepository.findByFeaturedTrue(pageable);
+            } else {
+                brands = brandRepository.findAll(pageable);
+            }
         }
         return brands.map(BrandResponseDto::fromEntity);
     }

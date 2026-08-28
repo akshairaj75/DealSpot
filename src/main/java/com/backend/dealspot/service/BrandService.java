@@ -21,5 +21,5 @@ public interface BrandService {
 
     void deleteBrand(Long id);
 
-    Page<BrandResponseDto> searchBrands(String q, int page, int size);
+    Page<BrandResponseDto> searchBrands(String q, Boolean featured, int page, int size);
 }
