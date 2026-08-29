@@ -75,8 +75,8 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() -> new RuntimeException("Brand not found"));
             product.setBrand(brand);
         }
-        product.setSku(dto.getSku());
-        product.setBarcode(dto.getBarcode());
+        product.setSku(dto.getSku() != null && !dto.getSku().trim().isEmpty() ? dto.getSku().trim() : null);
+        product.setBarcode(dto.getBarcode() != null && !dto.getBarcode().trim().isEmpty() ? dto.getBarcode().trim() : null);
         product.setNameEn(dto.getNameEn());
         product.setNameAr(dto.getNameAr());
         product.setUnit(dto.getUnit());
@@ -241,11 +241,11 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (dto.getSku() != null) {
-            product.setSku(dto.getSku());
+            product.setSku(!dto.getSku().trim().isEmpty() ? dto.getSku().trim() : null);
         }
 
         if (dto.getBarcode() != null) {
-            product.setBarcode(dto.getBarcode());
+            product.setBarcode(!dto.getBarcode().trim().isEmpty() ? dto.getBarcode().trim() : null);
         }
 
         // Active status
