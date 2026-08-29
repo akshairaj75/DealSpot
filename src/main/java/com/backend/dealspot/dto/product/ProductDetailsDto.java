@@ -1,13 +1,14 @@
 package com.backend.dealspot.dto.product;
+
 import com.backend.dealspot.entity.ProductDetail;
 import java.time.LocalDateTime;
-
 
 public class ProductDetailsDto {
 
     private Long id;
     private Long productId;
     private Long attributeKeyId;
+    private String attrKeyEn;
     private String attrKeyAr;
     private String attrValueEn;
     private String attrValueAr;
@@ -36,6 +37,14 @@ public class ProductDetailsDto {
 
     public void setAttributeKeyId(Long attributeKeyId) {
         this.attributeKeyId = attributeKeyId;
+    }
+
+    public String getAttrKeyEn() {
+        return attrKeyEn;
+    }
+
+    public void setAttrKeyEn(String attrKeyEn) {
+        this.attrKeyEn = attrKeyEn;
     }
 
     public String getAttrKeyAr() {
@@ -89,6 +98,8 @@ public class ProductDetailsDto {
         }
         if (entity.getAttributeKey() != null) {
             dto.setAttributeKeyId(entity.getAttributeKey().getId());
+            dto.setAttrKeyEn(entity.getAttributeKey().getAttrKeyEn());
+            dto.setAttrKeyAr(entity.getAttributeKey().getAttrKeyAr());
         }
         dto.setAttrValueEn(entity.getAttrValueEn());
         dto.setAttrValueAr(entity.getAttrValueAr());
