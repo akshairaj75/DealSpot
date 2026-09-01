@@ -68,18 +68,18 @@ public class OfferServiceImpl implements OfferService {
 
                 if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
                         if (authUser.getStoreId() != null) {
-                                dto.setStoreId(authUser.getStoreId());
+                                dto.setStoreId(authUser.getStoreId().longValue());
                         }
                 }
 
-                Store store = storeRepository.findById(dto.getStoreId())
+                Store store = storeRepository.findById(dto.getStoreId().intValue())
                                 .orElseThrow(() -> new RuntimeException("Store not found"));
 
 
-                City city = cityRepository.findById(dto.getCityId())
+                City city = cityRepository.findById(dto.getCityId().intValue())
                                 .orElseThrow(() -> new RuntimeException("City not found"));
 
-                Category category = categoryRepository.findById(dto.getCategoryId())
+                Category category = categoryRepository.findById(dto.getCategoryId().intValue())
                                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
                 Product product = null;
@@ -204,22 +204,22 @@ public class OfferServiceImpl implements OfferService {
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
 
                 if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
-                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId())) {
+                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId().longValue())) {
                                 throw new AccessDeniedException("You are not authorized to update offers for another store");
                         }
                         if (authUser.getStoreId() != null) {
-                                dto.setStoreId(authUser.getStoreId());
+                                dto.setStoreId(authUser.getStoreId().longValue());
                         }
                 }
 
                 if (dto.getStoreId() != null) {
-                        storeRepository.findById(dto.getStoreId()).ifPresent(offer::setStore);
+                        storeRepository.findById(dto.getStoreId().intValue()).ifPresent(offer::setStore);
                 }
                 if (dto.getCityId() != null) {
-                        cityRepository.findById(dto.getCityId()).ifPresent(offer::setCity);
+                        cityRepository.findById(dto.getCityId().intValue()).ifPresent(offer::setCity);
                 }
                 if (dto.getCategoryId() != null) {
-                        categoryRepository.findById(dto.getCategoryId()).ifPresent(offer::setCategory);
+                        categoryRepository.findById(dto.getCategoryId().intValue()).ifPresent(offer::setCategory);
                 }
                 if (dto.getProductId() != null) {
                         offer.setProduct(productRepository.findById(dto.getProductId()).orElse(null));

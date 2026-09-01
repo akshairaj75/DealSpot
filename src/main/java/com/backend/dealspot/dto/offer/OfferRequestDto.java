@@ -6,9 +6,9 @@ import java.time.LocalDate;
 
 public class OfferRequestDto {
 
-    private Integer storeId;
-    private Integer categoryId;
-    private Integer cityId;
+    private Long storeId;
+    private Long categoryId;
+    private Long cityId;
     private Long productId;
     private String titleEn;
     private String titleAr;
@@ -28,27 +28,27 @@ public class OfferRequestDto {
     private Boolean inStore;
     private Boolean active;
 
-    public Integer getStoreId() {
+    public Long getStoreId() {
         return storeId;
     }
 
-    public void setStoreId(Integer storeId) {
+    public void setStoreId(Long storeId) {
         this.storeId = storeId;
     }
 
-    public Integer getCategoryId() {
+    public Long getCategoryId() {
         return categoryId;
     }
 
-    public void setCategoryId(Integer categoryId) {
+    public void setCategoryId(Long categoryId) {
         this.categoryId = categoryId;
     }
 
-    public Integer getCityId() {
+    public Long getCityId() {
         return cityId;
     }
 
-    public void setCityId(Integer cityId) {
+    public void setCityId(Long cityId) {
         this.cityId = cityId;
     }
 
