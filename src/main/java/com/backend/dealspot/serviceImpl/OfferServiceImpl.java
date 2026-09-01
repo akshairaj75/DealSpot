@@ -158,26 +158,34 @@ public class OfferServiceImpl implements OfferService {
         }
 
         @Override
-        public List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId) {
-                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
-                        if (authUser.getStoreId() != null) {
-                                return offerRepository.findByStoreId(authUser.getStoreId())
-                                                .stream()
-                                                .map(OfferResponseDto::fromEntity)
-                                                .toList();
-                        }
+        public List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired) {
+                boolean isAdminOrManager = authUser != null && (
+                        authUser.getRole() == AdminRole.SUPER_ADMIN || 
+                        authUser.getRole() == AdminRole.STORE_MANAGER ||
+                        authUser.getRole() == AdminRole.CONTENT_MANAGER
+                );
+
+                boolean shouldIncludeExpired = Boolean.TRUE.equals(includeExpired) || isAdminOrManager;
+                java.time.LocalDate today = java.time.LocalDate.now();
+                List<Offer> offers;
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null) {
+                        offers = shouldIncludeExpired 
+                                ? offerRepository.findByStoreId(authUser.getStoreId())
+                                : offerRepository.findActiveAndValidOffersByStoreId(authUser.getStoreId(), today);
+                } else if (storeId != null) {
+                        offers = shouldIncludeExpired
+                                ? offerRepository.findByStoreId(storeId)
+                                : offerRepository.findActiveAndValidOffersByStoreId(storeId, today);
+                } else {
+                        offers = shouldIncludeExpired
+                                ? offerRepository.findAll()
+                                : offerRepository.findActiveAndValidOffers(today);
                 }
 
-                if (storeId != null) {
-                        return offerRepository.findByStoreId(storeId)
-                                        .stream()
-                                        .map(OfferResponseDto::fromEntity)
-                                        .toList();
-                }
-
-                List<Offer> offers = offerRepository.findAll();
                 return offers.stream()
-                                .map(OfferResponseDto::fromEntity).toList();
+                                .map(OfferResponseDto::fromEntity)
+                                .toList();
         }
 
         @Override

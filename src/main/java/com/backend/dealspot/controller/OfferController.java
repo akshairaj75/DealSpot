@@ -55,8 +55,9 @@ public class OfferController {
     @GetMapping("/fetch-all-offers")
     public ResponseEntity<List<OfferResponseDto>> fetchAllOffers(
             @AuthenticationPrincipal CustomUserPrincipal authUser,
-            @org.springframework.web.bind.annotation.RequestParam(value = "storeId", required = false) Integer storeId) {
-        List<OfferResponseDto> result = offerService.fetchAllOffers(authUser, storeId);
+            @org.springframework.web.bind.annotation.RequestParam(value = "storeId", required = false) Integer storeId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "includeExpired", required = false) Boolean includeExpired) {
+        List<OfferResponseDto> result = offerService.fetchAllOffers(authUser, storeId, includeExpired);
         return ResponseEntity.ok(result);
     }
 

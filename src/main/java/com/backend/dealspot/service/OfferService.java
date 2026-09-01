@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface OfferService {
 
-    List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId);
+    List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired);
 
     OfferResponseDto getOfferById(Long offerId);
 
