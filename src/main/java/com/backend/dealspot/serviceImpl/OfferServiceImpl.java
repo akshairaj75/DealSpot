@@ -17,6 +17,7 @@ import com.backend.dealspot.entity.OfferImage;
 import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.OfferBadgeType;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.OfferImageRepository;
@@ -240,6 +241,12 @@ public class OfferServiceImpl implements OfferService {
 
                 offer.setValidFrom(dto.getValidFrom());
                 offer.setValidUntil(dto.getValidUntil());
+
+                if (dto.getBadgeType() == OfferBadgeType.FEATURED) {
+                        offer.setFeatured(true);
+                } else if (dto.getBadgeType() == OfferBadgeType.FLASH) {
+                        offer.setFlash(true);
+                }
 
                 if (dto.getFeatured() != null)
                         offer.setFeatured(dto.getFeatured());
