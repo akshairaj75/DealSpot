@@ -1,5 +1,6 @@
 package com.backend.dealspot.repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,6 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     List<Offer> findByStoreIdAndActive(Integer storeId, boolean active);
 
+    List<Offer> findByActiveTrueAndValidUntilBefore(LocalDate date);
 }
 

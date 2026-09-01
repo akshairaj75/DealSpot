@@ -96,5 +96,12 @@ public class OfferController {
         return ResponseEntity.ok("Offer deleted successfully");
     }
 
-
+    @PostMapping("/{offerId}/extend")
+    public ResponseEntity<OfferResponseDto> extendOffer(
+            @PathVariable("offerId") Long offerId,
+            @org.springframework.web.bind.annotation.RequestParam(value = "days", defaultValue = "7") int days,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        OfferResponseDto result = offerService.extendOffer(offerId, days, authUser);
+        return ResponseEntity.ok(result);
+    }
 }

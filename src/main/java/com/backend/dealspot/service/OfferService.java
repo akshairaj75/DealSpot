@@ -24,5 +24,6 @@ public interface OfferService {
 
     void deleteOffer(Long offerId, CustomUserPrincipal authUser);
 
+    OfferResponseDto extendOffer(Long offerId, int days, CustomUserPrincipal authUser);
 }
 

@@ -69,8 +69,35 @@ public class OfferResponseDto {
     private Integer saveCount;
     private Integer shareCount;
     private boolean isSaved;
+    private boolean expired;
+    private boolean upcoming;
+    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isUpcoming() {
+        return upcoming;
+    }
+
+    public void setUpcoming(boolean upcoming) {
+        this.upcoming = upcoming;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
 
     public boolean isSaved() {
@@ -452,6 +479,24 @@ public class OfferResponseDto {
         dto.setOnline(offer.isOnline());
         dto.setInStore(offer.isInStore());
         dto.setActive(offer.isActive());
+
+        LocalDate today = LocalDate.now();
+        boolean isExp = offer.getValidUntil() != null && offer.getValidUntil().isBefore(today);
+        boolean isUpc = offer.getValidFrom() != null && offer.getValidFrom().isAfter(today);
+
+        dto.setExpired(isExp);
+        dto.setUpcoming(isUpc);
+
+        if (!offer.isActive()) {
+            dto.setStatus("DISABLED");
+        } else if (isExp) {
+            dto.setStatus("EXPIRED");
+        } else if (isUpc) {
+            dto.setStatus("UPCOMING");
+        } else {
+            dto.setStatus("ACTIVE");
+        }
+
         dto.setViewCount(offer.getViewCount());
         dto.setSaveCount(offer.getSaveCount());
         dto.setShareCount(offer.getShareCount());

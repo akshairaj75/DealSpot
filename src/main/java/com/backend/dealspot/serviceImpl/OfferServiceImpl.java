@@ -298,5 +298,28 @@ public class OfferServiceImpl implements OfferService {
                 offerRepository.delete(offer);
         }
 
+        @Transactional
+        @Override
+        public OfferResponseDto extendOffer(Long offerId, int days, CustomUserPrincipal authUser) {
+                Offer offer = offerRepository.findById(offerId)
+                                .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId())) {
+                                throw new AccessDeniedException("You are not authorized to extend offers for another store");
+                        }
+                }
+
+                java.time.LocalDate baseDate = java.time.LocalDate.now();
+                if (offer.getValidUntil() != null && offer.getValidUntil().isAfter(baseDate)) {
+                        baseDate = offer.getValidUntil();
+                }
+
+                offer.setValidUntil(baseDate.plusDays(days));
+                offer.setActive(true);
+
+                Offer updated = offerRepository.save(offer);
+                return OfferResponseDto.fromEntity(updated);
+        }
 }
 
