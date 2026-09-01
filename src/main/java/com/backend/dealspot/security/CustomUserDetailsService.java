@@ -73,12 +73,15 @@ public class CustomUserDetailsService{
                         AdminUser admin = adminUserRepository.findByEmail(email)
                                         .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
+                        Integer storeId = admin.getStore() != null ? admin.getStore().getId() : null;
+
                         return new CustomUserPrincipal(
                                         admin.getId(),
                                         admin.getEmail(),
                                         admin.getPasswordHash(),
                                         AccountType.ADMIN,
                                         admin.getRole(),
+                                        storeId,
                                         admin.isActive(),
                                         List.of(new SimpleGrantedAuthority("ROLE_" + admin.getRole().name())));
                 } else {
