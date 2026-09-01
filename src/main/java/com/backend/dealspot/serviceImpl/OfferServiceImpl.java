@@ -204,7 +204,7 @@ public class OfferServiceImpl implements OfferService {
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
 
                 if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
-                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId().longValue())) {
+                        if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId())) {
                                 throw new AccessDeniedException("You are not authorized to update offers for another store");
                         }
                         if (authUser.getStoreId() != null) {
