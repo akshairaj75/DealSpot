@@ -16,6 +16,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "(:categoryId IS NULL OR p.category.id = :categoryId OR (p.category.parent IS NOT NULL AND p.category.parent.id = :categoryId)) AND " +
            "(:brandId IS NULL OR (p.brand IS NOT NULL AND p.brand.id = :brandId)) AND " +
            "(:search IS NULL OR :search = '' OR " +
+           " CAST(p.id AS string) LIKE CONCAT('%', :search, '%') OR " +
            " LOWER(p.nameEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            " LOWER(p.nameAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            " LOWER(p.sku) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
