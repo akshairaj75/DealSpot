@@ -336,5 +336,38 @@ public class OfferServiceImpl implements OfferService {
                 Offer updated = offerRepository.save(offer);
                 return OfferResponseDto.fromEntity(updated);
         }
+
+        @Override
+        public org.springframework.data.domain.Page<OfferResponseDto> getPagedOffers(
+                        String search,
+                        Integer storeId,
+                        String badgeType,
+                        Boolean active,
+                        int page,
+                        int size) {
+
+                org.springframework.data.domain.Pageable pageable = 
+                        org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("id").descending());
+
+                com.backend.dealspot.enums.OfferBadgeType badgeEnum = null;
+                if (badgeType != null && !badgeType.trim().isEmpty() && !"ALL".equalsIgnoreCase(badgeType)) {
+                        try {
+                                badgeEnum = com.backend.dealspot.enums.OfferBadgeType.valueOf(badgeType.trim().toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                                // invalid badge type enum, ignore
+                        }
+                }
+
+                String searchQuery = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+
+                org.springframework.data.domain.Page<Offer> offersPage = offerRepository.searchOffers(
+                                searchQuery,
+                                storeId,
+                                badgeEnum,
+                                active,
+                                pageable);
+
+                return offersPage.map(OfferResponseDto::fromEntity);
+        }
 }
 

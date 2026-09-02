@@ -25,5 +25,13 @@ public interface OfferService {
     void deleteOffer(Long offerId, CustomUserPrincipal authUser);
 
     OfferResponseDto extendOffer(Long offerId, int days, CustomUserPrincipal authUser);
+
+    org.springframework.data.domain.Page<OfferResponseDto> getPagedOffers(
+            String search,
+            Integer storeId,
+            String badgeType,
+            Boolean active,
+            int page,
+            int size);
 }
 
