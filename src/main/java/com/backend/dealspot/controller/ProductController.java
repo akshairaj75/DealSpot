@@ -48,7 +48,7 @@ public class ProductController {
                 .toList();
         return ResponseEntity.ok(res);
     }
-//  ======================================================================
+    // ======================================================================
 
     @GetMapping("/fetch-attribute-keys")
     public ResponseEntity<List<AttributeKeyDto>> fetchAttributeKeys() {
@@ -92,7 +92,8 @@ public class ProductController {
             @RequestParam(name = "brandId", required = false) Long brandId,
             @RequestParam(name = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(name = "direction", defaultValue = "desc") String direction) {
-        Page<ProductResponseDto> result = productService.fetchPagedProducts(page, size, search, categoryId, brandId, sortBy, direction);
+        Page<ProductResponseDto> result = productService.fetchPagedProducts(page, size, search, categoryId, brandId,
+                sortBy, direction);
         return ResponseEntity.ok(result);
     }
 
@@ -115,7 +116,7 @@ public class ProductController {
 
     @GetMapping("/get-product-details/{productId}")
     public ResponseEntity<List<ProductDetailsDto>> getProductDetails(
-        @PathVariable("productId") Long productId) {
+            @PathVariable("productId") Long productId) {
         List<ProductDetailsDto> productDetails = productService.getProductDetails(productId);
         return ResponseEntity.ok(productDetails);
     }

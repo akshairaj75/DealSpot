@@ -76,7 +76,8 @@ public class ProductServiceImpl implements ProductService {
             product.setBrand(brand);
         }
         product.setSku(dto.getSku() != null && !dto.getSku().trim().isEmpty() ? dto.getSku().trim() : null);
-        product.setBarcode(dto.getBarcode() != null && !dto.getBarcode().trim().isEmpty() ? dto.getBarcode().trim() : null);
+        product.setBarcode(
+                dto.getBarcode() != null && !dto.getBarcode().trim().isEmpty() ? dto.getBarcode().trim() : null);
         product.setNameEn(dto.getNameEn());
         product.setNameAr(dto.getNameAr());
         product.setUnit(dto.getUnit());
@@ -166,7 +167,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseDto> fetchPagedProducts(int page, int size, String search, Integer categoryId, Long brandId, String sortBy, String direction) {
+    public Page<ProductResponseDto> fetchPagedProducts(int page, int size, String search, Integer categoryId,
+            Long brandId, String sortBy, String direction) {
         String sortField = (sortBy != null && !sortBy.trim().isEmpty()) ? sortBy.trim() : "createdAt";
         if ("id".equalsIgnoreCase(sortField)) {
             sortField = "id";
@@ -175,7 +177,8 @@ public class ProductServiceImpl implements ProductService {
         } else if ("createdAt".equalsIgnoreCase(sortField)) {
             sortField = "createdAt";
         }
-        Sort sort = "asc".equalsIgnoreCase(direction) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+        Sort sort = "asc".equalsIgnoreCase(direction) ? Sort.by(sortField).ascending()
+                : Sort.by(sortField).descending();
         Pageable pageable = PageRequest.of(Math.max(0, page), Math.max(1, size), sort);
 
         String cleanSearch = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
