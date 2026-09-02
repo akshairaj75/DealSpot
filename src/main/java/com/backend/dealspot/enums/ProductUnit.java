@@ -9,5 +9,6 @@ public enum ProductUnit {
     PACK,
     BOX,
     PAIR,
-    SET
+    SET,
+    BUNCH
 }
