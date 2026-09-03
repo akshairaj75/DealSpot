@@ -51,9 +51,13 @@ public class FlyerServiceImpl implements FlyerService {
                         CustomUserPrincipal authUser, HttpServletRequest request) {
 
         if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
-            if (authUser.getStoreId() != null) {
-                dto.setStoreId(authUser.getStoreId());
+            if (authUser.getStoreId() == null) {
+                throw new org.springframework.security.access.AccessDeniedException("No store is assigned to this store manager account");
             }
+            if (dto.getStoreId() != null && !dto.getStoreId().equals(authUser.getStoreId())) {
+                throw new org.springframework.security.access.AccessDeniedException("Store managers can only create flyers for their own store and branches");
+            }
+            dto.setStoreId(authUser.getStoreId());
         }
 
         Store store = storeRepository.findById(dto.getStoreId())

@@ -27,4 +27,3 @@ public interface UserService {
     void deleteAdmin(Long id);
 
 }
-

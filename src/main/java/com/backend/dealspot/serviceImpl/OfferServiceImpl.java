@@ -68,9 +68,13 @@ public class OfferServiceImpl implements OfferService {
                         HttpServletRequest request) {
 
                 if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
-                        if (authUser.getStoreId() != null) {
-                                dto.setStoreId(authUser.getStoreId().longValue());
+                        if (authUser.getStoreId() == null) {
+                                throw new AccessDeniedException("No store is assigned to this store manager account");
                         }
+                        if (dto.getStoreId() != null && !dto.getStoreId().equals(authUser.getStoreId().longValue())) {
+                                throw new AccessDeniedException("Store managers can only create offers for their own store and branches");
+                        }
+                        dto.setStoreId(authUser.getStoreId().longValue());
                 }
 
                 Store store = storeRepository.findById(dto.getStoreId().intValue())
@@ -205,12 +209,16 @@ public class OfferServiceImpl implements OfferService {
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
 
                 if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+                        if (authUser.getStoreId() == null) {
+                                throw new AccessDeniedException("No store is assigned to this store manager account");
+                        }
                         if (offer.getStore() == null || !offer.getStore().getId().equals(authUser.getStoreId())) {
                                 throw new AccessDeniedException("You are not authorized to update offers for another store");
                         }
-                        if (authUser.getStoreId() != null) {
-                                dto.setStoreId(authUser.getStoreId().longValue());
+                        if (dto.getStoreId() != null && !dto.getStoreId().equals(authUser.getStoreId().longValue())) {
+                                throw new AccessDeniedException("Store managers cannot transfer an offer to another store");
                         }
+                        dto.setStoreId(authUser.getStoreId().longValue());
                 }
 
                 if (dto.getStoreId() != null) {
