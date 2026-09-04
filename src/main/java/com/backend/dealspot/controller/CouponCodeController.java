@@ -3,6 +3,7 @@ package com.backend.dealspot.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,6 +31,7 @@ public class CouponCodeController {
         this.couponService = couponService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/add-coupon")
     public ResponseEntity<CouponCodeResponseDto> addCoupon(
             @RequestBody CouponCodeRequestDto dto,
@@ -54,6 +56,7 @@ public class CouponCodeController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping("/update/{couponId}")
     public ResponseEntity<CouponCodeResponseDto> updateCoupon(
             @RequestBody CouponCodeRequestDto dto,
@@ -64,6 +67,7 @@ public class CouponCodeController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @DeleteMapping("/delete/{couponId}")
     public ResponseEntity<String> deleteCoupon(
             @PathVariable Long couponId,

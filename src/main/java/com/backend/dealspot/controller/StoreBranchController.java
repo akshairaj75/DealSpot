@@ -3,6 +3,7 @@ package com.backend.dealspot.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,7 @@ public class StoreBranchController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/store/add-branch")
     public ResponseEntity<StoreBranchResponseDto> addBranch(
             @RequestBody StoreBranchRegisterDto dto,
@@ -46,6 +48,7 @@ public class StoreBranchController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/create/bulk")
     public ResponseEntity<List<StoreBranchResponseDto>> addBranchBulk(
             @RequestBody List<StoreBranchRegisterDto> dtos,
@@ -56,6 +59,7 @@ public class StoreBranchController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping("/update/{branchId}")
     public ResponseEntity<StoreBranchResponseDto> updateBranch(
             @PathVariable("branchId") Integer branchId,
@@ -65,6 +69,7 @@ public class StoreBranchController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @DeleteMapping("/delete/{branchId}")
     public ResponseEntity<String> deleteBranch(
             @PathVariable("branchId") Integer branchId,

@@ -3,6 +3,7 @@ package com.backend.dealspot.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class OfferController {
         this.offerService = offerService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping(value = "/create", consumes = { "multipart/form-data" })
     public ResponseEntity<OfferResponseDto> addOffer(
             @RequestPart("data") OfferRequestDto dto,
@@ -42,6 +44,7 @@ public class OfferController {
                 offerService.addOffer(dto, files, authUser, request));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping(value = "/create", consumes = { "application/json" })
     public ResponseEntity<OfferResponseDto> addOfferJson(
             @RequestBody OfferRequestDto dto,
@@ -68,6 +71,7 @@ public class OfferController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping(value = "/update/{offerId}", consumes = { "multipart/form-data" })
     public ResponseEntity<OfferResponseDto> updateOfferMultipart(
             @PathVariable("offerId") Long offerId,
@@ -79,6 +83,7 @@ public class OfferController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping(value = "/update/{offerId}", consumes = { "application/json" })
     public ResponseEntity<OfferResponseDto> updateOfferJson(
             @PathVariable("offerId") Long offerId,
@@ -89,6 +94,7 @@ public class OfferController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @org.springframework.web.bind.annotation.DeleteMapping("/delete/{offerId}")
     public ResponseEntity<String> deleteOffer(
             @PathVariable("offerId") Long offerId,
@@ -97,6 +103,7 @@ public class OfferController {
         return ResponseEntity.ok("Offer deleted successfully");
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/{offerId}/extend")
     public ResponseEntity<OfferResponseDto> extendOffer(
             @PathVariable("offerId") Long offerId,

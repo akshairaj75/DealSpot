@@ -4,6 +4,7 @@ import java.util.List;
 
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ public class StoreController {
         this.storeService = storeService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/create")
     public ResponseEntity<StoreResponseDto> createStore(
             @RequestPart("body") StoreRegisterDto dto,
@@ -75,6 +77,7 @@ public class StoreController {
         return ResponseEntity.ok(store);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping("/update-store/{storeId}")
     public ResponseEntity<StoreResponseDto> updateStore(
             @PathVariable("storeId") Integer storeId,
@@ -87,6 +90,7 @@ public class StoreController {
         return ResponseEntity.ok(updatedStore);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping("/toggle-featured/{storeId}")
     public ResponseEntity<StoreResponseDto> toggleFeatured(
             @PathVariable("storeId") Integer storeId,
@@ -96,6 +100,7 @@ public class StoreController {
         return ResponseEntity.ok(updated);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @DeleteMapping("/delete-store/{storeId}")
     public ResponseEntity<String> deleteStore(
             @PathVariable("storeId") Integer storeId,

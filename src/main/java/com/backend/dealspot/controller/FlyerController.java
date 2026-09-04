@@ -3,6 +3,7 @@ package com.backend.dealspot.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ public class FlyerController {
         this.flyerService = flyerService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/add")
     public ResponseEntity<FlyerResponseDto> addFlyer(
             @RequestPart("data") FlyerRequestDto flyerRequestDto,
@@ -44,6 +46,7 @@ public class FlyerController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping("/update/{flyerId}")
     public ResponseEntity<FlyerResponseDto> updateFlyer(
             @PathVariable Integer flyerId,
@@ -71,6 +74,7 @@ public class FlyerController {
         return ResponseEntity.ok(flyer);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @DeleteMapping("/delete/{flyerId}")
     public ResponseEntity<String> deleteFlyer(
             @PathVariable Integer flyerId,
@@ -87,6 +91,7 @@ public class FlyerController {
         return ResponseEntity.ok(pages);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PostMapping("/{flyerId}/pages/add")
     public ResponseEntity<FlyerPageResponseDto> addFlyerPage(
             @PathVariable Integer flyerId,
@@ -97,6 +102,7 @@ public class FlyerController {
         return ResponseEntity.ok(page);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @PutMapping("/pages/{pageId}")
     public ResponseEntity<FlyerPageResponseDto> updateFlyerPage(
             @PathVariable Integer pageId,
@@ -107,6 +113,7 @@ public class FlyerController {
         return ResponseEntity.ok(page);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
     @DeleteMapping("/pages/{pageId}")
     public ResponseEntity<String> deleteFlyerPage(
             @PathVariable Integer pageId,

@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,12 +31,14 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PutMapping("/reorder")
     public ResponseEntity<String> reorderCategories(@RequestBody List<CategoryOrderDto> orderList) {
         categoryService.updateCategoriesOrder(orderList);
         return ResponseEntity.ok("Category orders updated successfully");
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping(value = "/create")
     public ResponseEntity<CategoryDto> createCategory(
             @RequestPart("data") CategoryRequestDto dto,
@@ -45,6 +48,7 @@ public class CategoryController {
 
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/create/bulk")
     public ResponseEntity<List<CategoryDto>> createCategories(
             @RequestBody List<CategoryRequestDto> dtos) {
@@ -62,6 +66,7 @@ public class CategoryController {
         return ResponseEntity.ok(dto);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PutMapping("/edit/{categoryId}")
     public ResponseEntity<CategoryDto> editCategory(
             @RequestPart("data") CategoryRequestDto dto,
@@ -71,6 +76,7 @@ public class CategoryController {
         return ResponseEntity.ok(editedCategory);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @DeleteMapping("/delete/{categoryId}")
     public ResponseEntity<String> deleteCategory(@PathVariable Integer categoryId) {
         categoryService.deleteCategory(categoryId);

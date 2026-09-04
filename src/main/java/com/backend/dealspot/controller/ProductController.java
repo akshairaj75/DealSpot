@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +33,7 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/add-key")
     public ResponseEntity<AttributeKeyRegisterDto> addAttributeKey(
             @RequestBody AttributeKeyRegisterDto dto) {
@@ -39,6 +41,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.addAttributeKey(dto));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/add-key/bulk")
     public ResponseEntity<List<AttributeKeyRegisterDto>> addBulkAttributeKeys(
             @RequestBody List<AttributeKeyRegisterDto> dto) {
@@ -56,6 +59,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.fetchAttributeKeys());
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/add-product")
     public ResponseEntity<ProductResponseDto> registerProduct(
             @RequestPart("data") ProductRegisterDto dto,
@@ -66,6 +70,7 @@ public class ProductController {
 
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/add-product/bulk")
     public ResponseEntity<List<ProductResponseDto>> addBulkProducts(
             @RequestBody List<ProductRegisterDto> dto,
@@ -104,6 +109,7 @@ public class ProductController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PutMapping("/update-product/{productId}")
     public ResponseEntity<ProductResponseDto> editProduct(
             @PathVariable("productId") Long productId,

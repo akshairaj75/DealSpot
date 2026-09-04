@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,6 +35,7 @@ public class PartnerRequestController {
     }
 
     // Admin list all applications
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/admin/partner-requests")
     public ResponseEntity<List<PartnerRequestResponseDto>> getAllRequests(
             @RequestParam(value = "status", required = false) PartnerRequestStatus status) {
@@ -41,18 +43,21 @@ public class PartnerRequestController {
     }
 
     // Admin get single application
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/admin/partner-requests/{id}")
     public ResponseEntity<PartnerRequestResponseDto> getRequestById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(partnerRequestService.getRequestById(id));
     }
 
     // Super Admin Approve application
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/admin/partner-requests/{id}/approve")
     public ResponseEntity<PartnerRequestResponseDto> approveRequest(@PathVariable("id") Long id) {
         return ResponseEntity.ok(partnerRequestService.approveRequest(id));
     }
 
     // Super Admin Reject application
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/admin/partner-requests/{id}/reject")
     public ResponseEntity<PartnerRequestResponseDto> rejectRequest(
             @PathVariable("id") Long id,

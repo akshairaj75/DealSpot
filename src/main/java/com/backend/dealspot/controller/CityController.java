@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class CityController {
         this.cityService = cityService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/create")
     public ResponseEntity<CityResponseDto> createCity(
             @RequestBody CityRegisterDto dto,
@@ -42,6 +44,7 @@ public class CityController {
 
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/create/bulk")
     public ResponseEntity<List<CityResponseDto>> createBulkCities(
             @RequestBody List<CityRegisterDto> dtos,
@@ -61,6 +64,7 @@ public class CityController {
 
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PutMapping("/edit/{cityId}")
     public ResponseEntity<CityResponseDto> updateCity(
             @RequestBody CityRegisterDto dto,
@@ -72,6 +76,7 @@ public class CityController {
 
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @DeleteMapping("/delete/{cityId}")
     public ResponseEntity<String> deleteCity(
             @PathVariable("cityId") Integer cityId,

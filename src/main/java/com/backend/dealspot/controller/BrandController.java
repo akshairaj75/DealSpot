@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -27,6 +28,7 @@ public class BrandController {
         this.brandService = brandService;
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/api/dealspot/brands/register-brand")
     public ResponseEntity<BrandResponseDto> registerBrand(
             @RequestPart("data") BrandRegisterDto dto,
@@ -37,6 +39,7 @@ public class BrandController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PostMapping("/api/dealspot/brands/register-brand/bulk")
     public ResponseEntity<List<BrandResponseDto>> registerBulkBrands(
             @RequestPart("data") List<BrandRegisterDto> dto) {
@@ -58,6 +61,7 @@ public class BrandController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @PatchMapping("/api/dealspot/brands/update-brand/{id}")
     public ResponseEntity<BrandResponseDto> updateBrand(
         @PathVariable Long id, 
@@ -69,6 +73,7 @@ public class BrandController {
         return ResponseEntity.ok(res);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
     @DeleteMapping("/api/dealspot/brands/delete-brand/{id}")
     public ResponseEntity<String> deleteBrand(@PathVariable Long id) {
         

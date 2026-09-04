@@ -9,6 +9,7 @@ import com.backend.dealspot.service.NotificationService;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,6 +74,7 @@ public class NotificationController {
         return ResponseEntity.ok(Map.of("success", true));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @GetMapping("/all")
     public ResponseEntity<Page<NotificationDto>> getAllNotifications(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -85,6 +87,7 @@ public class NotificationController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @PostMapping("/broadcast")
     public ResponseEntity<Map<String, Object>> broadcastNotification(
             @RequestBody BroadcastNotificationDto dto) {
@@ -96,6 +99,7 @@ public class NotificationController {
         ));
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);

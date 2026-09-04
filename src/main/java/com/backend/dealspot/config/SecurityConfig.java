@@ -92,9 +92,11 @@ public class SecurityConfig {
                                 "/api/dealspot/categories/**",
                                 "/api/dealspot/offers/**",
                                 "/api/dealspot/flyers/**",
+                                "/api/flyers/**",
                                 "/api/dealspot/cities/**",
                                 "/api/dealspot/products/**",
                                 "/api/dealspot/coupons/**",
+                                "/api/coupons/**",
                                 "/api/dealspot/brands/**"
                         ).permitAll()
                         .requestMatchers("/api/chat/**")
