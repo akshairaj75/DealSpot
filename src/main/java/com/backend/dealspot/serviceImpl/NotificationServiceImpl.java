@@ -12,6 +12,8 @@ import com.backend.dealspot.service.NotificationService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,8 +25,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class NotificationServiceImpl implements NotificationService {
 
+    private static final int BATCH_SIZE = 500;
+
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public NotificationServiceImpl(NotificationRepository notificationRepository, UserRepository userRepository) {
         this.notificationRepository = notificationRepository;
@@ -61,33 +68,55 @@ public class NotificationServiceImpl implements NotificationService {
             return 1;
         }
 
-        List<User> users = userRepository.findAll();
-        if (users.isEmpty()) {
+        long totalUsers = userRepository.count();
+        if (totalUsers == 0) {
             return 0;
         }
 
         LocalDateTime now = LocalDateTime.now();
-        List<Notification> batch = new ArrayList<>(users.size());
+        NotificationType type = dto.getType() != null ? dto.getType() : NotificationType.SYSTEM;
+        NotificationChannel channel = dto.getChannel() != null ? dto.getChannel() : NotificationChannel.PUSH;
+        String titleEn = dto.getTitleEn() != null ? dto.getTitleEn() : "DealSpot Alert";
+        String titleAr = dto.getTitleAr() != null ? dto.getTitleAr() : "تنبيه ديل سبوت";
 
-        for (User u : users) {
-            Notification notification = new Notification();
-            notification.setUser(u);
-            notification.setType(dto.getType() != null ? dto.getType() : NotificationType.SYSTEM);
-            notification.setChannel(dto.getChannel() != null ? dto.getChannel() : NotificationChannel.PUSH);
-            notification.setTitleEn(dto.getTitleEn() != null ? dto.getTitleEn() : "DealSpot Alert");
-            notification.setTitleAr(dto.getTitleAr() != null ? dto.getTitleAr() : "تنبيه ديل سبوت");
-            notification.setBodyEn(dto.getBodyEn());
-            notification.setBodyAr(dto.getBodyAr());
-            notification.setRefId(dto.getRefId());
-            notification.setRefType(dto.getRefType());
-            notification.setDeepLink(dto.getDeepLink());
-            notification.setRead(false);
-            notification.setSentAt(now);
-            batch.add(notification);
-        }
+        int totalSent = 0;
+        int pageNumber = 0;
+        Page<Long> page;
 
-        notificationRepository.saveAll(batch);
-        return batch.size();
+        do {
+            page = userRepository.findAllUserIds(PageRequest.of(pageNumber, BATCH_SIZE));
+            List<Long> userIds = page.getContent();
+            if (userIds.isEmpty()) {
+                break;
+            }
+
+            List<Notification> batch = new ArrayList<>(userIds.size());
+            for (Long userId : userIds) {
+                Notification notification = new Notification();
+                notification.setUser(entityManager.getReference(User.class, userId));
+                notification.setType(type);
+                notification.setChannel(channel);
+                notification.setTitleEn(titleEn);
+                notification.setTitleAr(titleAr);
+                notification.setBodyEn(dto.getBodyEn());
+                notification.setBodyAr(dto.getBodyAr());
+                notification.setRefId(dto.getRefId());
+                notification.setRefType(dto.getRefType());
+                notification.setDeepLink(dto.getDeepLink());
+                notification.setRead(false);
+                notification.setSentAt(now);
+                batch.add(notification);
+            }
+
+            notificationRepository.saveAll(batch);
+            entityManager.flush();
+            entityManager.clear();
+
+            totalSent += batch.size();
+            pageNumber++;
+        } while (page.hasNext());
+
+        return totalSent;
     }
 
     @Override
