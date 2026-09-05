@@ -87,11 +87,12 @@ public class NotificationController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('STORE_MANAGER')")
     @PostMapping("/broadcast")
     public ResponseEntity<Map<String, Object>> broadcastNotification(
-            @RequestBody BroadcastNotificationDto dto) {
-        int count = notificationService.broadcastNotification(dto);
+            @RequestBody BroadcastNotificationDto dto,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        int count = notificationService.broadcastNotification(dto, authUser);
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "sentCount", count,

@@ -4,10 +4,14 @@ import com.backend.dealspot.dto.notification.BroadcastNotificationDto;
 import com.backend.dealspot.dto.notification.NotificationDto;
 import com.backend.dealspot.entity.Notification;
 import com.backend.dealspot.entity.User;
+import com.backend.dealspot.enums.AccountType;
+import com.backend.dealspot.enums.AdminRole;
 import com.backend.dealspot.enums.NotificationChannel;
 import com.backend.dealspot.enums.NotificationType;
 import com.backend.dealspot.repository.NotificationRepository;
+import com.backend.dealspot.repository.StoreFollowRepository;
 import com.backend.dealspot.repository.UserRepository;
+import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.NotificationService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,13 +34,18 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final StoreFollowRepository storeFollowRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public NotificationServiceImpl(NotificationRepository notificationRepository, UserRepository userRepository) {
+    public NotificationServiceImpl(
+            NotificationRepository notificationRepository,
+            UserRepository userRepository,
+            StoreFollowRepository storeFollowRepository) {
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
+        this.storeFollowRepository = storeFollowRepository;
     }
 
     @Override
@@ -62,15 +72,30 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public int broadcastNotification(BroadcastNotificationDto dto) {
+    public int broadcastNotification(BroadcastNotificationDto dto, CustomUserPrincipal authUser) {
+        if (authUser == null) {
+            throw new AccessDeniedException("Unauthorized");
+        }
+        if (authUser.getAccountType() != AccountType.ADMIN) {
+            throw new AccessDeniedException("Only admin accounts can broadcast notifications");
+        }
+
+        // Determine target store scope
+        Integer targetStoreId = dto.getStoreId();
+        if (authUser.getRole() == AdminRole.STORE_MANAGER) {
+            Integer managerStoreId = authUser.getStoreId();
+            if (managerStoreId == null) {
+                throw new AccessDeniedException("Store manager account is not assigned to any store");
+            }
+            if (targetStoreId != null && !targetStoreId.equals(managerStoreId)) {
+                throw new AccessDeniedException("Store manager can only broadcast notifications to followers of their assigned store");
+            }
+            targetStoreId = managerStoreId;
+        }
+
         if (dto.getTargetUserId() != null) {
             sendNotification(dto.getTargetUserId(), dto);
             return 1;
-        }
-
-        long totalUsers = userRepository.count();
-        if (totalUsers == 0) {
-            return 0;
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -84,7 +109,12 @@ public class NotificationServiceImpl implements NotificationService {
         Page<Long> page;
 
         do {
-            page = userRepository.findAllUserIds(PageRequest.of(pageNumber, BATCH_SIZE));
+            if (targetStoreId != null) {
+                page = storeFollowRepository.findUserIdsByStoreId(targetStoreId, PageRequest.of(pageNumber, BATCH_SIZE));
+            } else {
+                page = userRepository.findAllUserIds(PageRequest.of(pageNumber, BATCH_SIZE));
+            }
+
             List<Long> userIds = page.getContent();
             if (userIds.isEmpty()) {
                 break;

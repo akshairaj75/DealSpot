@@ -16,6 +16,7 @@ public class BroadcastNotificationDto {
     private NotificationRefType refType;
     private String deepLink;
     private Long targetUserId;
+    private Integer storeId;
 
     public String getTitleEn() {
         return titleEn;
@@ -95,5 +96,13 @@ public class BroadcastNotificationDto {
 
     public void setTargetUserId(Long targetUserId) {
         this.targetUserId = targetUserId;
+    }
+
+    public Integer getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(Integer storeId) {
+        this.storeId = storeId;
     }
 }

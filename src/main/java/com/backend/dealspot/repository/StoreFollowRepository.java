@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +28,8 @@ public interface StoreFollowRepository extends JpaRepository<StoreFollow, Long> 
 
     @Query("SELECT sf.store.id FROM StoreFollow sf WHERE sf.user.id = :userId")
     Set<Integer> findFollowedStoreIdsByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT sf.user.id FROM StoreFollow sf WHERE sf.store.id = :storeId")
+    Page<Long> findUserIdsByStoreId(@Param("storeId") Integer storeId, Pageable pageable);
 }
+

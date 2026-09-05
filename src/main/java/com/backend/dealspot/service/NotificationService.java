@@ -4,13 +4,14 @@ import com.backend.dealspot.dto.notification.BroadcastNotificationDto;
 import com.backend.dealspot.dto.notification.NotificationDto;
 import com.backend.dealspot.enums.NotificationChannel;
 import com.backend.dealspot.enums.NotificationType;
+import com.backend.dealspot.security.CustomUserPrincipal;
 import org.springframework.data.domain.Page;
 
 public interface NotificationService {
 
     NotificationDto sendNotification(Long userId, BroadcastNotificationDto dto);
 
-    int broadcastNotification(BroadcastNotificationDto dto);
+    int broadcastNotification(BroadcastNotificationDto dto, CustomUserPrincipal authUser);
 
     Page<NotificationDto> getUserNotifications(Long userId, int page, int size);
 
