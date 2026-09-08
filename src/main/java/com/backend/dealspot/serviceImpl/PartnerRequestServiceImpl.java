@@ -15,12 +15,14 @@ import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.PartnerRequest;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.enums.PartnerRequestStatus;
 import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.PartnerRequestRepository;
 import com.backend.dealspot.repository.StoreRepository;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.PartnerRequestService;
 
 @Service
@@ -32,6 +34,7 @@ public class PartnerRequestServiceImpl implements PartnerRequestService {
     private final CityRepository cityRepository;
     private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     public PartnerRequestServiceImpl(
             PartnerRequestRepository partnerRequestRepository,
@@ -39,13 +42,15 @@ public class PartnerRequestServiceImpl implements PartnerRequestService {
             AdminUserRepository adminUserRepository,
             CityRepository cityRepository,
             CategoryRepository categoryRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            AuditLogService auditLogService) {
         this.partnerRequestRepository = partnerRequestRepository;
         this.storeRepository = storeRepository;
         this.adminUserRepository = adminUserRepository;
         this.cityRepository = cityRepository;
         this.categoryRepository = categoryRepository;
         this.passwordEncoder = passwordEncoder;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -157,6 +162,12 @@ public class PartnerRequestServiceImpl implements PartnerRequestService {
         req.setReviewedAt(LocalDateTime.now());
         PartnerRequest updatedReq = partnerRequestRepository.save(req);
 
+        java.util.Map<String, Object> approveAuditPayload = new java.util.HashMap<>();
+        approveAuditPayload.put("storeNameEn", req.getStoreNameEn());
+        approveAuditPayload.put("applicantEmail", req.getApplicantEmail());
+        approveAuditPayload.put("storeId", savedStore.getId());
+        auditLogService.logAction("PARTNER_REQUEST", id, AuditAction.APPROVE, approveAuditPayload);
+
         return PartnerRequestResponseDto.fromEntity(updatedReq);
     }
 
@@ -170,6 +181,12 @@ public class PartnerRequestServiceImpl implements PartnerRequestService {
         req.setRejectionReason(reason);
         req.setReviewedAt(LocalDateTime.now());
         PartnerRequest updatedReq = partnerRequestRepository.save(req);
+
+        java.util.Map<String, Object> rejectAuditPayload = new java.util.HashMap<>();
+        rejectAuditPayload.put("storeNameEn", req.getStoreNameEn());
+        rejectAuditPayload.put("applicantEmail", req.getApplicantEmail());
+        rejectAuditPayload.put("reason", reason);
+        auditLogService.logAction("PARTNER_REQUEST", id, AuditAction.REJECT, rejectAuditPayload);
 
         return PartnerRequestResponseDto.fromEntity(updatedReq);
     }

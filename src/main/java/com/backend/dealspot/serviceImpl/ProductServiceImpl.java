@@ -22,12 +22,14 @@ import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.entity.ProductDetail;
 import com.backend.dealspot.entity.ProductImage;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.AttributeKeyRepository;
 import com.backend.dealspot.repository.BrandRepository;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.ProductRepository;
 import com.backend.dealspot.repository.ProductDetailRepository;
 import com.backend.dealspot.repository.ProductImageRepository;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.ProductService;
 
 import jakarta.transaction.Transactional;
@@ -42,6 +44,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductImageRepository productImageRepository;
     private final BrandRepository brandRepository;
     private final AttributeKeyRepository attributeKeyRepository;
+    private final AuditLogService auditLogService;
 
     public ProductServiceImpl(ProductRepository productRepository,
             CategoryRepository categoryRepository,
@@ -49,7 +52,8 @@ public class ProductServiceImpl implements ProductService {
             ProductDetailRepository productDetailRepository,
             ProductImageRepository productImageRepository,
             BrandRepository brandRepository,
-            AttributeKeyRepository attributeKeyRepository) {
+            AttributeKeyRepository attributeKeyRepository,
+            AuditLogService auditLogService) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
@@ -57,6 +61,7 @@ public class ProductServiceImpl implements ProductService {
         this.productImageRepository = productImageRepository;
         this.brandRepository = brandRepository;
         this.attributeKeyRepository = attributeKeyRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -130,6 +135,19 @@ public class ProductServiceImpl implements ProductService {
             }
             savedProduct = productRepository.save(savedProduct);
         }
+
+        java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+        auditPayload.put("nameEn", savedProduct.getNameEn());
+        auditPayload.put("nameAr", savedProduct.getNameAr());
+        auditPayload.put("sku", savedProduct.getSku());
+        auditPayload.put("barcode", savedProduct.getBarcode());
+        if (savedProduct.getCategory() != null) {
+            auditPayload.put("categoryId", savedProduct.getCategory().getId());
+        }
+        if (savedProduct.getBrand() != null) {
+            auditPayload.put("brandId", savedProduct.getBrand().getId());
+        }
+        auditLogService.logAction("PRODUCT", savedProduct.getId(), AuditAction.CREATE, auditPayload);
 
         return ProductResponseDto.fromEntity(savedProduct);
     }
@@ -337,6 +355,19 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Product updatedProduct = productRepository.save(product);
+
+        java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+        auditPayload.put("nameEn", updatedProduct.getNameEn());
+        auditPayload.put("nameAr", updatedProduct.getNameAr());
+        auditPayload.put("sku", updatedProduct.getSku());
+        auditPayload.put("barcode", updatedProduct.getBarcode());
+        if (updatedProduct.getCategory() != null) {
+            auditPayload.put("categoryId", updatedProduct.getCategory().getId());
+        }
+        if (updatedProduct.getBrand() != null) {
+            auditPayload.put("brandId", updatedProduct.getBrand().getId());
+        }
+        auditLogService.logAction("PRODUCT", updatedProduct.getId(), AuditAction.UPDATE, auditPayload);
 
         return ProductResponseDto.fromEntity(updatedProduct);
     }

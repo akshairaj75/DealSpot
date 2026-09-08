@@ -17,9 +17,11 @@ import com.backend.dealspot.dto.brand.BrandRegisterDto;
 import com.backend.dealspot.dto.brand.BrandResponseDto;
 import com.backend.dealspot.entity.Brand;
 import com.backend.dealspot.entity.Category;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.BrandRepository;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.ProductRepository;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.BrandService;
 
 @Service
@@ -29,15 +31,18 @@ public class BrandServiceImpl implements BrandService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final FileStorageService fileStorageService;
+    private final AuditLogService auditLogService;
 
     public BrandServiceImpl(BrandRepository brandRepository,
             CategoryRepository categoryRepository,
             ProductRepository productRepository,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            AuditLogService auditLogService) {
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.fileStorageService = fileStorageService;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -90,6 +95,13 @@ public class BrandServiceImpl implements BrandService {
         }
 
         Brand savedBrand = brandRepository.save(brand);
+
+        java.util.Map<String, Object> createAuditPayload = new java.util.HashMap<>();
+        createAuditPayload.put("nameEn", savedBrand.getNameEn());
+        createAuditPayload.put("nameAr", savedBrand.getNameAr());
+        createAuditPayload.put("websiteUrl", savedBrand.getWebsiteUrl());
+        auditLogService.logAction("BRAND", savedBrand.getId(), AuditAction.CREATE, createAuditPayload);
+
         return BrandResponseDto.fromEntity(savedBrand);
     }
 
@@ -163,6 +175,12 @@ public class BrandServiceImpl implements BrandService {
             throw new RuntimeException("Failed to upload brand assets", e);
         }
         Brand savedBrand = brandRepository.save(brand);
+
+        java.util.Map<String, Object> updateAuditPayload = new java.util.HashMap<>();
+        updateAuditPayload.put("nameEn", savedBrand.getNameEn());
+        updateAuditPayload.put("nameAr", savedBrand.getNameAr());
+        auditLogService.logAction("BRAND", savedBrand.getId(), AuditAction.UPDATE, updateAuditPayload);
+
         return BrandResponseDto.fromEntity(savedBrand);
     }
 
@@ -189,6 +207,11 @@ public class BrandServiceImpl implements BrandService {
 
         brandRepository.delete(brand);
 
+        java.util.Map<String, Object> deleteAuditPayload = new java.util.HashMap<>();
+        deleteAuditPayload.put("nameEn", brand.getNameEn());
+        deleteAuditPayload.put("nameAr", brand.getNameAr());
+
+        auditLogService.logAction("BRAND", id, AuditAction.DELETE, deleteAuditPayload);
     }
 
     @Override

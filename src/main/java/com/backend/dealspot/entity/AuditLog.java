@@ -34,14 +34,15 @@ public class AuditLog extends BaseEntity {
     @Column(name = "entity_type", nullable = false, length = 80)
     private String entityType;
 
-    @Column(name = "entity_id", nullable = false)
+    @Column(name = "entity_id", nullable = true)
     private Long entityId;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     @Column(name = "action", nullable = false, length = 50)
     private AuditAction action;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "performed_by", nullable = false)
+    @JoinColumn(name = "performed_by", nullable = true)
     private AdminUser performedBy;
 
     @Column(name = "ip_address", length = 45)

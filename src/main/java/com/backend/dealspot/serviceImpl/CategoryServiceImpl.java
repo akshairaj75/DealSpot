@@ -11,20 +11,24 @@ import com.backend.dealspot.dto.category.CategoryDto;
 import com.backend.dealspot.dto.category.CategoryOrderDto;
 import com.backend.dealspot.dto.category.CategoryRequestDto;
 import com.backend.dealspot.entity.Category;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.CategoryRepository;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.CategoryService;
-
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final FileStorageService fileStorageService;
+    private final AuditLogService auditLogService;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository,
-            FileStorageService fileStorageService) {
+            FileStorageService fileStorageService,
+            AuditLogService auditLogService) {
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -65,6 +69,12 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
         Category saved = categoryRepository.save(category);
+
+        java.util.Map<String, Object> createAuditPayload = new java.util.HashMap<>();
+        createAuditPayload.put("nameEn", saved.getNameEn());
+        createAuditPayload.put("nameAr", saved.getNameAr());
+        createAuditPayload.put("iconSlug", saved.getIconSlug());
+        auditLogService.logAction("CATEGORY", saved.getId().longValue(), AuditAction.CREATE, createAuditPayload);
 
         return CategoryDto.fromEntity(saved);
     }
@@ -143,6 +153,12 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
         Category saved = categoryRepository.save(category);
+
+        java.util.Map<String, Object> updateAuditPayload = new java.util.HashMap<>();
+        updateAuditPayload.put("nameEn", saved.getNameEn());
+        updateAuditPayload.put("nameAr", saved.getNameAr());
+        auditLogService.logAction("CATEGORY", saved.getId().longValue(), AuditAction.UPDATE, updateAuditPayload);
+
         return CategoryDto.fromEntity(saved);
     }
 
@@ -166,6 +182,12 @@ public class CategoryServiceImpl implements CategoryService {
             fileStorageService.deleteFile(category.getImageUrl(), "categories");
         }
 
+        java.util.Map<String, Object> deleteAuditPayload = new java.util.HashMap<>();
+        deleteAuditPayload.put("nameEn", category.getNameEn());
+        deleteAuditPayload.put("nameAr", category.getNameAr());
+
         categoryRepository.delete(category);
+
+        auditLogService.logAction("CATEGORY", categoryId.longValue(), AuditAction.DELETE, deleteAuditPayload);
     }
 }

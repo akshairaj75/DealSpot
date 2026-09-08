@@ -12,11 +12,13 @@ import com.backend.dealspot.entity.Offer;
 import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.CouponCodeRepository;
 import com.backend.dealspot.repository.OfferRepository;
 import com.backend.dealspot.repository.ProductRepository;
 import com.backend.dealspot.repository.StoreRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.CouponCodeService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,20 +27,20 @@ import jakarta.servlet.http.HttpServletRequest;
 public class CouponCodeServiceImpl implements CouponCodeService {
 
         private final CouponCodeRepository couponCodeRepository;
-
         private final ProductRepository productRepository;
-
         private final OfferRepository offerRepository;
-
         private final StoreRepository storeRepository;
+        private final AuditLogService auditLogService;
 
         public CouponCodeServiceImpl(CouponCodeRepository couponCodeRepository,
                         ProductRepository productRepository, OfferRepository offerRepository,
-                        StoreRepository storeRepository) {
+                        StoreRepository storeRepository,
+                        AuditLogService auditLogService) {
             this.couponCodeRepository = couponCodeRepository;
             this.productRepository = productRepository;
             this.offerRepository = offerRepository;
             this.storeRepository = storeRepository;
+            this.auditLogService = auditLogService;
         }
 
         @Override
@@ -83,6 +85,16 @@ public class CouponCodeServiceImpl implements CouponCodeService {
                 coupon.setActive(dto.getActive() != null ? dto.getActive() : true);
 
                 CouponCode savedCoupon = couponCodeRepository.save(coupon);
+
+                java.util.Map<String, Object> createAuditPayload = new java.util.HashMap<>();
+                createAuditPayload.put("code", savedCoupon.getCode());
+                if (savedCoupon.getStore() != null) {
+                        createAuditPayload.put("storeId", savedCoupon.getStore().getId());
+                        createAuditPayload.put("storeNameEn", savedCoupon.getStore().getNameEn());
+                }
+                createAuditPayload.put("discountValue", savedCoupon.getDiscountValue());
+                auditLogService.logAction("COUPON_CODE", savedCoupon.getId(), authUser, AuditAction.CREATE, createAuditPayload, request);
+
                 return CouponCodeResponseDto.fromEntity(savedCoupon);
         }
 
@@ -151,6 +163,14 @@ public class CouponCodeServiceImpl implements CouponCodeService {
                 }
 
                 CouponCode savedCoupon = couponCodeRepository.save(coupon);
+
+                java.util.Map<String, Object> updateAuditPayload = new java.util.HashMap<>();
+                updateAuditPayload.put("code", savedCoupon.getCode());
+                if (savedCoupon.getStore() != null) {
+                        updateAuditPayload.put("storeId", savedCoupon.getStore().getId());
+                }
+                auditLogService.logAction("COUPON_CODE", savedCoupon.getId(), authUser, AuditAction.UPDATE, updateAuditPayload, request);
+
                 return CouponCodeResponseDto.fromEntity(savedCoupon);
         }
 
@@ -165,7 +185,15 @@ public class CouponCodeServiceImpl implements CouponCodeService {
                         }
                 }
 
+                java.util.Map<String, Object> deleteAuditPayload = new java.util.HashMap<>();
+                deleteAuditPayload.put("code", coupon.getCode());
+                if (coupon.getStore() != null) {
+                        deleteAuditPayload.put("storeId", coupon.getStore().getId());
+                }
+
                 couponCodeRepository.delete(coupon);
+
+                auditLogService.logAction("COUPON_CODE", couponId, authUser, AuditAction.DELETE, deleteAuditPayload, null);
         }
 
 }

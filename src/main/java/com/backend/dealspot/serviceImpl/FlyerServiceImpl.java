@@ -17,11 +17,13 @@ import com.backend.dealspot.entity.Flyer;
 import com.backend.dealspot.entity.FlyerPage;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.FlyerPageRepository;
 import com.backend.dealspot.repository.FlyerRepository;
 import com.backend.dealspot.repository.StoreRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.FlyerService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,15 +36,18 @@ public class FlyerServiceImpl implements FlyerService {
         private final CityRepository cityRepository;
         private final FlyerPageRepository flyerPageRepository;
         private final FileStorageService fileStorageService;
+        private final AuditLogService auditLogService;
 
         public FlyerServiceImpl(FlyerRepository flyerRepository, StoreRepository storeRepository,
                         CityRepository cityRepository, FlyerPageRepository flyerPageRepository,
-                        FileStorageService fileStorageService) {
+                        FileStorageService fileStorageService,
+                        AuditLogService auditLogService) {
                 this.flyerRepository = flyerRepository;
                 this.storeRepository = storeRepository;
                 this.cityRepository = cityRepository;
                 this.flyerPageRepository = flyerPageRepository;
                 this.fileStorageService = fileStorageService;
+                this.auditLogService = auditLogService;
         }
 
         @Transactional
@@ -122,6 +127,16 @@ public class FlyerServiceImpl implements FlyerService {
         }
 
         savedFlyer = flyerRepository.save(savedFlyer);
+
+        java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+        auditPayload.put("titleEn", savedFlyer.getTitleEn());
+        auditPayload.put("titleAr", savedFlyer.getTitleAr());
+        if (savedFlyer.getStore() != null) {
+            auditPayload.put("storeId", savedFlyer.getStore().getId());
+            auditPayload.put("storeNameEn", savedFlyer.getStore().getNameEn());
+        }
+        auditLogService.logAction("FLYER", savedFlyer.getId().longValue(), authUser, AuditAction.CREATE, auditPayload, request);
+
         return FlyerResponseDto.fromEntity(savedFlyer);
     }
 
@@ -195,6 +210,15 @@ public class FlyerServiceImpl implements FlyerService {
         }
 
         Flyer updatedFlyer = flyerRepository.save(flyer);
+
+        java.util.Map<String, Object> updateAuditPayload = new java.util.HashMap<>();
+        updateAuditPayload.put("titleEn", updatedFlyer.getTitleEn());
+        updateAuditPayload.put("titleAr", updatedFlyer.getTitleAr());
+        if (updatedFlyer.getStore() != null) {
+            updateAuditPayload.put("storeId", updatedFlyer.getStore().getId());
+        }
+        auditLogService.logAction("FLYER", updatedFlyer.getId().longValue(), authUser, AuditAction.UPDATE, updateAuditPayload, request);
+
         return FlyerResponseDto.fromEntity(updatedFlyer);
     }
 
@@ -239,8 +263,17 @@ public class FlyerServiceImpl implements FlyerService {
             }
         }
 
+        java.util.Map<String, Object> deleteAuditPayload = new java.util.HashMap<>();
+        deleteAuditPayload.put("titleEn", flyer.getTitleEn());
+        deleteAuditPayload.put("titleAr", flyer.getTitleAr());
+        if (flyer.getStore() != null) {
+            deleteAuditPayload.put("storeId", flyer.getStore().getId());
+        }
+
         flyerPageRepository.deleteAll(flyer.getPages());
         flyerRepository.delete(flyer);
+
+        auditLogService.logAction("FLYER", flyerId.longValue(), authUser, AuditAction.DELETE, deleteAuditPayload, null);
     }
 
     @Override

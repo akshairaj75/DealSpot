@@ -3,13 +3,25 @@ package com.backend.dealspot.serviceImpl;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.backend.dealspot.dto.audit.AuditLogFilterDto;
 import com.backend.dealspot.dto.audit.AuditLogResponseDto;
 import com.backend.dealspot.dto.audit.RecentActivityDto;
 import com.backend.dealspot.entity.AdminUser;
 import com.backend.dealspot.entity.AuditLog;
 import com.backend.dealspot.enums.AuditAction;
+import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.AuditLogRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.service.AuditLogService;
@@ -18,41 +30,100 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class AuditServiceImpl implements AuditLogService {
 
+    private static final Logger log = LoggerFactory.getLogger(AuditServiceImpl.class);
 
     private final AuditLogRepository auditLogRepository;
-
+    private final AdminUserRepository adminUserRepository;
     private final ObjectMapper objectMapper;
 
-    public AuditServiceImpl(AuditLogRepository auditLogRepository, ObjectMapper objectMapper) {
+    public AuditServiceImpl(AuditLogRepository auditLogRepository, AdminUserRepository adminUserRepository, ObjectMapper objectMapper) {
         this.auditLogRepository = auditLogRepository;
+        this.adminUserRepository = adminUserRepository;
         this.objectMapper = objectMapper;
     }
 
-    // @Override
-    // public List<AuditLogResponseDto> getAllAuditLogs(CustomUserPrincipal
-    // authUser) {
-    // List<AuditLog> auditLogs = auditLogRepository.findAll();
-    // return auditLogs
-    // .stream()
-    // .map(AuditLogResponseDto::fromEntity)
-    // .toList();
-    // }
+    @Override
+    public Page<AuditLogResponseDto> getPagedLogs(AuditLogFilterDto filter) {
+        int page = filter != null && filter.getPage() >= 0 ? filter.getPage() : 0;
+        int size = filter != null && filter.getSize() > 0 ? filter.getSize() : 20;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        if (filter == null) {
+            return auditLogRepository.findAll(pageable).map(AuditLogResponseDto::fromEntity);
+        }
+
+        Page<AuditLog> auditLogs = auditLogRepository.searchAuditLogs(
+                filter.getEntityType(),
+                filter.getAction(),
+                filter.getPerformedById(),
+                filter.getStartDate(),
+                filter.getEndDate(),
+                filter.getSearchKeyword() != null ? filter.getSearchKeyword().trim() : null,
+                pageable
+        );
+
+        return auditLogs.map(AuditLogResponseDto::fromEntity);
+    }
+
+    @Override
+    public List<RecentActivityDto> getRecentActivities(CustomUserPrincipal authUser, int limit) {
+        int size = limit > 0 ? limit : 10;
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<AuditLog> page = auditLogRepository.findAll(pageable);
+        return page.getContent()
+                .stream()
+                .map(this::mapToRecentActivity)
+                .toList();
+    }
 
     @Override
     public List<RecentActivityDto> getAllAuditLogs(CustomUserPrincipal authUser) {
-
         List<AuditLog> auditLogs = auditLogRepository.findAllByOrderByCreatedAtDesc();
         return auditLogs
                 .stream()
                 .map(this::mapToRecentActivity)
                 .toList();
+    }
 
+    @Override
+    public void logAction(
+            String entityType,
+            Long entityId,
+            AuditAction action,
+            Map<String, Object> payload) {
+        CustomUserPrincipal principal = getCurrentPrincipal();
+        HttpServletRequest request = getCurrentRequest();
+        logAction(entityType, entityId, principal, action, payload, request);
+    }
+
+    @Override
+    public void logAction(
+            String entityType,
+            Long entityId,
+            CustomUserPrincipal authUser,
+            AuditAction action,
+            Map<String, Object> payload,
+            HttpServletRequest request) {
+        AdminUser admin = null;
+        if (authUser != null && authUser.getId() != null) {
+            admin = adminUserRepository.findById(authUser.getId()).orElse(null);
+        }
+        if (admin == null) {
+            CustomUserPrincipal current = getCurrentPrincipal();
+            if (current != null && current.getId() != null) {
+                admin = adminUserRepository.findById(current.getId()).orElse(null);
+            }
+        }
+        if (request == null) {
+            request = getCurrentRequest();
+        }
+        logAction(entityType, entityId, admin, action, payload, request);
     }
 
     @Transactional
@@ -64,22 +135,57 @@ public class AuditServiceImpl implements AuditLogService {
             AuditAction action,
             Map<String, Object> payload,
             HttpServletRequest request) {
+        try {
+            if (performedBy == null) {
+                CustomUserPrincipal current = getCurrentPrincipal();
+                if (current != null && current.getId() != null) {
+                    performedBy = adminUserRepository.findById(current.getId()).orElse(null);
+                }
+            }
+            if (request == null) {
+                request = getCurrentRequest();
+            }
 
-        AuditLog auditLog = new AuditLog();
+            AuditLog auditLog = new AuditLog();
+            auditLog.setEntityType(entityType);
+            auditLog.setEntityId(entityId);
+            auditLog.setPerformedBy(performedBy);
+            auditLog.setAction(action);
+            auditLog.setPayload(convertPayloadToJson(payload));
+            auditLog.setIpAddress(getClientIpAddress(request));
 
-        auditLog.setEntityType(entityType);
-        auditLog.setEntityId(entityId);
-        auditLog.setPerformedBy(performedBy);
-        auditLog.setAction(action);
-        auditLog.setPayload(convertPayloadToJson(payload));
-        auditLog.setIpAddress(getClientIpAddress(request));
+            auditLogRepository.save(auditLog);
+        } catch (Exception ex) {
+            log.error("Failed to save audit log for entity: {}, action: {}. Reason: {}", entityType, action, ex.getMessage(), ex);
+        }
+    }
 
-        auditLogRepository.save(auditLog);
+    private CustomUserPrincipal getCurrentPrincipal() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof CustomUserPrincipal customUser) {
+                return customUser;
+            }
+        } catch (Exception e) {
+            log.debug("No authentication principal found in SecurityContext: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private HttpServletRequest getCurrentRequest() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                return attributes.getRequest();
+            }
+        } catch (Exception e) {
+            log.debug("No request context found in RequestContextHolder: {}", e.getMessage());
+        }
+        return null;
     }
 
     @Override
     public List<AuditLogResponseDto> getLogsByEntity(String entityType, Long entityId) {
-
         List<AuditLog> auditLogs = auditLogRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc(entityType,
                 entityId);
         return auditLogs
@@ -90,7 +196,6 @@ public class AuditServiceImpl implements AuditLogService {
 
     @Override
     public List<AuditLogResponseDto> getLogsByUser(Long userId) {
-
         return auditLogRepository.findByPerformedBy_IdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(AuditLogResponseDto::fromEntity)
@@ -98,7 +203,6 @@ public class AuditServiceImpl implements AuditLogService {
     }
 
     private String convertPayloadToJson(Map<String, Object> payload) {
-
         if (payload == null || payload.isEmpty()) {
             return "{}";
         }
@@ -134,11 +238,16 @@ public class AuditServiceImpl implements AuditLogService {
         RecentActivityDto dto = new RecentActivityDto();
 
         dto.setAuditLogId(log.getId());
+        dto.setActivityId(log.getId());
         dto.setCreatedAt(log.getCreatedAt());
+        dto.setTimestamp(log.getCreatedAt());
+        dto.setAction(log.getAction() != null ? log.getAction().name() : "");
+        dto.setEntityType(log.getEntityType());
 
         String payload = log.getPayload();
         String entityType = log.getEntityType();
-        String userName = log.getPerformedBy() != null ? log.getPerformedBy().getFullName() : "Someone";
+        String userName = log.getPerformedBy() != null ? log.getPerformedBy().getFullName() : "System";
+        dto.setPerformedBy(userName);
         
         String entityName = getFormattedEntityName(entityType, payload);
         String typeLabel = formatEntityType(entityType);

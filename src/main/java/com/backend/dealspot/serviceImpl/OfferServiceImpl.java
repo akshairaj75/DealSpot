@@ -17,6 +17,7 @@ import com.backend.dealspot.entity.OfferImage;
 import com.backend.dealspot.entity.Product;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.enums.OfferBadgeType;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
@@ -25,6 +26,7 @@ import com.backend.dealspot.repository.OfferRepository;
 import com.backend.dealspot.repository.ProductRepository;
 import com.backend.dealspot.repository.StoreRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.OfferService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,23 +35,19 @@ import jakarta.servlet.http.HttpServletRequest;
 public class OfferServiceImpl implements OfferService {
 
         private final StoreRepository storeRepository;
-
         private final ProductRepository productRepository;
-
         private final CategoryRepository categoryRepository;
-
         private final CityRepository cityRepository;
-
         private final OfferRepository offerRepository;
-
         private final FileStorageService fileStorageService;
-
         private final OfferImageRepository offerImageRepository;
+        private final AuditLogService auditLogService;
 
         public OfferServiceImpl(StoreRepository storeRepository, ProductRepository productRepository,
                         CategoryRepository categoryRepository, CityRepository cityRepository,
                         OfferRepository offerRepository, FileStorageService fileStorageService,
-                        OfferImageRepository offerImageRepository) {
+                        OfferImageRepository offerImageRepository,
+                        AuditLogService auditLogService) {
                 this.storeRepository = storeRepository;
                 this.productRepository = productRepository;
                 this.categoryRepository = categoryRepository;
@@ -57,6 +55,7 @@ public class OfferServiceImpl implements OfferService {
                 this.offerRepository = offerRepository;
                 this.fileStorageService = fileStorageService;
                 this.offerImageRepository = offerImageRepository;
+                this.auditLogService = auditLogService;
         }
 
         @Transactional
@@ -158,6 +157,16 @@ public class OfferServiceImpl implements OfferService {
                                 savedOffer = offerRepository.save(savedOffer);
                         }
                 }
+
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("titleEn", savedOffer.getTitleEn());
+                auditPayload.put("titleAr", savedOffer.getTitleAr());
+                if (savedOffer.getStore() != null) {
+                        auditPayload.put("storeId", savedOffer.getStore().getId());
+                        auditPayload.put("storeNameEn", savedOffer.getStore().getNameEn());
+                }
+                auditPayload.put("offerPrice", savedOffer.getOfferPrice());
+                auditLogService.logAction("OFFER", savedOffer.getId(), authUser, AuditAction.CREATE, auditPayload, request);
 
                 return OfferResponseDto.fromEntity(savedOffer);
         }
@@ -302,6 +311,17 @@ public class OfferServiceImpl implements OfferService {
                 }
 
                 Offer savedOffer = offerRepository.save(offer);
+
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("titleEn", savedOffer.getTitleEn());
+                auditPayload.put("titleAr", savedOffer.getTitleAr());
+                if (savedOffer.getStore() != null) {
+                        auditPayload.put("storeId", savedOffer.getStore().getId());
+                        auditPayload.put("storeNameEn", savedOffer.getStore().getNameEn());
+                }
+                auditPayload.put("offerPrice", savedOffer.getOfferPrice());
+                auditLogService.logAction("OFFER", savedOffer.getId(), authUser, AuditAction.UPDATE, auditPayload, request);
+
                 return OfferResponseDto.fromEntity(savedOffer);
         }
 
@@ -317,8 +337,17 @@ public class OfferServiceImpl implements OfferService {
                         }
                 }
 
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("titleEn", offer.getTitleEn());
+                auditPayload.put("titleAr", offer.getTitleAr());
+                if (offer.getStore() != null) {
+                        auditPayload.put("storeId", offer.getStore().getId());
+                }
+
                 offerImageRepository.deleteAll(offer.getImages());
                 offerRepository.delete(offer);
+
+                auditLogService.logAction("OFFER", offerId, authUser, AuditAction.DELETE, auditPayload, null);
         }
 
         @Transactional
@@ -342,6 +371,13 @@ public class OfferServiceImpl implements OfferService {
                 offer.setActive(true);
 
                 Offer updated = offerRepository.save(offer);
+
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("titleEn", updated.getTitleEn());
+                auditPayload.put("extendedDays", days);
+                auditPayload.put("validUntil", updated.getValidUntil() != null ? updated.getValidUntil().toString() : "");
+                auditLogService.logAction("OFFER", updated.getId(), authUser, AuditAction.UPDATE, auditPayload, null);
+
                 return OfferResponseDto.fromEntity(updated);
         }
 

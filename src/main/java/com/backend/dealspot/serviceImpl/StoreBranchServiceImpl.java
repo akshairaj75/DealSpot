@@ -12,10 +12,12 @@ import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.entity.StoreBranch;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.StoreBranchRepository;
 import com.backend.dealspot.repository.StoreRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.StoreBranchService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,16 +26,17 @@ import jakarta.servlet.http.HttpServletRequest;
 public class StoreBranchServiceImpl implements StoreBranchService {
 
     private final StoreBranchRepository storeBranchRepository;
-
     private final StoreRepository storeRepository;
-
     private final CityRepository cityRepository;
+    private final AuditLogService auditLogService;
 
     public StoreBranchServiceImpl(StoreBranchRepository storeBranchRepository, StoreRepository storeRepository,
-            CityRepository cityRepository) {
+            CityRepository cityRepository,
+            AuditLogService auditLogService) {
         this.storeBranchRepository = storeBranchRepository;
         this.storeRepository = storeRepository;
         this.cityRepository = cityRepository;
+        this.auditLogService = auditLogService;
     }
 
     @Override
@@ -80,6 +83,14 @@ public class StoreBranchServiceImpl implements StoreBranchService {
 
         StoreBranch savedBranch = storeBranchRepository.save(branch);
 
+        java.util.Map<String, Object> createAuditPayload = new java.util.HashMap<>();
+        createAuditPayload.put("branchName", savedBranch.getBranchName());
+        if (savedBranch.getStore() != null) {
+            createAuditPayload.put("storeId", savedBranch.getStore().getId());
+            createAuditPayload.put("storeNameEn", savedBranch.getStore().getNameEn());
+        }
+        auditLogService.logAction("STORE_BRANCH", savedBranch.getId().longValue(), authUser, AuditAction.CREATE, createAuditPayload, null);
+
         return StoreBranchResponseDto.fromEntity(savedBranch);
     }
 
@@ -115,6 +126,13 @@ public class StoreBranchServiceImpl implements StoreBranchService {
 
         StoreBranch savedBranch = storeBranchRepository.save(branch);
 
+        java.util.Map<String, Object> updateAuditPayload = new java.util.HashMap<>();
+        updateAuditPayload.put("branchName", savedBranch.getBranchName());
+        if (savedBranch.getStore() != null) {
+            updateAuditPayload.put("storeId", savedBranch.getStore().getId());
+        }
+        auditLogService.logAction("STORE_BRANCH", savedBranch.getId().longValue(), authUser, AuditAction.UPDATE, updateAuditPayload, null);
+
         return StoreBranchResponseDto.fromEntity(savedBranch);
     }
 
@@ -129,7 +147,15 @@ public class StoreBranchServiceImpl implements StoreBranchService {
             }
         }
 
+        java.util.Map<String, Object> deleteAuditPayload = new java.util.HashMap<>();
+        deleteAuditPayload.put("branchName", branch.getBranchName());
+        if (branch.getStore() != null) {
+            deleteAuditPayload.put("storeId", branch.getStore().getId());
+        }
+
         storeBranchRepository.delete(branch);
+
+        auditLogService.logAction("STORE_BRANCH", branchId.longValue(), authUser, AuditAction.DELETE, deleteAuditPayload, request);
     }
 
 }

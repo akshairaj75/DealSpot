@@ -15,11 +15,13 @@ import com.backend.dealspot.entity.Category;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.enums.AdminRole;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CategoryRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.StoreRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.StoreService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,18 +35,21 @@ public class StoreServiceImpl implements StoreService {
     private final FileStorageService fileStorageService;
     private final AdminUserRepository adminUserRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     public StoreServiceImpl(StoreRepository storeRepository, CityRepository cityRepository,
             CategoryRepository categoryRepository,
             FileStorageService fileStorageService,
             AdminUserRepository adminUserRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            AuditLogService auditLogService) {
         this.storeRepository = storeRepository;
         this.cityRepository = cityRepository;
         this.categoryRepository = categoryRepository;
         this.fileStorageService = fileStorageService;
         this.adminUserRepository = adminUserRepository;
         this.passwordEncoder = passwordEncoder;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -124,6 +129,13 @@ public class StoreServiceImpl implements StoreService {
             adminUserRepository.save(manager);
         }
 
+        java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+        auditPayload.put("nameEn", saved.getNameEn());
+        auditPayload.put("nameAr", saved.getNameAr());
+        auditPayload.put("contactEmail", saved.getContactEmail());
+        auditPayload.put("contactPhone", saved.getContactPhone());
+        auditLogService.logAction("STORE", saved.getId().longValue(), authUser, AuditAction.CREATE, auditPayload, request);
+
         return StoreResponseDto.fromEntity(saved);
     }
 
@@ -169,9 +181,6 @@ public class StoreServiceImpl implements StoreService {
         if (dto.getDescriptionAr() != null && !dto.getDescriptionAr().isEmpty()) {
             store.setDescriptionAr(dto.getDescriptionAr());
         }
-        // if (dto.getLogoUrl() != null && !dto.getLogoUrl().isEmpty()) {
-        // store.setLogoUrl(dto.getLogoUrl());
-        // }
         if (dto.getBannerUrl() != null && !dto.getBannerUrl().isEmpty()) {
             store.setBannerUrl(dto.getBannerUrl());
         }
@@ -227,6 +236,13 @@ public class StoreServiceImpl implements StoreService {
             }
         }
         Store saved = storeRepository.save(store);
+
+        java.util.Map<String, Object> updateAuditPayload = new java.util.HashMap<>();
+        updateAuditPayload.put("nameEn", saved.getNameEn());
+        updateAuditPayload.put("nameAr", saved.getNameAr());
+        updateAuditPayload.put("contactEmail", saved.getContactEmail());
+        auditLogService.logAction("STORE", saved.getId().longValue(), authUser, AuditAction.UPDATE, updateAuditPayload, request);
+
         return StoreResponseDto.fromEntity(saved);
     }
 
@@ -240,6 +256,12 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new RuntimeException("Store not found"));
         store.setFeatured(!store.isFeatured());
         Store saved = storeRepository.save(store);
+
+        java.util.Map<String, Object> toggleAuditPayload = new java.util.HashMap<>();
+        toggleAuditPayload.put("nameEn", saved.getNameEn());
+        toggleAuditPayload.put("featured", saved.isFeatured());
+        auditLogService.logAction("STORE", saved.getId().longValue(), authUser, AuditAction.UPDATE, toggleAuditPayload, request);
+
         return StoreResponseDto.fromEntity(saved);
     }
 
@@ -248,7 +270,14 @@ public class StoreServiceImpl implements StoreService {
     public void deleteStore(Integer storeId, CustomUserPrincipal authUser, HttpServletRequest request) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("Store not found"));
+
+        java.util.Map<String, Object> deleteAuditPayload = new java.util.HashMap<>();
+        deleteAuditPayload.put("nameEn", store.getNameEn());
+        deleteAuditPayload.put("nameAr", store.getNameAr());
+
         storeRepository.delete(store);
+
+        auditLogService.logAction("STORE", storeId.longValue(), authUser, AuditAction.DELETE, deleteAuditPayload, request);
     }
 
 }

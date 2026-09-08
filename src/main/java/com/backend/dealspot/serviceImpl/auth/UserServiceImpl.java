@@ -16,34 +16,35 @@ import com.backend.dealspot.entity.AdminUser;
 import com.backend.dealspot.entity.City;
 import com.backend.dealspot.entity.User;
 import com.backend.dealspot.enums.AccountType;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.AdminUserRepository;
 import com.backend.dealspot.repository.CityRepository;
 import com.backend.dealspot.repository.UserRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
 import com.backend.dealspot.security.JwtService;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
 
         private final UserRepository userRepository;
-
         private final PasswordEncoder passwordEncoder;
-
         private final AdminUserRepository adminUserRepository;
-
         private final CityRepository cityRepository;
-
         private final JwtService jwtService;
+        private final AuditLogService auditLogService;
 
         public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,
                         AdminUserRepository adminUserRepository, CityRepository cityRepository,
-                        JwtService jwtService) {
+                        JwtService jwtService,
+                        AuditLogService auditLogService) {
                 this.userRepository = userRepository;
                 this.passwordEncoder = passwordEncoder;
                 this.adminUserRepository = adminUserRepository;
                 this.cityRepository = cityRepository;
                 this.jwtService = jwtService;
+                this.auditLogService = auditLogService;
         }
 
         // @Override
@@ -248,6 +249,13 @@ public class UserServiceImpl implements UserService {
                 admin.setActive(true);
 
                 AdminUser saved = adminUserRepository.save(admin);
+
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("fullName", saved.getFullName());
+                auditPayload.put("email", saved.getEmail());
+                auditPayload.put("role", saved.getRole() != null ? saved.getRole().name() : "");
+                auditLogService.logAction("ADMIN_USER", saved.getId(), AuditAction.CREATE, auditPayload);
+
                 return AdminUserResponseDto.fromEntity(saved);
         }
 
@@ -258,15 +266,28 @@ public class UserServiceImpl implements UserService {
 
                 admin.setActive(!admin.isActive());
                 AdminUser updated = adminUserRepository.save(admin);
+
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("fullName", updated.getFullName());
+                auditPayload.put("email", updated.getEmail());
+                auditPayload.put("active", updated.isActive());
+                auditLogService.logAction("ADMIN_USER", updated.getId(), AuditAction.UPDATE, auditPayload);
+
                 return AdminUserResponseDto.fromEntity(updated);
         }
 
         @Override
         public void deleteAdmin(Long id) {
-                if (!adminUserRepository.existsById(id)) {
-                        throw new RuntimeException("Admin user not found with id: " + id);
-                }
+                AdminUser admin = adminUserRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Admin user not found with id: " + id));
+
+                java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+                auditPayload.put("fullName", admin.getFullName());
+                auditPayload.put("email", admin.getEmail());
+
                 adminUserRepository.deleteById(id);
+
+                auditLogService.logAction("ADMIN_USER", id, AuditAction.DELETE, auditPayload);
         }
 
 }
