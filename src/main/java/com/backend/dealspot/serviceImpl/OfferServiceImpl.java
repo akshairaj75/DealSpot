@@ -375,12 +375,18 @@ public class OfferServiceImpl implements OfferService {
 
         @Override
         public org.springframework.data.domain.Page<OfferResponseDto> getPagedOffers(
+                        CustomUserPrincipal authUser,
                         String search,
                         Integer storeId,
                         String badgeType,
+                        String status,
                         Boolean active,
                         int page,
                         int size) {
+
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null) {
+                        storeId = authUser.getStoreId();
+                }
 
                 org.springframework.data.domain.Pageable pageable = 
                         org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by("id").descending());
@@ -395,11 +401,15 @@ public class OfferServiceImpl implements OfferService {
                 }
 
                 String searchQuery = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+                String statusQuery = (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) ? status.trim().toUpperCase() : null;
+                java.time.LocalDate today = java.time.LocalDate.now();
 
                 org.springframework.data.domain.Page<Offer> offersPage = offerRepository.searchOffers(
                                 searchQuery,
                                 storeId,
                                 badgeEnum,
+                                statusQuery,
+                                today,
                                 active,
                                 pageable);
 

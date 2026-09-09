@@ -27,9 +27,11 @@ public interface OfferService {
     OfferResponseDto extendOffer(Long offerId, int days, CustomUserPrincipal authUser);
 
     org.springframework.data.domain.Page<OfferResponseDto> getPagedOffers(
+            CustomUserPrincipal authUser,
             String search,
             Integer storeId,
             String badgeType,
+            String status,
             Boolean active,
             int page,
             int size);

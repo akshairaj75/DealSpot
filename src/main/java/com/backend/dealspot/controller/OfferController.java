@@ -115,14 +115,17 @@ public class OfferController {
 
     @GetMapping({"/paged", "/search"})
     public ResponseEntity<org.springframework.data.domain.Page<OfferResponseDto>> getPagedOffers(
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
             @org.springframework.web.bind.annotation.RequestParam(value = "search", required = false) String search,
             @org.springframework.web.bind.annotation.RequestParam(value = "storeId", required = false) Integer storeId,
             @org.springframework.web.bind.annotation.RequestParam(value = "badgeType", required = false) String badgeType,
+            @org.springframework.web.bind.annotation.RequestParam(value = "status", required = false) String status,
             @org.springframework.web.bind.annotation.RequestParam(value = "active", required = false) Boolean active,
             @org.springframework.web.bind.annotation.RequestParam(value = "page", defaultValue = "0") int page,
             @org.springframework.web.bind.annotation.RequestParam(value = "size", defaultValue = "20") int size) {
 
-        org.springframework.data.domain.Page<OfferResponseDto> res = offerService.getPagedOffers(search, storeId, badgeType, active, page, size);
+        org.springframework.data.domain.Page<OfferResponseDto> res = offerService.getPagedOffers(
+                authUser, search, storeId, badgeType, status, active, page, size);
         return ResponseEntity.ok(res);
     }
 }
