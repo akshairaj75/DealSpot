@@ -22,10 +22,10 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     List<Offer> findByActiveTrueAndValidUntilBefore(LocalDate date);
 
-    @Query("SELECT o FROM Offer o WHERE o.active = true AND o.validFrom <= :today AND o.validUntil >= :today")
+    @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today)")
     List<Offer> findActiveAndValidOffers(@Param("today") LocalDate today);
 
-    @Query("SELECT o FROM Offer o WHERE o.active = true AND o.validFrom <= :today AND o.validUntil >= :today AND o.store.id = :storeId")
+    @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today) AND o.store.id = :storeId")
     List<Offer> findActiveAndValidOffersByStoreId(@Param("storeId") Integer storeId, @Param("today") LocalDate today);
 
     @Query("SELECT o FROM Offer o WHERE " +

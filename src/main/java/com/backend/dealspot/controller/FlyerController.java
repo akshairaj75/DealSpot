@@ -62,8 +62,9 @@ public class FlyerController {
     @GetMapping("/fetch-all-flyers")
     public ResponseEntity<List<FlyerResponseDto>> fetchAllFlyers(
             @AuthenticationPrincipal CustomUserPrincipal authUser,
-            @RequestParam(value = "storeId", required = false) Integer storeId) {
-        List<FlyerResponseDto> list = flyerService.fetchAllFlyers(authUser, storeId);
+            @RequestParam(value = "storeId", required = false) Integer storeId,
+            @RequestParam(value = "includeExpired", required = false) Boolean includeExpired) {
+        List<FlyerResponseDto> list = flyerService.fetchAllFlyers(authUser, storeId, includeExpired);
         return ResponseEntity.ok(list);
     }
 

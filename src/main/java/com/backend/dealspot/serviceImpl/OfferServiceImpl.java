@@ -173,20 +173,12 @@ public class OfferServiceImpl implements OfferService {
 
         @Override
         public List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired) {
-                boolean isAdminOrManager = authUser != null && (
-                        authUser.getRole() == AdminRole.SUPER_ADMIN || 
-                        authUser.getRole() == AdminRole.STORE_MANAGER ||
-                        authUser.getRole() == AdminRole.CONTENT_MANAGER
-                );
-
-                boolean shouldIncludeExpired = Boolean.TRUE.equals(includeExpired) || isAdminOrManager;
+                boolean shouldIncludeExpired = Boolean.TRUE.equals(includeExpired);
                 java.time.LocalDate today = java.time.LocalDate.now();
                 List<Offer> offers;
 
-                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null) {
-                        offers = shouldIncludeExpired 
-                                ? offerRepository.findByStoreId(authUser.getStoreId())
-                                : offerRepository.findActiveAndValidOffersByStoreId(authUser.getStoreId(), today);
+                if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null && shouldIncludeExpired) {
+                        offers = offerRepository.findByStoreId(authUser.getStoreId());
                 } else if (storeId != null) {
                         offers = shouldIncludeExpired
                                 ? offerRepository.findByStoreId(storeId)

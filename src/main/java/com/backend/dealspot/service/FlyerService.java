@@ -19,7 +19,7 @@ public interface FlyerService {
     FlyerResponseDto updateFlyer(Integer flyerId, FlyerRequestDto flyerRequestDto, List<MultipartFile> pages, MultipartFile pdf, CustomUserPrincipal authUser,
             HttpServletRequest request);
 
-    List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId);
+    List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired);
 
     FlyerResponseDto fetchFlyerById(Integer flyerId);
 

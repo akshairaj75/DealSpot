@@ -1,6 +1,7 @@
 package com.backend.dealspot.serviceImpl;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -223,18 +224,22 @@ public class FlyerServiceImpl implements FlyerService {
     }
 
     @Override
-    public List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId) {
-        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
-            if (authUser.getStoreId() != null) {
-                return flyerRepository.findByStoreId(authUser.getStoreId())
-                        .stream().map(FlyerResponseDto::fromEntity).toList();
-            }
+    public List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired) {
+        boolean shouldIncludeExpired = Boolean.TRUE.equals(includeExpired);
+        LocalDate today = LocalDate.now();
+        List<Flyer> flyers;
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null && shouldIncludeExpired) {
+            flyers = flyerRepository.findByStoreId(authUser.getStoreId());
+        } else if (storeId != null) {
+            flyers = shouldIncludeExpired
+                    ? flyerRepository.findByStoreId(storeId)
+                    : flyerRepository.findActiveAndValidFlyersByStoreId(storeId, today);
+        } else {
+            flyers = shouldIncludeExpired
+                    ? flyerRepository.findAll()
+                    : flyerRepository.findActiveAndValidFlyers(today);
         }
-        if (storeId != null) {
-            return flyerRepository.findByStoreId(storeId)
-                    .stream().map(FlyerResponseDto::fromEntity).toList();
-        }
-        List<Flyer> flyers = flyerRepository.findAll();
         return flyers.stream().map(FlyerResponseDto::fromEntity).toList();
     }
 
