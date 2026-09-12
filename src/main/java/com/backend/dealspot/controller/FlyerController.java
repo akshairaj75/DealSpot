@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -126,5 +127,14 @@ public class FlyerController {
         return ResponseEntity.ok("Flyer page deleted successfully");
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
+    @PutMapping("/{flyerId}/pages/reorder")
+    public ResponseEntity<List<FlyerPageResponseDto>> reorderFlyerPages(
+            @PathVariable Integer flyerId,
+            @RequestBody List<Integer> pageIds,
+            @AuthenticationPrincipal CustomUserPrincipal authUser) {
+        List<FlyerPageResponseDto> pages = flyerService.reorderFlyerPages(flyerId, pageIds, authUser);
+        return ResponseEntity.ok(pages);
+    }
 
 }

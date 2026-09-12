@@ -437,5 +437,58 @@ public class FlyerServiceImpl implements FlyerService {
         flyerRepository.save(flyer);
     }
 
+    @Transactional
+    @Override
+    public List<FlyerPageResponseDto> reorderFlyerPages(Integer flyerId, List<Integer> orderedPageIds, CustomUserPrincipal authUser) {
+        Flyer flyer = flyerRepository.findById(flyerId)
+                .orElseThrow(() -> new RuntimeException("Flyer not found"));
+
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER) {
+            if (flyer.getStore() == null || !flyer.getStore().getId().equals(authUser.getStoreId())) {
+                throw new AccessDeniedException("You are not authorized to manage flyer pages for another store");
+            }
+        }
+
+        if (orderedPageIds == null || orderedPageIds.isEmpty()) {
+            return fetchPagesByFlyerId(flyerId);
+        }
+
+        List<FlyerPage> existingPages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyerId);
+        java.util.Map<Integer, FlyerPage> pageMap = existingPages.stream()
+                .collect(java.util.stream.Collectors.toMap(FlyerPage::getId, p -> p));
+
+        // Step 1: Assign temporary negative numbers to avoid unique key constraint collision
+        for (int i = 0; i < orderedPageIds.size(); i++) {
+            FlyerPage page = pageMap.get(orderedPageIds.get(i));
+            if (page != null) {
+                page.setPageNumber(-(i + 1));
+                flyerPageRepository.save(page);
+            }
+        }
+        flyerPageRepository.flush();
+
+        // Step 2: Assign final 1-based sequential page numbers
+        String coverImage = null;
+        for (int i = 0; i < orderedPageIds.size(); i++) {
+            FlyerPage page = pageMap.get(orderedPageIds.get(i));
+            if (page != null) {
+                int finalPageNum = i + 1;
+                page.setPageNumber(finalPageNum);
+                flyerPageRepository.save(page);
+                if (finalPageNum == 1) {
+                    coverImage = page.getImageUrl();
+                }
+            }
+        }
+        flyerPageRepository.flush();
+
+        if (coverImage != null) {
+            flyer.setCoverImageUrl(coverImage);
+            flyerRepository.save(flyer);
+        }
+
+        return fetchPagesByFlyerId(flyerId);
+    }
+
 }
 

@@ -33,5 +33,7 @@ public interface FlyerService {
 
     void deleteFlyerPage(Integer pageId, CustomUserPrincipal authUser);
 
+    List<FlyerPageResponseDto> reorderFlyerPages(Integer flyerId, List<Integer> orderedPageIds, CustomUserPrincipal authUser);
+
 }
 
