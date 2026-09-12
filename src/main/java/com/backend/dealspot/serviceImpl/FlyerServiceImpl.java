@@ -171,8 +171,14 @@ public class FlyerServiceImpl implements FlyerService {
 
         // If new pages are provided, replace them
         if (pages != null && !pages.isEmpty()) {
-            flyerPageRepository.deleteAll(flyer.getPages());
-            flyer.getPages().clear();
+            List<FlyerPage> existingPages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyer.getId());
+            if (existingPages != null && !existingPages.isEmpty()) {
+                flyerPageRepository.deleteAll(existingPages);
+                flyerPageRepository.flush();
+            }
+            if (flyer.getPages() != null) {
+                flyer.getPages().clear();
+            }
             flyer.setTotalPages(pages.size());
 
             for (int i = 0; i < pages.size(); i++) {
@@ -188,7 +194,9 @@ public class FlyerServiceImpl implements FlyerService {
                     flyerPage.setThumbUrl(imagePath);
 
                     flyerPageRepository.save(flyerPage);
-                    flyer.getPages().add(flyerPage);
+                    if (flyer.getPages() != null) {
+                        flyer.getPages().add(flyerPage);
+                    }
 
                     if (i == 0) {
                         flyer.setCoverImageUrl(imagePath);
@@ -310,9 +318,23 @@ public class FlyerServiceImpl implements FlyerService {
             String imagePath = fileStorageService.storeFile(file, "flyers/" + flyerId + "/pages");
 
             List<FlyerPage> currentPages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyerId);
+            int maxPageNum = currentPages.isEmpty() ? 0 : currentPages.stream().mapToInt(FlyerPage::getPageNumber).max().orElse(0);
             int actualPageNum = (pageNumber != null && pageNumber > 0)
                     ? pageNumber
-                    : (currentPages.size() + 1);
+                    : (maxPageNum + 1);
+
+            // If actualPageNum is already taken, shift any existing pages >= actualPageNum up by 1
+            boolean exists = currentPages.stream().anyMatch(p -> p.getPageNumber().equals(actualPageNum));
+            if (exists) {
+                for (int i = currentPages.size() - 1; i >= 0; i--) {
+                    FlyerPage p = currentPages.get(i);
+                    if (p.getPageNumber() >= actualPageNum) {
+                        p.setPageNumber(p.getPageNumber() + 1);
+                        flyerPageRepository.save(p);
+                    }
+                }
+                flyerPageRepository.flush();
+            }
 
             FlyerPage flyerPage = new FlyerPage();
             flyerPage.setFlyer(flyer);
@@ -326,7 +348,8 @@ public class FlyerServiceImpl implements FlyerService {
                 flyer.setCoverImageUrl(imagePath);
             }
 
-            flyer.setTotalPages(currentPages.size() + 1);
+            List<FlyerPage> allPages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyerId);
+            flyer.setTotalPages(allPages.size());
             flyerRepository.save(flyer);
 
             return FlyerPageResponseDto.fromEntity(savedPage);
@@ -347,8 +370,17 @@ public class FlyerServiceImpl implements FlyerService {
             }
         }
 
-        if (pageNumber != null && pageNumber > 0) {
+        if (pageNumber != null && pageNumber > 0 && !pageNumber.equals(flyerPage.getPageNumber())) {
+            List<FlyerPage> currentPages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyerPage.getFlyer().getId());
+            for (FlyerPage other : currentPages) {
+                if (!other.getId().equals(flyerPage.getId()) && other.getPageNumber().equals(pageNumber)) {
+                    other.setPageNumber(flyerPage.getPageNumber());
+                    flyerPageRepository.save(other);
+                    break;
+                }
+            }
             flyerPage.setPageNumber(pageNumber);
+            flyerPageRepository.flush();
         }
 
         if (file != null && !file.isEmpty()) {
@@ -384,10 +416,19 @@ public class FlyerServiceImpl implements FlyerService {
 
         Flyer flyer = flyerPage.getFlyer();
         flyerPageRepository.delete(flyerPage);
+        flyerPageRepository.flush();
 
         List<FlyerPage> remainingPages = flyerPageRepository.findByFlyerIdOrderByPageNumberAsc(flyer.getId());
-        flyer.setTotalPages(remainingPages.size());
+        for (int i = 0; i < remainingPages.size(); i++) {
+            FlyerPage p = remainingPages.get(i);
+            if (p.getPageNumber() != i + 1) {
+                p.setPageNumber(i + 1);
+                flyerPageRepository.save(p);
+            }
+        }
+        flyerPageRepository.flush();
 
+        flyer.setTotalPages(remainingPages.size());
         if (remainingPages.isEmpty()) {
             flyer.setCoverImageUrl(null);
         } else {
