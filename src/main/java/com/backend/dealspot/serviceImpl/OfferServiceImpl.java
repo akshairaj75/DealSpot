@@ -83,12 +83,21 @@ public class OfferServiceImpl implements OfferService {
                 City city = cityRepository.findById(dto.getCityId().intValue())
                                 .orElseThrow(() -> new RuntimeException("City not found"));
 
-                Category category = categoryRepository.findById(dto.getCategoryId().intValue())
-                                .orElseThrow(() -> new RuntimeException("Category not found"));
+                Category category = null;
+                if (dto.getCategoryId() != null) {
+                        category = categoryRepository.findById(dto.getCategoryId().intValue()).orElse(null);
+                }
 
                 Product product = null;
                 if (dto.getProductId() != null) {
                         product = productRepository.findById(dto.getProductId()).orElse(null);
+                        if (category == null && product != null && product.getCategory() != null) {
+                                category = product.getCategory();
+                        }
+                }
+
+                if (category == null) {
+                        throw new RuntimeException("Category not found");
                 }
 
                 Offer offer = new Offer();

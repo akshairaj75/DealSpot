@@ -44,6 +44,9 @@ public class FlyerResponseDto {
     private LocalDate validFrom;
     private LocalDate validUntil;
     private boolean active;
+    private boolean expired;
+    private boolean upcoming;
+    private String status;
     private Long viewCount;
     private List<FlyerPageResponseDto> pages = new ArrayList<>();
 
@@ -183,6 +186,30 @@ public class FlyerResponseDto {
         this.active = active;
     }
 
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
+    }
+
+    public boolean isUpcoming() {
+        return upcoming;
+    }
+
+    public void setUpcoming(boolean upcoming) {
+        this.upcoming = upcoming;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Long getViewCount() {
         return viewCount;
     }
@@ -217,6 +244,22 @@ public class FlyerResponseDto {
         dto.setValidUntil(flyer.getValidUntil());
         dto.setActive(flyer.isActive());
         dto.setViewCount(flyer.getViewCount());
+
+        LocalDate today = LocalDate.now();
+        boolean isExp = flyer.getValidUntil() != null && flyer.getValidUntil().isBefore(today);
+        boolean isUpc = flyer.getValidFrom() != null && flyer.getValidFrom().isAfter(today);
+        dto.setExpired(isExp);
+        dto.setUpcoming(isUpc);
+
+        if (!flyer.isActive()) {
+            dto.setStatus("DISABLED");
+        } else if (isExp) {
+            dto.setStatus("EXPIRED");
+        } else if (isUpc) {
+            dto.setStatus("UPCOMING");
+        } else {
+            dto.setStatus("ACTIVE");
+        }
 
         if (flyer.getStore() != null) {
             dto.setStoreId(flyer.getStore().getId());

@@ -224,22 +224,25 @@ public class FlyerServiceImpl implements FlyerService {
     }
 
     @Override
-    public List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired) {
-        boolean shouldIncludeExpired = Boolean.TRUE.equals(includeExpired);
+    public List<FlyerResponseDto> fetchAllFlyers(CustomUserPrincipal authUser, Integer storeId, Integer cityId, String search, String status, Boolean includeExpired) {
         LocalDate today = LocalDate.now();
-        List<Flyer> flyers;
 
-        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null && shouldIncludeExpired) {
-            flyers = flyerRepository.findByStoreId(authUser.getStoreId());
-        } else if (storeId != null) {
-            flyers = shouldIncludeExpired
-                    ? flyerRepository.findByStoreId(storeId)
-                    : flyerRepository.findActiveAndValidFlyersByStoreId(storeId, today);
-        } else {
-            flyers = shouldIncludeExpired
-                    ? flyerRepository.findAll()
-                    : flyerRepository.findActiveAndValidFlyers(today);
+        if (authUser != null && authUser.getRole() == AdminRole.STORE_MANAGER && authUser.getStoreId() != null) {
+            storeId = authUser.getStoreId();
         }
+
+        String searchVal = (search != null && !search.trim().isEmpty()) ? search.trim() : null;
+        String statusVal = (status != null && !status.trim().isEmpty()) ? status.trim().toUpperCase() : null;
+
+        if (statusVal == null) {
+            if (Boolean.TRUE.equals(includeExpired)) {
+                statusVal = "ALL";
+            } else {
+                statusVal = "UNEXPIRED";
+            }
+        }
+
+        List<Flyer> flyers = flyerRepository.searchFlyers(searchVal, storeId, cityId, statusVal, today);
         return flyers.stream().map(FlyerResponseDto::fromEntity).toList();
     }
 

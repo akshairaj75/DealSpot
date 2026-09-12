@@ -63,8 +63,11 @@ public class FlyerController {
     public ResponseEntity<List<FlyerResponseDto>> fetchAllFlyers(
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             @RequestParam(value = "storeId", required = false) Integer storeId,
+            @RequestParam(value = "cityId", required = false) Integer cityId,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "includeExpired", required = false) Boolean includeExpired) {
-        List<FlyerResponseDto> list = flyerService.fetchAllFlyers(authUser, storeId, includeExpired);
+        List<FlyerResponseDto> list = flyerService.fetchAllFlyers(authUser, storeId, cityId, search, status, includeExpired);
         return ResponseEntity.ok(list);
     }
 
