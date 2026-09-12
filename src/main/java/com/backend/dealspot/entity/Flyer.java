@@ -38,7 +38,7 @@ public class Flyer extends BaseEntity {
     private Store store;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "city_id", nullable = false)
+    @JoinColumn(name = "city_id", nullable = true)
     private City city;
 
     @Column(name = "title_en", nullable = false, length = 200)

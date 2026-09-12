@@ -28,7 +28,7 @@ public interface FlyerRepository extends JpaRepository<Flyer, Integer> {
            " LOWER(c.nameEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
            " LOWER(c.nameAr) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
            "(:storeId IS NULL OR s.id = :storeId) AND " +
-           "(:cityId IS NULL OR c.id = :cityId) AND " +
+           "(:cityId IS NULL OR c.id = :cityId OR c.id IS NULL) AND " +
            "(:status IS NULL OR :status = '' OR :status = 'ALL' OR " +
            " (:status = 'ACTIVE' AND f.active = true AND (f.validUntil IS NULL OR f.validUntil >= :today) AND (f.validFrom IS NULL OR f.validFrom <= :today)) OR " +
            " (:status = 'UNEXPIRED' AND f.active = true AND (f.validUntil IS NULL OR f.validUntil >= :today)) OR " +

@@ -16,6 +16,7 @@ public class FlyerResponseDto {
     private String storeLogoUrl;
     private boolean storeVerified;
     private Integer cityId;
+    private boolean nationwide;
 
     public String getStoreLogoUrl() {
         return storeLogoUrl;
@@ -104,6 +105,14 @@ public class FlyerResponseDto {
 
     public void setCityNameAr(String cityNameAr) {
         this.cityNameAr = cityNameAr;
+    }
+
+    public boolean isNationwide() {
+        return nationwide;
+    }
+
+    public void setNationwide(boolean nationwide) {
+        this.nationwide = nationwide;
     }
 
     public String getTitleEn() {
@@ -273,6 +282,12 @@ public class FlyerResponseDto {
             dto.setCityId(flyer.getCity().getId());
             dto.setCityNameEn(flyer.getCity().getNameEn());
             dto.setCityNameAr(flyer.getCity().getNameAr());
+            dto.setNationwide(false);
+        } else {
+            dto.setCityId(null);
+            dto.setCityNameEn("All Cities");
+            dto.setCityNameAr("جميع المدن");
+            dto.setNationwide(true);
         }
 
         if (flyer.getPages() != null) {

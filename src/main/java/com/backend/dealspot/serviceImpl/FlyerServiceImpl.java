@@ -70,8 +70,11 @@ public class FlyerServiceImpl implements FlyerService {
                 .orElseThrow(() -> new RuntimeException("Store not found"));
 
 
-        City city = cityRepository.findById(dto.getCityId())
-                .orElseThrow(() -> new RuntimeException("City not found"));
+        City city = null;
+        if (dto.getCityId() != null && dto.getCityId() > 0) {
+            city = cityRepository.findById(dto.getCityId())
+                    .orElseThrow(() -> new RuntimeException("City not found"));
+        }
 
         Flyer flyer = new Flyer();
 
@@ -156,9 +159,13 @@ public class FlyerServiceImpl implements FlyerService {
         }
 
         if (dto.getCityId() != null) {
-            City city = cityRepository.findById(dto.getCityId())
-                    .orElseThrow(() -> new RuntimeException("City not found"));
-            flyer.setCity(city);
+            if (dto.getCityId() > 0) {
+                City city = cityRepository.findById(dto.getCityId())
+                        .orElseThrow(() -> new RuntimeException("City not found"));
+                flyer.setCity(city);
+            } else {
+                flyer.setCity(null);
+            }
         }
 
         if (dto.getTitleEn() != null) flyer.setTitleEn(dto.getTitleEn());
