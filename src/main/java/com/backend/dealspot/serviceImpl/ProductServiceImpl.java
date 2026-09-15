@@ -79,10 +79,12 @@ public class ProductServiceImpl implements ProductService {
             product.setCategory(category);
         }
 
-        if (dto.getBrandId() != null) {
+        if (dto.getBrandId() != null && dto.getBrandId() > 0) {
             Brand brand = brandRepository.findById(dto.getBrandId())
-                    .orElseThrow(() -> new RuntimeException("Brand not found"));
+                    .orElseThrow(() -> new IllegalArgumentException("Brand not found with id: " + dto.getBrandId()));
             product.setBrand(brand);
+        } else {
+            product.setBrand(null);
         }
         product.setSku(dto.getSku() != null && !dto.getSku().trim().isEmpty() ? dto.getSku().trim() : null);
         product.setBarcode(
@@ -226,11 +228,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        if (dto.getBrandId() != null) {
+        if (dto.getBrandId() != null && dto.getBrandId() > 0) {
             Brand brand = brandRepository.findById(dto.getBrandId())
-                    .orElseThrow(() -> new RuntimeException("Brand not found"));
-
+                    .orElseThrow(() -> new IllegalArgumentException("Brand not found with id: " + dto.getBrandId()));
             product.setBrand(brand);
+        } else {
+            product.setBrand(null);
         }
 
         // Category
