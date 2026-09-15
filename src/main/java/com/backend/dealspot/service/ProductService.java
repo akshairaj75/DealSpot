@@ -28,4 +28,6 @@ public interface ProductService {
 
     List<ProductDetailsDto> getProductDetails(Long productId);
 
+    void deleteProduct(Long productId);
+
 }

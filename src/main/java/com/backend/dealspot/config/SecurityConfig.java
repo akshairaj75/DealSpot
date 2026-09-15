@@ -112,6 +112,15 @@ public class SecurityConfig {
                                             "message": "Unauthorized"
                                     }
                                     """);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("""
+                                    {
+                                            "message": "Access Denied"
+                                    }
+                                    """);
                         }))
 
                 .logout(logout -> logout

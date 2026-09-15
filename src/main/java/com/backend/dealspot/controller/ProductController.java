@@ -127,4 +127,12 @@ public class ProductController {
         return ResponseEntity.ok(productDetails);
     }
 
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER')")
+    @org.springframework.web.bind.annotation.DeleteMapping({"/delete-product/{productId}", "/delete/{productId}"})
+    public ResponseEntity<Void> deleteProduct(
+            @PathVariable("productId") Long productId) {
+        productService.deleteProduct(productId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

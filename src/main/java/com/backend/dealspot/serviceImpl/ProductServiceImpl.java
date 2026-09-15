@@ -31,11 +31,15 @@ import com.backend.dealspot.repository.ProductDetailRepository;
 import com.backend.dealspot.repository.ProductImageRepository;
 import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.ProductService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.transaction.Transactional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -129,7 +133,8 @@ public class ProductServiceImpl implements ProductService {
                         savedProduct.setPrimaryImageUrl(filePath);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error("Failed to store image '{}' for product SKU '{}': {}", 
+                            file.getOriginalFilename(), savedProduct.getSku(), e.getMessage(), e);
                 }
 
             }
@@ -378,6 +383,37 @@ public class ProductServiceImpl implements ProductService {
         return details.stream()
                 .map(ProductDetailsDto::fromEntity)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public void deleteProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
+
+        // Delete associated product details
+        List<ProductDetail> details = productDetailRepository.findByProductId(productId);
+        if (details != null && !details.isEmpty()) {
+            productDetailRepository.deleteAll(details);
+        }
+
+        // Delete product
+        productRepository.delete(product);
+
+        // Record Audit Log
+        java.util.Map<String, Object> auditPayload = new java.util.HashMap<>();
+        auditPayload.put("productId", productId);
+        auditPayload.put("nameEn", product.getNameEn());
+        auditPayload.put("nameAr", product.getNameAr());
+        auditPayload.put("sku", product.getSku());
+        if (product.getCategory() != null) {
+            auditPayload.put("categoryId", product.getCategory().getId());
+        }
+        if (product.getBrand() != null) {
+            auditPayload.put("brandId", product.getBrand().getId());
+        }
+        auditLogService.logAction("PRODUCT", productId, AuditAction.DELETE, auditPayload);
+        log.info("Product with id [{}] successfully deleted", productId);
     }
 
 }

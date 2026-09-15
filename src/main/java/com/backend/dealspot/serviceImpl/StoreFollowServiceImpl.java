@@ -12,10 +12,12 @@ import com.backend.dealspot.dto.store.StoreResponseDto;
 import com.backend.dealspot.entity.Store;
 import com.backend.dealspot.entity.StoreFollow;
 import com.backend.dealspot.entity.User;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.StoreFollowRepository;
 import com.backend.dealspot.repository.StoreRepository;
 import com.backend.dealspot.repository.UserRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.StoreFollowService;
 
 @Service
@@ -24,14 +26,17 @@ public class StoreFollowServiceImpl implements StoreFollowService {
     private final StoreFollowRepository storeFollowRepository;
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
     public StoreFollowServiceImpl(
             StoreFollowRepository storeFollowRepository,
             StoreRepository storeRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AuditLogService auditLogService) {
         this.storeFollowRepository = storeFollowRepository;
         this.storeRepository = storeRepository;
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     private User getAuthenticatedUser(CustomUserPrincipal authUser) {
@@ -52,12 +57,40 @@ public class StoreFollowServiceImpl implements StoreFollowService {
         Optional<StoreFollow> existing = storeFollowRepository.findByUserAndStore(user, store);
         if (existing.isPresent()) {
             storeFollowRepository.delete(existing.get());
+            auditLogService.log(
+                    AuditAction.UNFOLLOW_STORE,
+                    user.getId(),
+                    null,
+                    "POST",
+                    "/api/dealspot/stores/" + storeId + "/follow-toggle",
+                    200,
+                    true,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
             return false; // Unfollowed
         } else {
             StoreFollow follow = new StoreFollow();
             follow.setUser(user);
             follow.setStore(store);
             storeFollowRepository.save(follow);
+            auditLogService.log(
+                    AuditAction.FOLLOW_STORE,
+                    user.getId(),
+                    null,
+                    "POST",
+                    "/api/dealspot/stores/" + storeId + "/follow-toggle",
+                    200,
+                    true,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
             return true; // Followed
         }
     }

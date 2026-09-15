@@ -12,10 +12,12 @@ import com.backend.dealspot.dto.offer.OfferResponseDto;
 import com.backend.dealspot.entity.Offer;
 import com.backend.dealspot.entity.SavedOffer;
 import com.backend.dealspot.entity.User;
+import com.backend.dealspot.enums.AuditAction;
 import com.backend.dealspot.repository.OfferRepository;
 import com.backend.dealspot.repository.SavedOfferRepository;
 import com.backend.dealspot.repository.UserRepository;
 import com.backend.dealspot.security.CustomUserPrincipal;
+import com.backend.dealspot.service.AuditLogService;
 import com.backend.dealspot.service.SavedOfferService;
 
 @Service
@@ -24,14 +26,17 @@ public class SavedOfferServiceImpl implements SavedOfferService {
     private final SavedOfferRepository savedOfferRepository;
     private final OfferRepository offerRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
     public SavedOfferServiceImpl(
             SavedOfferRepository savedOfferRepository,
             OfferRepository offerRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AuditLogService auditLogService) {
         this.savedOfferRepository = savedOfferRepository;
         this.offerRepository = offerRepository;
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     private User getAuthenticatedUser(CustomUserPrincipal authUser) {
@@ -56,6 +61,25 @@ public class SavedOfferServiceImpl implements SavedOfferService {
             int currentCount = offer.getSaveCount() != null ? offer.getSaveCount() : 0;
             offer.setSaveCount(Math.max(0, currentCount - 1));
             offerRepository.save(offer);
+
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("offerId", offerId);
+            payload.put("offerTitle", offer.getTitleEn());
+            auditLogService.log(
+                    AuditAction.UNSAVE_OFFER,
+                    user.getId(),
+                    null,
+                    "POST",
+                    "/api/dealspot/offers/" + offerId + "/save-toggle",
+                    200,
+                    true,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
             return false; // Unsaved
         } else {
             SavedOffer savedOffer = new SavedOffer();
@@ -66,6 +90,25 @@ public class SavedOfferServiceImpl implements SavedOfferService {
             int currentCount = offer.getSaveCount() != null ? offer.getSaveCount() : 0;
             offer.setSaveCount(currentCount + 1);
             offerRepository.save(offer);
+
+            java.util.Map<String, Object> payload = new java.util.HashMap<>();
+            payload.put("offerId", offerId);
+            payload.put("offerTitle", offer.getTitleEn());
+            auditLogService.log(
+                    AuditAction.SAVE_OFFER,
+                    user.getId(),
+                    null,
+                    "POST",
+                    "/api/dealspot/offers/" + offerId + "/save-toggle",
+                    200,
+                    true,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
             return true; // Saved
         }
     }
