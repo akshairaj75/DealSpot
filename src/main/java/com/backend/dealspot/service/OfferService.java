@@ -12,28 +12,33 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface OfferService {
 
-    List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired);
+        List<OfferResponseDto> fetchAllOffers(CustomUserPrincipal authUser, Integer storeId, Boolean includeExpired);
 
-    OfferResponseDto getOfferById(Long offerId);
+        OfferResponseDto getOfferById(Long offerId);
 
-    OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, List<MultipartFile> images, CustomUserPrincipal authUser,
-            HttpServletRequest request);
+        OfferResponseDto updateOffer(Long offerId, OfferRequestDto dto, List<MultipartFile> images,
+                        CustomUserPrincipal authUser,
+                        HttpServletRequest request);
 
-    OfferResponseDto addOffer(OfferRequestDto dto, List<MultipartFile> images, CustomUserPrincipal authUser,
-            HttpServletRequest request);
+        OfferResponseDto addOffer(OfferRequestDto dto, List<MultipartFile> images, CustomUserPrincipal authUser,
+                        HttpServletRequest request);
 
-    void deleteOffer(Long offerId, CustomUserPrincipal authUser);
+        void deleteOffer(Long offerId, CustomUserPrincipal authUser);
 
-    OfferResponseDto extendOffer(Long offerId, int days, CustomUserPrincipal authUser);
+        OfferResponseDto extendOffer(Long offerId, int days, CustomUserPrincipal authUser);
 
-    org.springframework.data.domain.Page<OfferResponseDto> getPagedOffers(
-            CustomUserPrincipal authUser,
-            String search,
-            Integer storeId,
-            String badgeType,
-            String status,
-            Boolean active,
-            int page,
-            int size);
+        OfferResponseDto splitAndCreateOffer(
+                com.backend.dealspot.dto.offer.OfferPeriodSplitRequestDto dto,
+                CustomUserPrincipal authUser,
+                HttpServletRequest request);
+
+        org.springframework.data.domain.Page<OfferResponseDto> getPagedOffers(
+                        CustomUserPrincipal authUser,
+                        String search,
+                        Integer storeId,
+                        String badgeType,
+                        String status,
+                        Boolean active,
+                        int page,
+                        int size);
 }
-

@@ -2,11 +2,11 @@ package com.backend.dealspot.enums;
 
 public enum AuditAction {
     // Generic / Standard CRUD actions
-    CREATE, 
-    UPDATE, 
-    DELETE, 
-    APPROVE, 
-    REJECT, 
+    CREATE,
+    UPDATE,
+    DELETE,
+    APPROVE,
+    REJECT,
     BULK_EXPIRE,
 
     // Authentication & Security actions
@@ -68,5 +68,14 @@ public enum AuditAction {
 
     // Partner Request actions
     APPROVE_PARTNER_REQUEST,
-    REJECT_PARTNER_REQUEST
+    REJECT_PARTNER_REQUEST,
+
+    // Special Offer / Campaign actions
+    CREATE_SPECIAL_OFFER,
+    UPDATE_SPECIAL_OFFER,
+    DELETE_SPECIAL_OFFER,
+    ATTACH_DEALS_SPECIAL_OFFER,
+    REMOVE_DEAL_SPECIAL_OFFER,
+    OFFER_PRICE_PERIOD_SPLIT,
+    OVERLAPPING_OFFER_REJECTED
 }

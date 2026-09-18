@@ -27,6 +27,7 @@ public class OfferRequestDto {
     private Boolean online;
     private Boolean inStore;
     private Boolean active;
+    private Long specialOfferId;
 
     public Long getStoreId() {
         return storeId;
@@ -195,4 +196,13 @@ public class OfferRequestDto {
     public void setActive(Boolean active) {
         this.active = active;
     }
+
+    public Long getSpecialOfferId() {
+        return specialOfferId;
+    }
+
+    public void setSpecialOfferId(Long specialOfferId) {
+        this.specialOfferId = specialOfferId;
+    }
+
 }

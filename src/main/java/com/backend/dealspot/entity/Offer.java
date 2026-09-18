@@ -22,9 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(
-    name = "offers",
-    indexes = {
+@Table(name = "offers", indexes = {
         @Index(name = "idx_offers_store", columnList = "store_id"),
         @Index(name = "idx_offers_product", columnList = "product_id"),
         @Index(name = "idx_offers_category", columnList = "category_id"),
@@ -34,9 +32,10 @@ import java.util.List;
         @Index(name = "idx_offers_flash", columnList = "is_flash"),
         @Index(name = "idx_offers_active", columnList = "is_active"),
         @Index(name = "idx_offers_badge", columnList = "badge_type"),
-        @Index(name = "idx_offers_discount", columnList = "discount_pct")
-    }
-)
+        @Index(name = "idx_offers_discount", columnList = "discount_pct"),
+        @Index(name = "idx_offers_special_offer", columnList = "special_offer_id"),
+        @Index(name = "idx_offers_prod_store_active", columnList = "product_id, store_id, is_active")
+})
 @Check(name = "chk_offers_price", constraints = "offer_price <= original_price")
 @Check(name = "chk_offers_price_positive", constraints = "offer_price > 0")
 @Check(name = "chk_offers_discount", constraints = "discount_pct BETWEEN 0 AND 100")
@@ -47,6 +46,10 @@ public class Offer extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "special_offer_id", nullable = true)
+    private SpecialOffer specialOffer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
@@ -378,5 +381,13 @@ public class Offer extends BaseEntity {
 
     public void setCouponCodes(List<CouponCode> couponCodes) {
         this.couponCodes = couponCodes;
+    }
+
+    public SpecialOffer getSpecialOffer() {
+        return specialOffer;
+    }
+
+    public void setSpecialOffer(SpecialOffer specialOffer) {
+        this.specialOffer = specialOffer;
     }
 }

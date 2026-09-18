@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.backend.dealspot.dto.offer.OfferPeriodSplitRequestDto;
 import com.backend.dealspot.dto.offer.OfferRequestDto;
 import com.backend.dealspot.dto.offer.OfferResponseDto;
 import com.backend.dealspot.security.CustomUserPrincipal;
@@ -113,7 +114,7 @@ public class OfferController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping({"/paged", "/search"})
+    @GetMapping({ "/paged", "/search" })
     public ResponseEntity<org.springframework.data.domain.Page<OfferResponseDto>> getPagedOffers(
             @AuthenticationPrincipal CustomUserPrincipal authUser,
             @org.springframework.web.bind.annotation.RequestParam(value = "search", required = false) String search,
@@ -128,4 +129,15 @@ public class OfferController {
                 authUser, search, storeId, badgeType, status, active, page, size);
         return ResponseEntity.ok(res);
     }
+
+    @PreAuthorize("hasRole('SUPER_ADMIN') or hasRole('CONTENT_MANAGER') or hasRole('STORE_MANAGER')")
+    @PostMapping(value = "/split-and-create", consumes = { "application/json" })
+    public ResponseEntity<OfferResponseDto> splitAndCreateOffer(
+            @RequestBody OfferPeriodSplitRequestDto dto,
+            @AuthenticationPrincipal CustomUserPrincipal authUser,
+            HttpServletRequest request) {
+        OfferResponseDto result = offerService.splitAndCreateOffer(dto, authUser, request);
+        return ResponseEntity.ok(result);
+    }
 }
+

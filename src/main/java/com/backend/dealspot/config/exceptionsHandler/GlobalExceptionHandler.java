@@ -50,15 +50,37 @@ public class GlobalExceptionHandler {
                     null,
                     null,
                     errorType,
-                    errorMessage
-            );
+                    errorMessage);
         } catch (Exception e) {
-            log.warn("Failed to write database audit log for error {}: {}", ex.getClass().getSimpleName(), e.getMessage());
+            log.warn("Failed to write database audit log for error {}: {}", ex.getClass().getSimpleName(),
+                    e.getMessage());
         }
     }
 
+    @ExceptionHandler(com.backend.dealspot.exception.OfferConflictException.class)
+    public ResponseEntity<com.backend.dealspot.dto.offer.OfferConflictResponseDto> handleOfferConflict(
+            com.backend.dealspot.exception.OfferConflictException ex, HttpServletRequest request) {
+        log.warn("Handled offer conflict exception: {}", ex.getMessage());
+        recordAuditError("OVERLAPPING_OFFER_REJECTED", HttpStatus.CONFLICT.value(), ex, request);
+        com.backend.dealspot.dto.offer.OfferConflictResponseDto response = new com.backend.dealspot.dto.offer.OfferConflictResponseDto(
+                ex.getMessage(),
+                ex.getConflictingOfferId(),
+                ex.getConflictingOfferTitle(),
+                ex.getOfferPrice(),
+                ex.getOriginalPrice(),
+                ex.getValidFrom(),
+                ex.getValidUntil(),
+                ex.getProductId(),
+                ex.getStoreId(),
+                ex.getSpecialOfferId(),
+                ex.getSpecialOfferTitle()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex,
+            HttpServletRequest request) {
         log.warn("Handled illegal argument exception: {}", ex.getMessage());
         recordAuditError("INVALID_ARGUMENT", HttpStatus.BAD_REQUEST.value(), ex, request);
         return ResponseEntity.badRequest()
@@ -74,7 +96,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+            org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest request) {
         log.warn("Malformed JSON request payload: {}", ex.getMessage());
         recordAuditError("MALFORMED_JSON", HttpStatus.BAD_REQUEST.value(), ex, request);
         return ResponseEntity.badRequest()
@@ -82,7 +105,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
         StringBuilder sb = new StringBuilder("Validation failed: ");
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             sb.append(error.getField()).append(" ").append(error.getDefaultMessage()).append("; ");
@@ -94,7 +118,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex,
+            HttpServletRequest request) {
         log.warn("Handled constraint violation: {}", ex.getMessage());
         recordAuditError("CONSTRAINT_VIOLATION", HttpStatus.BAD_REQUEST.value(), ex, request);
         return ResponseEntity.badRequest()
@@ -102,7 +127,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex,
+            HttpServletRequest request) {
         log.warn("Authentication failed: {}", ex.getMessage());
         recordAuditError("AUTH_FAILED", HttpStatus.UNAUTHORIZED.value(), ex, request);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -118,7 +144,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleNoResourceFound(NoResourceFoundException ex,
+            HttpServletRequest request) {
         log.warn("Resource not found: {}", ex.getMessage());
         recordAuditError("RESOURCE_NOT_FOUND", HttpStatus.NOT_FOUND.value(), ex, request);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -126,15 +153,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex,
+            HttpServletRequest request) {
         log.error("Database integrity violation: {}", ex.getMessage(), ex);
         recordAuditError("DATA_INTEGRITY_VIOLATION", HttpStatus.CONFLICT.value(), ex, request);
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse("A database conflict or constraint violation occurred. Please check your data."));
+                .body(new ErrorResponse(
+                        "A database conflict or constraint violation occurred. Please check your data."));
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException ex,
+            HttpServletRequest request) {
         log.warn("Max upload size exceeded: {}", ex.getMessage());
         recordAuditError("MAX_UPLOAD_SIZE_EXCEEDED", HttpStatus.valueOf(413).value(), ex, request);
         return ResponseEntity.status(HttpStatus.valueOf(413))

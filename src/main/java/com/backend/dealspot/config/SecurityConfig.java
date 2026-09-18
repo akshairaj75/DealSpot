@@ -21,117 +21,116 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // @Bean
-    // public PasswordEncoder passwordEncoder() {
-    // return new BCryptPasswordEncoder();
-    // }
+        // @Bean
+        // public PasswordEncoder passwordEncoder() {
+        // return new BCryptPasswordEncoder();
+        // }
 
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(
-    // HttpSecurity http) throws Exception {
-    // http
-    // .csrf(csrf -> csrf.disable())
-    // .sessionManagement(session -> session
-    // .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-    // .authorizeHttpRequests(auth -> auth
-    // // .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-    // // .anyRequest().authenticated()
-    // .anyRequest().permitAll())
-    // .formLogin(Customizer.withDefaults());
+        // @Bean
+        // public SecurityFilterChain securityFilterChain(
+        // HttpSecurity http) throws Exception {
+        // http
+        // .csrf(csrf -> csrf.disable())
+        // .sessionManagement(session -> session
+        // .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+        // .authorizeHttpRequests(auth -> auth
+        // // .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+        // // .anyRequest().authenticated()
+        // .anyRequest().permitAll())
+        // .formLogin(Customizer.withDefaults());
 
-    // return http.build();
-    // }
+        // return http.build();
+        // }
 
+        private final JwtAuthenticationFilter jwtFilter;
 
+        public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
+                this.jwtFilter = jwtFilter;
+        }
 
-    private final JwtAuthenticationFilter jwtFilter;
+        @Bean
+        public AuthenticationManager authenticationManager(
+                        AuthenticationConfiguration authenticationConfiguration) throws Exception {
+                return authenticationConfiguration.getAuthenticationManager();
+        }
 
-    public SecurityConfig(JwtAuthenticationFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }   
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
+        @Bean
+        public SecurityFilterChain filterChain(
+                        HttpSecurity http) throws Exception {
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+                http
+                                .cors(Customizer.withDefaults())
+                                .csrf(csrf -> csrf.disable())
+                                .sessionManagement(session -> session.sessionCreationPolicy(
+                                                SessionCreationPolicy.IF_REQUIRED))
 
-    @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http) throws Exception {
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-        http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(
-                        SessionCreationPolicy.IF_REQUIRED))
+                                                .requestMatchers(
+                                                                "/api/dealspot/auth/**",
+                                                                "/api/dealspot/partner-requests/apply",
+                                                                "/api/oauth2/**",
+                                                                "/uploads/**",
+                                                                "/login/oauth2/**",
+                                                                "/swagger-ui/**",
+                                                                "/swagger-ui.html",
+                                                                "/v3/api-docs/**",
+                                                                "/ws/**")
+                                                .permitAll()
 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                                .requestMatchers(HttpMethod.GET,
+                                                                "/api/dealspot/stores/**",
+                                                                "/api/dealspot/store-branches/**",
+                                                                "/api/dealspot/categories/**",
+                                                                "/api/dealspot/offers/**",
+                                                                "/api/dealspot/flyers/**",
+                                                                "/api/flyers/**",
+                                                                "/api/dealspot/cities/**",
+                                                                "/api/dealspot/products/**",
+                                                                "/api/dealspot/coupons/**",
+                                                                "/api/coupons/**",
+                                                                "/api/dealspot/brands/**",
+                                                                "/api/dealspot/special-offers/**")
+                                                .permitAll()
+                                                .requestMatchers("/api/chat/**")
+                                                .authenticated()
+                                                .anyRequest().authenticated())
 
-                        .requestMatchers(
-                                "/api/dealspot/auth/**",
-                                "/api/dealspot/partner-requests/apply",
-                                "/api/oauth2/**",
-                                "/uploads/**",
-                                "/login/oauth2/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/ws/**")
-                        .permitAll()
+                                .exceptionHandling(ex -> ex
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                                        response.setContentType("application/json");
+                                                        response.getWriter().write("""
+                                                                        {
+                                                                                "message": "Unauthorized"
+                                                                        }
+                                                                        """);
+                                                })
+                                                .accessDeniedHandler((request, response, accessDeniedException) -> {
+                                                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                                                        response.setContentType("application/json");
+                                                        response.getWriter().write("""
+                                                                        {
+                                                                                "message": "Access Denied"
+                                                                        }
+                                                                        """);
+                                                }))
 
-                        .requestMatchers(HttpMethod.GET, 
-                                "/api/dealspot/stores/**",
-                                "/api/dealspot/store-branches/**",
-                                "/api/dealspot/categories/**",
-                                "/api/dealspot/offers/**",
-                                "/api/dealspot/flyers/**",
-                                "/api/flyers/**",
-                                "/api/dealspot/cities/**",
-                                "/api/dealspot/products/**",
-                                "/api/dealspot/coupons/**",
-                                "/api/coupons/**",
-                                "/api/dealspot/brands/**"
-                        ).permitAll()
-                        .requestMatchers("/api/chat/**")
-                        .authenticated()
-                        .anyRequest().authenticated())
-
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter().write("""
-                                    {
-                                            "message": "Unauthorized"
-                                    }
-                                    """);
-                        })
-                        .accessDeniedHandler((request, response, accessDeniedException) -> {
-                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                            response.setContentType("application/json");
-                            response.getWriter().write("""
-                                    {
-                                            "message": "Access Denied"
-                                    }
-                                    """);
-                        }))
-
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/api/auth/logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID"));
-        http.addFilterBefore(
-                jwtFilter,
-                UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+                                .logout(logout -> logout
+                                                .logoutUrl("/logout")
+                                                .logoutSuccessUrl("/api/auth/logout")
+                                                .invalidateHttpSession(true)
+                                                .deleteCookies("JSESSIONID"));
+                http.addFilterBefore(
+                                jwtFilter,
+                                UsernamePasswordAuthenticationFilter.class);
+                return http.build();
+        }
 
 }

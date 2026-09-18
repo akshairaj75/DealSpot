@@ -74,6 +74,33 @@ public class OfferResponseDto {
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long specialOfferId;
+    private String specialOfferTitleEn;
+    private String specialOfferTitleAr;
+
+    public Long getSpecialOfferId() {
+        return specialOfferId;
+    }
+
+    public void setSpecialOfferId(Long specialOfferId) {
+        this.specialOfferId = specialOfferId;
+    }
+
+    public String getSpecialOfferTitleEn() {
+        return specialOfferTitleEn;
+    }
+
+    public void setSpecialOfferTitleEn(String specialOfferTitleEn) {
+        this.specialOfferTitleEn = specialOfferTitleEn;
+    }
+
+    public String getSpecialOfferTitleAr() {
+        return specialOfferTitleAr;
+    }
+
+    public void setSpecialOfferTitleAr(String specialOfferTitleAr) {
+        this.specialOfferTitleAr = specialOfferTitleAr;
+    }
 
     public boolean isExpired() {
         return expired;
@@ -99,7 +126,6 @@ public class OfferResponseDto {
         this.status = status;
     }
 
-
     public boolean isSaved() {
         return isSaved;
     }
@@ -107,7 +133,6 @@ public class OfferResponseDto {
     public void setSaved(boolean isSaved) {
         this.isSaved = isSaved;
     }
-
 
     public Long getId() {
         return id;
@@ -525,7 +550,8 @@ public class OfferResponseDto {
 
         if (offer.getProduct() != null) {
             String prodImg = offer.getProduct().getPrimaryImageUrl();
-            if ((prodImg == null || prodImg.trim().isEmpty()) && offer.getProduct().getImages() != null && !offer.getProduct().getImages().isEmpty()) {
+            if ((prodImg == null || prodImg.trim().isEmpty()) && offer.getProduct().getImages() != null
+                    && !offer.getProduct().getImages().isEmpty()) {
                 prodImg = offer.getProduct().getImages().get(0).getImageUrl();
             }
 
@@ -542,7 +568,8 @@ public class OfferResponseDto {
                 dto.setBrandLogoUrl(offer.getProduct().getBrand().getLogoUrl());
             }
 
-            // If offer does not have its own custom image, fall back directly to the product's primary image
+            // If offer does not have its own custom image, fall back directly to the
+            // product's primary image
             if (dto.getImageUrl() == null || dto.getImageUrl().trim().isEmpty()) {
                 dto.setImageUrl(prodImg);
             }
@@ -557,6 +584,12 @@ public class OfferResponseDto {
             if (dto.getDescriptionAr() == null || dto.getDescriptionAr().trim().isEmpty()) {
                 dto.setDescriptionAr(offer.getProduct().getDescriptionAr());
             }
+        }
+
+        if (offer.getSpecialOffer() != null) {
+            dto.setSpecialOfferId(offer.getSpecialOffer().getId());
+            dto.setSpecialOfferTitleEn(offer.getSpecialOffer().getTitleEn());
+            dto.setSpecialOfferTitleAr(offer.getSpecialOffer().getTitleAr());
         }
 
         return dto;

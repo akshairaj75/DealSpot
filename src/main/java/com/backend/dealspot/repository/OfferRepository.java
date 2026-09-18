@@ -14,46 +14,76 @@ import com.backend.dealspot.enums.OfferBadgeType;
 
 public interface OfferRepository extends JpaRepository<Offer, Long> {
 
-    List<Offer> findAllByActive(boolean b);
+       List<Offer> findAllByActive(boolean b);
 
-    List<Offer> findByStoreId(Integer storeId);
+       List<Offer> findByStoreId(Integer storeId);
 
-    List<Offer> findByStoreIdAndActive(Integer storeId, boolean active);
+       List<Offer> findByStoreIdAndActive(Integer storeId, boolean active);
 
-    List<Offer> findByActiveTrueAndValidUntilBefore(LocalDate date);
+       List<Offer> findBySpecialOfferId(Long specialOfferId);
 
-    @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today)")
-    List<Offer> findActiveAndValidOffers(@Param("today") LocalDate today);
+       List<Offer> findBySpecialOfferIdAndActiveTrue(Long specialOfferId);
 
-    @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today) AND o.store.id = :storeId")
-    List<Offer> findActiveAndValidOffersByStoreId(@Param("storeId") Integer storeId, @Param("today") LocalDate today);
+       @Query("SELECT o FROM Offer o WHERE o.product.id = :productId " +
+              "AND o.store.id = :storeId " +
+              "AND o.active = true " +
+              "AND o.validFrom <= :validUntil " +
+              "AND o.validUntil >= :validFrom")
+       List<Offer> findOverlappingActiveOffers(
+               @Param("productId") Long productId,
+               @Param("storeId") Integer storeId,
+               @Param("validFrom") LocalDate validFrom,
+               @Param("validUntil") LocalDate validUntil);
 
-    @Query("SELECT o FROM Offer o " +
-           "LEFT JOIN o.store s " +
-           "LEFT JOIN o.category c " +
-           "WHERE (:search IS NULL OR :search = '' OR " +
-           " LOWER(o.titleEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(o.titleAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(s.nameEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(s.nameAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(c.nameEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " LOWER(c.nameAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           " CONCAT(o.id, '') LIKE CONCAT('%', :search, '%')) AND " +
-           "(:storeId IS NULL OR s.id = :storeId) AND " +
-           "(:badgeType IS NULL OR (:badgeType = com.backend.dealspot.enums.OfferBadgeType.NONE AND (o.badgeType IS NULL OR o.badgeType = :badgeType)) OR o.badgeType = :badgeType) AND " +
-           "(:status IS NULL OR :status = '' OR " +
-           " (:status = 'ACTIVE' AND o.active = true AND (o.validUntil IS NULL OR o.validUntil >= :today) AND (o.validFrom IS NULL OR o.validFrom <= :today)) OR " +
-           " (:status = 'EXPIRED' AND o.validUntil IS NOT NULL AND o.validUntil < :today) OR " +
-           " (:status = 'UPCOMING' AND o.validFrom IS NOT NULL AND o.validFrom > :today) OR " +
-           " (:status = 'DISABLED' AND o.active = false)) AND " +
-           "(:active IS NULL OR o.active = :active)")
-    Page<Offer> searchOffers(
-            @Param("search") String search,
-            @Param("storeId") Integer storeId,
-            @Param("badgeType") OfferBadgeType badgeType,
-            @Param("status") String status,
-            @Param("today") LocalDate today,
-            @Param("active") Boolean active,
-            Pageable pageable);
+       @Query("SELECT o FROM Offer o WHERE o.product.id = :productId " +
+              "AND o.store.id = :storeId " +
+              "AND o.active = true " +
+              "AND o.id <> :excludeOfferId " +
+              "AND o.validFrom <= :validUntil " +
+              "AND o.validUntil >= :validFrom")
+       List<Offer> findOverlappingActiveOffersExcluding(
+               @Param("productId") Long productId,
+               @Param("storeId") Integer storeId,
+               @Param("validFrom") LocalDate validFrom,
+               @Param("validUntil") LocalDate validUntil,
+               @Param("excludeOfferId") Long excludeOfferId);
+
+       List<Offer> findByActiveTrueAndValidUntilBefore(LocalDate date);
+
+       @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today)")
+       List<Offer> findActiveAndValidOffers(@Param("today") LocalDate today);
+
+       @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today) AND o.store.id = :storeId")
+       List<Offer> findActiveAndValidOffersByStoreId(@Param("storeId") Integer storeId,
+                     @Param("today") LocalDate today);
+
+       @Query("SELECT o FROM Offer o " +
+                     "LEFT JOIN o.store s " +
+                     "LEFT JOIN o.category c " +
+                     "WHERE (:search IS NULL OR :search = '' OR " +
+                     " LOWER(o.titleEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                     " LOWER(o.titleAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                     " LOWER(s.nameEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                     " LOWER(s.nameAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                     " LOWER(c.nameEn) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                     " LOWER(c.nameAr) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                     " CONCAT(o.id, '') LIKE CONCAT('%', :search, '%')) AND " +
+                     "(:storeId IS NULL OR s.id = :storeId) AND " +
+                     "(:badgeType IS NULL OR (:badgeType = com.backend.dealspot.enums.OfferBadgeType.NONE AND (o.badgeType IS NULL OR o.badgeType = :badgeType)) OR o.badgeType = :badgeType) AND "
+                     +
+                     "(:status IS NULL OR :status = '' OR " +
+                     " (:status = 'ACTIVE' AND o.active = true AND (o.validUntil IS NULL OR o.validUntil >= :today) AND (o.validFrom IS NULL OR o.validFrom <= :today)) OR "
+                     +
+                     " (:status = 'EXPIRED' AND o.validUntil IS NOT NULL AND o.validUntil < :today) OR " +
+                     " (:status = 'UPCOMING' AND o.validFrom IS NOT NULL AND o.validFrom > :today) OR " +
+                     " (:status = 'DISABLED' AND o.active = false)) AND " +
+                     "(:active IS NULL OR o.active = :active)")
+       Page<Offer> searchOffers(
+                     @Param("search") String search,
+                     @Param("storeId") Integer storeId,
+                     @Param("badgeType") OfferBadgeType badgeType,
+                     @Param("status") String status,
+                     @Param("today") LocalDate today,
+                     @Param("active") Boolean active,
+                     Pageable pageable);
 }
-
