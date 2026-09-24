@@ -240,7 +240,7 @@ public class OfferServiceImpl implements OfferService {
 
         @Override
         public OfferResponseDto getOfferById(Long offerId) {
-                Offer offer = offerRepository.findById(offerId)
+                Offer offer = offerRepository.findDetailedById(offerId)
                                 .orElseThrow(() -> new RuntimeException("Offer not found"));
                 return OfferResponseDto.fromEntity(offer);
         }
@@ -486,13 +486,6 @@ public class OfferServiceImpl implements OfferService {
                                         conflicting);
                 }
 
-                java.time.LocalDate origFrom = existing.getValidFrom();
-                java.time.LocalDate origUntil = existing.getValidUntil();
-
-                if (splitFrom.isBefore(origFrom) || splitUntil.isAfter(origUntil)) {
-                        throw new IllegalArgumentException("Split period (" + splitFrom + " to " + splitUntil + ") must fall within the existing offer validity period (" + origFrom + " to " + origUntil + ")");
-                }
-
                 com.backend.dealspot.entity.SpecialOffer specialOffer = null;
                 if (dto.getSpecialOfferId() != null) {
                         specialOffer = specialOfferRepository.findById(dto.getSpecialOfferId())
@@ -507,6 +500,50 @@ public class OfferServiceImpl implements OfferService {
                                 discountPct = diff.multiply(java.math.BigDecimal.valueOf(100))
                                                 .divide(originalPrice, 0, java.math.RoundingMode.HALF_UP).intValue();
                         }
+                }
+
+                boolean isAlreadyCampaignOffer = existing.getSpecialOffer() != null
+                                && dto.getSpecialOfferId() != null
+                                && existing.getSpecialOffer().getId().equals(dto.getSpecialOfferId());
+
+                if (isAlreadyCampaignOffer) {
+                        // In-place update of existing campaign offer without creating duplicate rows
+                        existing.setOfferPrice(dto.getNewOfferPrice());
+                        existing.setOriginalPrice(originalPrice);
+                        existing.setDiscountPct(discountPct);
+                        existing.setValidFrom(splitFrom);
+                        existing.setValidUntil(splitUntil);
+                        if (dto.getTitleEn() != null && !dto.getTitleEn().trim().isEmpty()) {
+                                existing.setTitleEn(dto.getTitleEn());
+                        }
+                        if (dto.getTitleAr() != null && !dto.getTitleAr().trim().isEmpty()) {
+                                existing.setTitleAr(dto.getTitleAr());
+                        }
+                        if (dto.getBadgeType() != null) {
+                                existing.setBadgeType(dto.getBadgeType());
+                        }
+                        existing.setActive(true);
+
+                        Offer updated = offerRepository.save(existing);
+
+                        java.util.Map<String, Object> auditDetails = new java.util.HashMap<>();
+                        auditDetails.put("existingOfferId", existing.getId());
+                        auditDetails.put("specialOfferId", dto.getSpecialOfferId());
+                        auditDetails.put("splitFrom", splitFrom.toString());
+                        auditDetails.put("splitUntil", splitUntil.toString());
+                        auditDetails.put("newOfferPrice", dto.getNewOfferPrice());
+                        auditDetails.put("inPlaceUpdate", true);
+
+                        auditLogService.logAction("OFFER", updated.getId(), authUser, AuditAction.OFFER_PRICE_PERIOD_SPLIT, auditDetails, request);
+
+                        return OfferResponseDto.fromEntity(updated);
+                }
+
+                java.time.LocalDate origFrom = existing.getValidFrom();
+                java.time.LocalDate origUntil = existing.getValidUntil();
+
+                if (splitFrom.isBefore(origFrom) || splitUntil.isAfter(origUntil)) {
+                        throw new IllegalArgumentException("Split period (" + splitFrom + " to " + splitUntil + ") must fall within the existing offer validity period (" + origFrom + " to " + origUntil + ")");
                 }
 
                 Offer campaignOffer = new Offer();

@@ -537,4 +537,49 @@ public class SpecialOfferSplittingAndConflictTest {
         verify(offerRepository, never()).delete(any(Offer.class));
         verify(specialOfferRepository).delete(specialOffer);
     }
+
+    @Test
+    @DisplayName("splitAndCreateOffer: modifying already-overridden campaign offer updates in-place on the same Offer ID")
+    void splitAndCreateOffer_alreadyCampaignOffer_updatesInPlace_noNewOfferCreated() {
+        Long offerId = 250L;
+        Offer campaignOffer = new Offer();
+        campaignOffer.setId(offerId);
+        campaignOffer.setTitleEn("Eid Deal v1");
+        campaignOffer.setTitleAr("عرض العيد");
+        campaignOffer.setProduct(product);
+        campaignOffer.setStore(store);
+        campaignOffer.setCategory(category);
+        campaignOffer.setCity(city);
+        campaignOffer.setValidFrom(LocalDate.of(2026, 6, 1));
+        campaignOffer.setValidUntil(LocalDate.of(2026, 6, 15));
+        campaignOffer.setOfferPrice(new BigDecimal("199.00"));
+        campaignOffer.setOriginalPrice(new BigDecimal("300.00"));
+        campaignOffer.setSpecialOffer(specialOffer);
+        campaignOffer.setActive(true);
+
+        OfferPeriodSplitRequestDto dto = new OfferPeriodSplitRequestDto();
+        dto.setExistingOfferId(offerId);
+        dto.setSpecialOfferId(500L);
+        dto.setSplitValidFrom(LocalDate.of(2026, 6, 1));
+        dto.setSplitValidUntil(LocalDate.of(2026, 6, 15));
+        dto.setNewOfferPrice(new BigDecimal("179.00"));
+        dto.setNewOriginalPrice(new BigDecimal("300.00"));
+        dto.setTitleEn("Eid Deal v2 (Adjusted Price)");
+
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(campaignOffer));
+        when(productRepository.findByIdForUpdate(100L)).thenReturn(Optional.of(product));
+        when(specialOfferRepository.findById(500L)).thenReturn(Optional.of(specialOffer));
+        when(offerRepository.findOverlappingActiveOffersExcluding(eq(100L), eq(10), eq(dto.getSplitValidFrom()), eq(dto.getSplitValidUntil()), eq(offerId)))
+                .thenReturn(Collections.emptyList());
+        when(offerRepository.save(any(Offer.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        OfferResponseDto result = offerService.splitAndCreateOffer(dto, adminUser, httpRequest);
+
+        assertNotNull(result);
+        assertEquals(offerId, result.getId(), "Must maintain the EXACT same Offer ID");
+        assertEquals(new BigDecimal("179.00"), result.getOfferPrice(), "Price must be updated to 179.00");
+        assertEquals("Eid Deal v2 (Adjusted Price)", result.getTitleEn());
+        assertTrue(campaignOffer.isActive(), "Offer must remain active");
+        assertEquals(500L, result.getSpecialOfferId());
+    }
 }

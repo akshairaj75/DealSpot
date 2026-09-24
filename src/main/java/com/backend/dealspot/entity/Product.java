@@ -83,6 +83,7 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product")
     private List<ProductDetail> details = new ArrayList<>();
 
+    @org.hibernate.annotations.BatchSize(size = 50)
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
 

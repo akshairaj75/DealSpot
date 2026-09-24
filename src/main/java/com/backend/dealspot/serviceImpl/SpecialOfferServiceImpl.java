@@ -263,7 +263,7 @@ public class SpecialOfferServiceImpl implements SpecialOfferService {
     @Transactional
     @Override
     public SpecialOfferResponseDto getSpecialOfferById(Long id) {
-        SpecialOffer specialOffer = specialOfferRepository.findById(id)
+        SpecialOffer specialOffer = specialOfferRepository.findDetailedById(id)
                 .orElseThrow(() -> new RuntimeException("Special offer not found with id: " + id));
 
         // Increment view count

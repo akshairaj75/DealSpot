@@ -77,6 +77,7 @@ public class SpecialOffer extends BaseEntity {
     @Column(name = "view_count", nullable = false)
     private Long viewCount = 0L;
 
+    @org.hibernate.annotations.BatchSize(size = 50)
     @OneToMany(mappedBy = "specialOffer")
     private List<Offer> offers = new ArrayList<>();
 

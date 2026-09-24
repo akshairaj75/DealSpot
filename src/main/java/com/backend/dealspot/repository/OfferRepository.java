@@ -2,9 +2,11 @@ package com.backend.dealspot.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,14 +16,19 @@ import com.backend.dealspot.enums.OfferBadgeType;
 
 public interface OfferRepository extends JpaRepository<Offer, Long> {
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        List<Offer> findAllByActive(boolean b);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        List<Offer> findByStoreId(Integer storeId);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        List<Offer> findByStoreIdAndActive(Integer storeId, boolean active);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        List<Offer> findBySpecialOfferId(Long specialOfferId);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        List<Offer> findBySpecialOfferIdAndActiveTrue(Long specialOfferId);
 
        @Query("SELECT o FROM Offer o WHERE o.product.id = :productId " +
@@ -50,13 +57,16 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
        List<Offer> findByActiveTrueAndValidUntilBefore(LocalDate date);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today)")
        List<Offer> findActiveAndValidOffers(@Param("today") LocalDate today);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        @Query("SELECT o FROM Offer o WHERE o.active = true AND (o.validFrom IS NULL OR o.validFrom <= :today) AND (o.validUntil IS NULL OR o.validUntil >= :today) AND o.store.id = :storeId")
        List<Offer> findActiveAndValidOffersByStoreId(@Param("storeId") Integer storeId,
                      @Param("today") LocalDate today);
 
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
        @Query("SELECT o FROM Offer o " +
                      "LEFT JOIN o.store s " +
                      "LEFT JOIN o.category c " +
@@ -86,4 +96,7 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
                      @Param("today") LocalDate today,
                      @Param("active") Boolean active,
                      Pageable pageable);
+
+       @EntityGraph(attributePaths = {"store", "category", "city", "product", "product.brand", "specialOffer"})
+       Optional<Offer> findDetailedById(Long id);
 }
